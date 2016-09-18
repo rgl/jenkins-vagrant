@@ -3,6 +3,7 @@ set -eux
 
 domain=$(hostname --fqdn)
 
+
 echo 'Defaults env_keep += "DEBIAN_FRONTEND"' >/etc/sudoers.d/env_keep_apt
 chmod 440 /etc/sudoers.d/env_keep_apt
 export DEBIAN_FRONTEND=noninteractive
@@ -38,6 +39,7 @@ cat /var/lib/jenkins/secrets/initialAdminPassword
 cd /var/lib/jenkins
 netstat -antp
 jcli version
+sudo -sHu jenkins
 EOF
 
 cat >~/.bashrc <<'EOF'
@@ -215,7 +217,7 @@ import jenkins.model.Jenkins
 
 Jenkins.instance.noUsageStatistics = true
 Jenkins.instance.numExecutors = 3
-Jenkins.instance.labelString = "hello-world test"
+Jenkins.instance.labelString = "ubuntu 16.04 linux amd64"
 Jenkins.instance.save()
 EOF
 
@@ -236,6 +238,8 @@ jcli install-plugin git -deploy
 
 # generate a default SSH key-pair for use in the Jenkins CLI authentication.
 ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa
+# also generate one for the jenkins account that communicates with the slaves.
+su jenkins -c 'ssh-keygen -q -t rsa -N "" -f ~/.ssh/id_rsa'
 
 # set the admin SSH public key.
 # see http://javadoc.jenkins-ci.org/hudson/model/User.html
@@ -296,6 +300,39 @@ EOF
 
 
 #
+# create artifacts that need to be shared with the other nodes.
+
+mkdir -p /vagrant/tmp
+pushd /vagrant/tmp
+cp /var/lib/jenkins/.ssh/id_rsa.pub $domain-ssh-rsa.pub
+cp /etc/ssl/private/$domain-crt.pem .
+popd
+
+
+#
+# add slave node.
+# see http://javadoc.jenkins-ci.org/jenkins/model/Jenkins.html
+# see http://javadoc.jenkins-ci.org/jenkins/model/Nodes.html
+# see http://javadoc.jenkins-ci.org/hudson/slaves/DumbSlave.html
+# see http://javadoc.jenkins-ci.org/hudson/model/Computer.html
+
+jgroovy = <<'EOF'
+import jenkins.model.Jenkins
+import hudson.slaves.DumbSlave
+import hudson.slaves.CommandLauncher
+
+node = new DumbSlave(
+    "ubuntu",
+    "/var/jenkins",
+    new CommandLauncher("ssh ubuntu.jenkins.example.com /var/jenkins/bin/jenkins-slave"))
+node.numExecutors = 3
+node.labelString = "ubuntu 16.04 linux amd64"
+Jenkins.instance.nodesObject.addNode(node)
+Jenkins.instance.nodesObject.save()
+EOF
+
+
+#
 # show install summary.
 
 systemctl status jenkins
@@ -305,7 +342,13 @@ jgroovy = <<'EOF'
 import hudson.model.User
 import jenkins.model.Jenkins
 
-Jenkins.instance.assignedLabels.sort().each { println "jenkins label: " + it }
+Jenkins.instance.nodes.sort { it.name }.each {
+    name = it.name
+    println sprintf("jenkins %s node", name)
+    it.assignedLabels.sort().each { println sprintf("jenkins %s node label: %s", name, it) }
+}
+println "jenkins master node"
+Jenkins.instance.assignedLabels.sort().each { println "jenkins master node label: " + it }
 User.all.sort { it.id }.each { println sprintf("jenkins user: %s (%s)", it.id, it.fullName) }
 EOF
 echo "jenkins is installed at https://jenkins.example.com"

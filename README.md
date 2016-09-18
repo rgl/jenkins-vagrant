@@ -19,7 +19,13 @@ Add the following entry to your `/etc/hosts` file:
 
 ```
 10.10.10.100 jenkins.example.com
-``` 
+```
+
+Install the following Vagrant plugin:
+
+```bash
+vagrant plugin install vagrant-triggers # see https://github.com/emyl/vagrant-triggers
+```
 
 Run `vagrant up` to launch the server and see its output to known how to login at the [local Jenkins home page](https://jenkins.example.com) as `admin`.
 
