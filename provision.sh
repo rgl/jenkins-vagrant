@@ -333,6 +333,29 @@ EOF
 
 
 #
+# create a simple free style project.
+# see http://javadoc.jenkins-ci.org/jenkins/model/Jenkins.html
+# see http://javadoc.jenkins-ci.org/hudson/model/FreeStyleProject.html
+# see http://javadoc.jenkins-ci.org/hudson/tasks/Shell.html
+
+jgroovy = <<'EOF'
+import jenkins.model.Jenkins
+import hudson.model.FreeStyleProject
+import hudson.tasks.Shell
+
+project = new FreeStyleProject(Jenkins.instance, "dump-environment")
+project.buildersList.add(new Shell(
+"""\
+id
+uname -a
+env
+"""))
+
+Jenkins.instance.add(project, project.name)
+EOF
+
+
+#
 # show install summary.
 
 systemctl status jenkins

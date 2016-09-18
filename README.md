@@ -6,7 +6,8 @@ This configures Jenkins through [CLI/JNLP](https://wiki.jenkins-ci.org/display/J
 * Add a SSH public key to `admin` user account and use it to access the CLI.
 * Add and list users.
 * Install and configure plugins.
-* Setup nginx as a Jenkins HTTPS proxy and static file server. 
+* Setup nginx as a Jenkins HTTPS proxy and static file server.
+* Create a simple Free Style Project job.
 
 If you are new to Groovy, be sure to check the [Groovy Learn X in Y minutes page](https://learnxinyminutes.com/docs/groovy/).
 
