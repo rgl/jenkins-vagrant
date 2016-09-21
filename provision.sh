@@ -232,6 +232,9 @@ git config --global core.autocrlf false
 EOF
 jcli install-plugin git -deploy
 
+# install support for running PowerShell scripts.
+jcli install-plugin powershell -deploy
+
 
 #
 # configure security.
@@ -306,11 +309,12 @@ mkdir -p /vagrant/tmp
 pushd /vagrant/tmp
 cp /var/lib/jenkins/.ssh/id_rsa.pub $domain-ssh-rsa.pub
 cp /etc/ssl/private/$domain-crt.pem .
+openssl x509 -outform der -in $domain-crt.pem -out $domain-crt.der
 popd
 
 
 #
-# add slave node.
+# add the ubuntu slave node.
 # see http://javadoc.jenkins-ci.org/jenkins/model/Jenkins.html
 # see http://javadoc.jenkins-ci.org/jenkins/model/Nodes.html
 # see http://javadoc.jenkins-ci.org/hudson/slaves/DumbSlave.html
@@ -333,23 +337,68 @@ EOF
 
 
 #
-# create a simple free style project.
+# add the windows slave node.
+
+jgroovy = <<'EOF'
+import jenkins.model.Jenkins
+import hudson.slaves.DumbSlave
+import hudson.slaves.CommandLauncher
+
+node = new DumbSlave(
+    "windows",
+    "C:/jenkins",
+    new CommandLauncher("ssh windows.jenkins.example.com C:/jenkins/bin/jenkins-slave"))
+node.numExecutors = 3
+node.labelString = "windows 2012r2 amd64"
+Jenkins.instance.nodesObject.addNode(node)
+Jenkins.instance.nodesObject.save()
+EOF
+
+
+#
+# create simple free style projects.
 # see http://javadoc.jenkins-ci.org/jenkins/model/Jenkins.html
 # see http://javadoc.jenkins-ci.org/hudson/model/FreeStyleProject.html
+# see http://javadoc.jenkins-ci.org/hudson/model/Label.html
 # see http://javadoc.jenkins-ci.org/hudson/tasks/Shell.html
+# see http://javadoc.jenkins-ci.org/hudson/tasks/BatchFile.html
+# see https://github.com/jenkinsci/powershell-plugin/blob/master/src/main/java/hudson/plugins/powershell/PowerShell.java
 
 jgroovy = <<'EOF'
 import jenkins.model.Jenkins
 import hudson.model.FreeStyleProject
+import hudson.model.labels.LabelAtom
 import hudson.tasks.Shell
 
-project = new FreeStyleProject(Jenkins.instance, "dump-environment")
+project = new FreeStyleProject(Jenkins.instance, 'dump-environment-linux')
+project.assignedLabel = new LabelAtom('linux')
 project.buildersList.add(new Shell(
-"""\
+'''\
 id
 uname -a
 env
-"""))
+'''))
+
+Jenkins.instance.add(project, project.name)
+EOF
+
+jgroovy = <<'EOF'
+import jenkins.model.Jenkins
+import hudson.model.FreeStyleProject
+import hudson.model.labels.LabelAtom
+import hudson.plugins.powershell.PowerShell
+import hudson.tasks.BatchFile
+
+project = new FreeStyleProject(Jenkins.instance, 'dump-environment-windows')
+project.assignedLabel = new LabelAtom('windows')
+project.buildersList.add(new BatchFile(
+'''\
+set
+'''))
+project.buildersList.add(new PowerShell(
+'''\
+$PSVersionTable | Format-Table -AutoSize
+'''))
 
 Jenkins.instance.add(project, project.name)
 EOF
