@@ -15,7 +15,7 @@ This configures Jenkins through [CLI/JNLP](https://wiki.jenkins-ci.org/display/J
 
 These are the machines and how they are connected with each other:
 
-<img src="diagram.svg">
+<img src="diagram.png">
 
 
 # Usage
