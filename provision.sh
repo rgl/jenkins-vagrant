@@ -226,6 +226,16 @@ Jenkins.instance.mode = Mode.EXCLUSIVE
 Jenkins.instance.save()
 EOF
 
+# set the administrator email.
+# see http://javadoc.jenkins-ci.org/jenkins/model/JenkinsLocationConfiguration.html
+jgroovy = <<'EOF'
+import jenkins.model.JenkinsLocationConfiguration
+
+c = JenkinsLocationConfiguration.get()
+c.adminAddress = 'Admin <admin@example.com>'
+c.save()
+EOF
+
 # install git and the git plugin.
 apt-get install -y git-core
 su jenkins -c bash <<'EOF'
