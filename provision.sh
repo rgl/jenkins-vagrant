@@ -213,11 +213,16 @@ function jgroovy {
 # customize.
 # see http://javadoc.jenkins-ci.org/jenkins/model/Jenkins.html
 jgroovy = <<'EOF'
+import hudson.model.Node.Mode
 import jenkins.model.Jenkins
 
+// disable usage statistics.
 Jenkins.instance.noUsageStatistics = true
-Jenkins.instance.numExecutors = 3
-Jenkins.instance.labelString = "ubuntu 16.04 linux amd64"
+
+// do not run jobs on the master.
+Jenkins.instance.numExecutors = 0
+Jenkins.instance.mode = Mode.EXCLUSIVE
+
 Jenkins.instance.save()
 EOF
 
