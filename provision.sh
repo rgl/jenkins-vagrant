@@ -485,9 +485,11 @@ project = new FreeStyleProject(Jenkins.instance, 'dump-environment-linux')
 project.assignedLabel = new LabelAtom('linux')
 project.buildersList.add(new Shell(
 '''\
-id
+cat /etc/lsb-release
 uname -a
 env
+locale
+id
 '''))
 
 Jenkins.instance.add(project, project.name)
