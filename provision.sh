@@ -331,7 +331,8 @@ Jenkins.instance.securityRealm = new LDAPSecurityRealm(
     'CN=Users',
 
     // String userSearch:
-    // {0} is the username.
+    // NB this is used to determine that a user exists.
+    // NB {0} is replaced with the username.
     '(&(sAMAccountName={0})(objectClass=person)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))',
 
     // String groupSearchBase:
@@ -339,16 +340,18 @@ Jenkins.instance.securityRealm = new LDAPSecurityRealm(
     'CN=Users',
 
     // String groupSearchFilter:
-    // NB {0} is replaced with the user DN.
-    // NB {1} is replaced with the username.
-    // Default: (|(member={0})(uniqueMember={0})(memberUid={1}))
-    // NB the default is always used when you use a FromUserRecordLDAPGroupMembershipStrategy as a groupMembershipStrategy.
-    '(&(cn={0})(objectClass=group))',
+    // NB this is used to determine that a group exists.
+    // NB the search is scoped to groupSearchBase.
+    // NB {0} is replaced with the groupname.
+    '(&(objectCategory=group)(cn={0}))',
 
     // LDAPGroupMembershipStrategy groupMembershipStrategy:
+    // NB this is used to determine a user groups.
+    // Default: (|(member={0})(uniqueMember={0})(memberUid={1}))
+    // NB the search is scoped to groupSearchBase.
     // NB {0} is replaced with the user DN.
     // NB {1} is replaced with the username.
-    new FromGroupSearchLDAPGroupMembershipStrategy('(&(cn={0})(objectClass=group))'),
+    new FromGroupSearchLDAPGroupMembershipStrategy('(&(objectCategory=group)(member={0}))'),
     //new FromUserRecordLDAPGroupMembershipStrategy('memberOf'),
 
     // String managerDN:
@@ -382,6 +385,22 @@ Jenkins.instance.securityRealm = new LDAPSecurityRealm(
     null)
 
 Jenkins.instance.save()
+EOF
+# verify that we can resolve an LDAP user and group.
+# see http://javadoc.jenkins-ci.org/hudson/security/SecurityRealm.html
+# see http://javadoc.jenkins-ci.org/hudson/security/GroupDetails.html
+jgroovy = <<'EOF'
+import jenkins.model.Jenkins
+
+// resolve a user.
+// NB u is-a org.acegisecurity.userdetails.ldap.LdapUserDetailsImpl.
+u = Jenkins.instance.securityRealm.loadUserByUsername("vagrant")
+u.authorities.sort().each { println sprintf("LDAP user %s authority: %s", u.username, it) }
+
+// resolve a group.
+// NB g is-a hudson.security.LDAPSecurityRealm$GroupDetailsImpl.
+g = Jenkins.instance.securityRealm.loadGroupByGroupname("Enterprise Admins")
+println sprintf("LDAP group: %s", g.name)
 EOF
 fi
 
