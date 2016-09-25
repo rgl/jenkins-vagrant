@@ -3,7 +3,8 @@ This is a [Vagrant](https://www.vagrantup.com/) Environment for a Continuous Int
 This configures Jenkins through [CLI/JNLP](https://wiki.jenkins-ci.org/display/JENKINS/Jenkins+CLI) and [Groovy](http://www.groovy-lang.org/) scripts to:
 
 * Enable the simple `Logged-in users can do anything` Authorization security policy.
-* Add a SSH public key to `admin` user account and use it to access the CLI.
+* Add a SSH public key to `vagrant` user account and use it to access the CLI.
+* Optionally use LDAP user authentication.
 * Add and list users.
 * Install and configure plugins.
 * Setup nginx as a Jenkins HTTPS proxy and static file server.
@@ -45,6 +46,11 @@ Install the following Vagrant plugin:
 ```bash
 vagrant plugin install vagrant-triggers # see https://github.com/emyl/vagrant-triggers
 ```
+
+If you want to use LDAP for user authentication, you have to:
+
+1. have [rgl/windows-domain-controller-vagrant](https://github.com/rgl/windows-domain-controller-vagrant) up and running at `../windows-domain-controller-vagrant`.
+1. uncomment the `config_authentication='ldap'` line inside [provision.sh](provision.sh). 
 
 Run `vagrant up jenkins` to launch the master. See its output to known how to login at the
 [local Jenkins home page](https://jenkins.example.com) as `admin` (you can also login with

@@ -38,6 +38,11 @@ Vagrant.configure('2') do |config|
     config.vm.provision :shell, path: 'provision-windows.ps1', args: [config_jenkins_fqdn, config_windows_fqdn]
   end
 
+  config.trigger.before :up, :vm => ['jenkins'] do
+    ldap_ca_cert_path = '../windows-domain-controller-vagrant/tmp/ExampleEnterpriseRootCA.der'
+    run "sh -c '[ -f #{ldap_ca_cert_path} ] && mkdir -p tmp && cp #{ldap_ca_cert_path} tmp'"
+  end
+
   config.trigger.after :up, :vm => ['ubuntu', 'windows'] do
     run "vagrant ssh -c 'cat /vagrant/tmp/*.ssh_known_hosts | sudo tee /etc/ssh/ssh_known_hosts' jenkins"
   end

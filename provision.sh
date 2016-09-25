@@ -3,6 +3,13 @@ set -eux
 
 domain=$(hostname --fqdn)
 
+# use the local Jenkins user database.
+config_authentication='jenkins'
+# OR use LDAP.
+# NB this assumes you are running the Active Directory from https://github.com/rgl/windows-domain-controller-vagrant.
+# NB AND you must manually copy its tmp/ExampleEnterpriseRootCA.der file to this environment tmp/ directory. 
+#config_authentication='ldap'
+
 
 echo 'Defaults env_keep += "DEBIAN_FRONTEND"' >/etc/sudoers.d/env_keep_apt
 chmod 440 /etc/sudoers.d/env_keep_apt
@@ -265,26 +272,25 @@ ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa
 # also generate one for the jenkins account that communicates with the slaves.
 su jenkins -c 'ssh-keygen -q -t rsa -N "" -f ~/.ssh/id_rsa'
 
-# set the admin SSH public key.
+# enable simple security.
+# also create the vagrant user with an SSH public key. jcli will use this account from now on.
+# see http://javadoc.jenkins-ci.org/hudson/security/HudsonPrivateSecurityRealm.html
 # see http://javadoc.jenkins-ci.org/hudson/model/User.html
 # see https://github.com/jenkinsci/ssh-cli-auth-module/blob/master/src/main/java/org/jenkinsci/main/modules/cli/auth/ssh/UserPropertyImpl.java
 jgroovy = "$(cat ~/.ssh/id_rsa.pub)" <<'EOF'
-import hudson.model.User
-import org.jenkinsci.main.modules.cli.auth.ssh.UserPropertyImpl
-
-u = User.getById("admin", false)
-u.addProperty(new UserPropertyImpl(args[0]+"\n"))
-u.save()
-EOF
-
-# enable simple security.
-# see http://javadoc.jenkins-ci.org/hudson/security/HudsonPrivateSecurityRealm.html
-jgroovy = <<'EOF'
 import jenkins.model.Jenkins
 import hudson.security.HudsonPrivateSecurityRealm
 import hudson.security.FullControlOnceLoggedInAuthorizationStrategy
+import hudson.tasks.Mailer
+import org.jenkinsci.main.modules.cli.auth.ssh.UserPropertyImpl
 
 Jenkins.instance.securityRealm = new HudsonPrivateSecurityRealm(false)
+
+u = Jenkins.instance.securityRealm.createAccount('vagrant', 'vagrant')
+u.fullName = 'Vagrant'
+u.addProperty(new Mailer.UserProperty('vagrant@example.com'))
+u.addProperty(new UserPropertyImpl(args[0]+"\n"))
+u.save()
 
 Jenkins.instance.authorizationStrategy = new FullControlOnceLoggedInAuthorizationStrategy(
   allowAnonymousRead: true)
@@ -297,10 +303,93 @@ function jcli {
     $JCLI -i ~/.ssh/id_rsa "$@"
 }
 
-# create example accounts.
+# use LDAP for user authentication (when enabled).
+# NB this assumes you are running the Active Directory from https://github.com/rgl/windows-domain-controller-vagrant.
+# see https://wiki.jenkins-ci.org/display/JENKINS/LDAP+Plugin
+# see https://github.com/jenkinsci/ldap-plugin/blob/b0b86221a898ecbd95c005ceda57a67533833314/src/main/java/hudson/security/LDAPSecurityRealm.java#L480
+if [ "$config_authentication" = 'ldap' ]; then
+echo '192.168.56.2 dc.example.com' >>/etc/hosts
+openssl x509 -inform der -in /vagrant/tmp/ExampleEnterpriseRootCA.der -out /usr/local/share/ca-certificates/ExampleEnterpriseRootCA.crt
+update-ca-certificates
+jgroovy = <<'EOF'
+import jenkins.model.Jenkins
+import jenkins.security.plugins.ldap.FromUserRecordLDAPGroupMembershipStrategy
+import jenkins.security.plugins.ldap.FromGroupSearchLDAPGroupMembershipStrategy
+import hudson.security.LDAPSecurityRealm
+import hudson.util.Secret
+
+Jenkins.instance.securityRealm = new LDAPSecurityRealm(
+    // String server:
+    // TIP use the ldap: scheme and wireshark on the dc.example.com machine to troubeshoot.
+    'ldaps://dc.example.com',
+
+    // String rootDN:
+    'DC=example,DC=com',
+
+    // String userSearchBase:
+    // NB this is relative to rootDN. 
+    'CN=Users',
+
+    // String userSearch:
+    // {0} is the username.
+    '(&(sAMAccountName={0})(objectClass=person)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))',
+
+    // String groupSearchBase:
+    // NB this is relative to rootDN.
+    'CN=Users',
+
+    // String groupSearchFilter:
+    // NB {0} is replaced with the user DN.
+    // NB {1} is replaced with the username.
+    // Default: (|(member={0})(uniqueMember={0})(memberUid={1}))
+    // NB the default is always used when you use a FromUserRecordLDAPGroupMembershipStrategy as a groupMembershipStrategy.
+    '(&(cn={0})(objectClass=group))',
+
+    // LDAPGroupMembershipStrategy groupMembershipStrategy:
+    // NB {0} is replaced with the user DN.
+    // NB {1} is replaced with the username.
+    new FromGroupSearchLDAPGroupMembershipStrategy('(&(cn={0})(objectClass=group))'),
+    //new FromUserRecordLDAPGroupMembershipStrategy('memberOf'),
+
+    // String managerDN:
+    'jane.doe@example.com',
+
+    // Secret managerPasswordSecret:
+    Secret.fromString('HeyH0Password'),
+
+    // boolean inhibitInferRootDN:
+    false,
+
+    // boolean disableMailAddressResolver:
+    false,
+
+    // CacheConfiguration cache:
+    null,
+
+    // EnvironmentProperty[] environmentProperties:
+    null,
+
+    // String displayNameAttributeName:
+    'displayName',
+
+    // String mailAddressAttributeName:
+    'mail',
+
+    // IdStrategy userIdStrategy:
+    null,
+
+    // IdStrategy groupIdStrategy:
+    null)
+
+Jenkins.instance.save()
+EOF
+fi
+
+# create example accounts (when using jenkins authentication).
 # see http://javadoc.jenkins-ci.org/hudson/model/User.html
 # see http://javadoc.jenkins-ci.org/hudson/security/HudsonPrivateSecurityRealm.html
 # see https://github.com/jenkinsci/mailer-plugin/blob/master/src/main/java/hudson/tasks/Mailer.java
+if [ "$config_authentication" = 'jenkins' ]; then
 jgroovy = <<'EOF'
 import jenkins.model.Jenkins
 import hudson.tasks.Mailer
@@ -321,6 +410,7 @@ import hudson.tasks.Mailer
     u.save()
 }
 EOF
+fi
 
 
 #
@@ -446,3 +536,4 @@ User.all.sort { it.id }.each { println sprintf("jenkins user: %s (%s)", it.id, i
 EOF
 echo "jenkins is installed at https://jenkins.example.com"
 echo "the admin password is $(cat /var/lib/jenkins/secrets/initialAdminPassword)"
+echo "you can also use the vagrant user with the vagrant password"
