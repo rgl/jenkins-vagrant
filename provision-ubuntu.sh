@@ -10,6 +10,12 @@ export DEBIAN_FRONTEND=noninteractive
 
 
 #
+# make sure the package index cache is up-to-date before installing anything.
+
+apt-get update
+
+
+#
 # install vim.
 
 apt-get install -y --no-install-recommends vim
