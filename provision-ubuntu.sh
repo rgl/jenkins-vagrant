@@ -44,8 +44,6 @@ alias l='ls -lF --color'
 alias ll='l -a'
 alias h='history 25'
 alias j='jobs -l'
-alias jcli='java -jar /var/cache/jenkins/war/WEB-INF/jenkins-cli.jar -s http://localhost:8080 -i ~/.ssh/id_rsa'
-alias jgroovy='jcli groovy'
 EOF
 
 cat >~/.inputrc <<'EOF'
