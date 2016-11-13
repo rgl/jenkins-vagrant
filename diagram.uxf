@@ -4,10 +4,10 @@
   <element>
     <id>UMLDeployment</id>
     <coordinates>
-      <x>110</x>
+      <x>100</x>
       <y>40</y>
       <w>190</w>
-      <h>320</h>
+      <h>410</h>
     </coordinates>
     <panel_attributes>&lt;&lt;jenkins master&gt;&gt;
 jenkins.example.com
@@ -17,7 +17,7 @@ jenkins.example.com
   <element>
     <id>UMLDeployment</id>
     <coordinates>
-      <x>470</x>
+      <x>460</x>
       <y>50</y>
       <w>260</w>
       <h>80</h>
@@ -30,7 +30,7 @@ ubuntu.jenkins.example.com
   <element>
     <id>UMLDeployment</id>
     <coordinates>
-      <x>470</x>
+      <x>460</x>
       <y>140</y>
       <w>260</w>
       <h>80</h>
@@ -43,7 +43,7 @@ windows.jenkins.example.com
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>290</x>
+      <x>280</x>
       <y>90</y>
       <w>120</w>
       <h>50</h>
@@ -55,7 +55,7 @@ windows.jenkins.example.com
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>390</x>
+      <x>380</x>
       <y>90</y>
       <w>100</w>
       <h>40</h>
@@ -68,7 +68,7 @@ r1=ssh
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>390</x>
+      <x>380</x>
       <y>180</y>
       <w>100</w>
       <h>40</h>
@@ -81,7 +81,7 @@ r1=ssh
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>290</x>
+      <x>280</x>
       <y>180</y>
       <w>120</w>
       <h>50</h>
@@ -93,8 +93,8 @@ r1=ssh
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>30</x>
-      <y>190</y>
+      <x>20</x>
+      <y>220</y>
       <w>100</w>
       <h>40</h>
     </coordinates>
@@ -106,8 +106,8 @@ r1=https
   <element>
     <id>UMLDeployment</id>
     <coordinates>
-      <x>470</x>
-      <y>260</y>
+      <x>460</x>
+      <y>350</y>
       <w>260</w>
       <h>80</h>
     </coordinates>
@@ -119,8 +119,8 @@ dc.example.com
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>390</x>
-      <y>300</y>
+      <x>380</x>
+      <y>390</y>
       <w>100</w>
       <h>40</h>
     </coordinates>
@@ -132,8 +132,8 @@ r1=ldaps
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>290</x>
-      <y>300</y>
+      <x>280</x>
+      <y>390</y>
       <w>120</w>
       <h>50</h>
     </coordinates>
@@ -144,8 +144,8 @@ r1=ldaps
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>350</x>
-      <y>230</y>
+      <x>340</x>
+      <y>320</y>
       <w>390</w>
       <h>120</h>
     </coordinates>
@@ -154,5 +154,43 @@ halign=right
 lt=.
 layer=-1</panel_attributes>
     <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLDeployment</id>
+    <coordinates>
+      <x>460</x>
+      <y>230</y>
+      <w>260</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;jenkins slave&gt;&gt;
+macos.jenkins.example.com
+(10.10.10.103)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>380</x>
+      <y>270</y>
+      <w>100</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>lt=()-
+r1=ssh
+</panel_attributes>
+    <additional_attributes>10.0;20.0;80.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>280</x>
+      <y>270</y>
+      <w>120</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>lt=-(
+</panel_attributes>
+    <additional_attributes>10.0;20.0;90.0;20.0</additional_attributes>
   </element>
 </diagram>

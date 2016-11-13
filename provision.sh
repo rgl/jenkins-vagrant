@@ -486,6 +486,25 @@ EOF
 
 
 #
+# add the macos slave node.
+
+jgroovy = <<'EOF'
+import jenkins.model.Jenkins
+import hudson.slaves.DumbSlave
+import hudson.slaves.CommandLauncher
+
+node = new DumbSlave(
+    "macos",
+    "/var/jenkins",
+    new CommandLauncher("ssh macos.jenkins.example.com /var/jenkins/bin/jenkins-slave"))
+node.numExecutors = 3
+node.labelString = "macos 10.12 amd64"
+Jenkins.instance.nodesObject.addNode(node)
+Jenkins.instance.nodesObject.save()
+EOF
+
+
+#
 # create simple free style projects.
 # see http://javadoc.jenkins-ci.org/jenkins/model/Jenkins.html
 # see http://javadoc.jenkins-ci.org/hudson/model/FreeStyleProject.html
@@ -530,6 +549,27 @@ set
 project.buildersList.add(new PowerShell(
 '''\
 $PSVersionTable | Format-Table -AutoSize
+'''))
+
+Jenkins.instance.add(project, project.name)
+EOF
+
+jgroovy = <<'EOF'
+import jenkins.model.Jenkins
+import hudson.model.FreeStyleProject
+import hudson.model.labels.LabelAtom
+import hudson.tasks.Shell
+
+project = new FreeStyleProject(Jenkins.instance, 'dump-environment-macos')
+project.assignedLabel = new LabelAtom('macos')
+project.buildersList.add(new Shell(
+'''\
+system_profiler SPSoftwareDataType
+sw_vers
+uname -a
+env
+locale
+id
 '''))
 
 Jenkins.instance.add(project, project.name)

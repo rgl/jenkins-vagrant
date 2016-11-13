@@ -11,6 +11,7 @@ This configures Jenkins through [CLI/JNLP](https://wiki.jenkins-ci.org/display/J
 * Create a simple Free Style Project job.
 * Add a Ubuntu Linux slave node.
 * Add a Windows slave node.
+* Add a macOS slave node.
 
 **NB** If you are new to Groovy, be sure to check the [Groovy Learn X in Y minutes page](https://learnxinyminutes.com/docs/groovy/).
 
@@ -34,6 +35,8 @@ vagrant box add windows_2012_r2 windows_2012_r2_virtualbox.box
 rm *.box
 cd ..
 ```
+
+Build and install the [macOS Base Box](https://github.com/rgl/macos-vagrant).
 
 Add the following entry to your `/etc/hosts` file:
 
@@ -61,3 +64,5 @@ one of the example accounts, e.g. `alice.doe` and password `password`).
 Run `vagrant up ubuntu` to launch the Ubuntu slave.
 
 Run `vagrant up windows` to launch the Windows slave.
+
+Run `vagrant up macos` to launch the macOS slave.
