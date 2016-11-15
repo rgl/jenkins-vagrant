@@ -249,7 +249,7 @@ c.adminAddress = 'Admin <admin@example.com>'
 c.save()
 EOF
 
-# install git and the git plugin.
+# install and configure git.
 apt-get install -y git-core
 su jenkins -c bash <<'EOF'
 set -eux
@@ -258,10 +258,55 @@ git config --global user.name 'Jenkins'
 git config --global push.default simple
 git config --global core.autocrlf false
 EOF
-jcli install-plugin git -deploy
 
-# install support for running PowerShell scripts.
-jcli install-plugin powershell -deploy
+# install plugins.
+# NB installing plugins is quite flaky, mainly because Jenkins (as-of 2.19.2)
+#    does not retry their downloads. this will workaround it by (re)installing
+#    until it works.
+# see http://javadoc.jenkins-ci.org/jenkins/model/Jenkins.html
+# see http://javadoc.jenkins-ci.org/hudson/PluginManager.html
+# see http://javadoc.jenkins.io/hudson/model/UpdateCenter.html
+# see http://javadoc.jenkins.io/hudson/model/UpdateSite.Plugin.html
+jgroovy = <<'EOF'
+import jenkins.model.Jenkins
+Jenkins.instance.updateCenter.updateAllSites()
+EOF
+function install-plugins {
+jgroovy = <<'EOF'
+import jenkins.model.Jenkins
+
+updateCenter = Jenkins.instance.updateCenter
+pluginManager = Jenkins.instance.pluginManager
+
+installed = [] as Set
+
+def install(id) {
+  plugin = updateCenter.getPlugin(id)
+
+  plugin.dependencies.each {
+    install(it.key)
+  }
+
+  if (!pluginManager.getPlugin(id) && !installed.contains(id)) {
+    println("installing plugin ${id}...")
+    pluginManager.install([id], false).each { it.get() }
+    installed.add(id)
+  }
+}
+
+[
+    'git',
+    'powershell',
+    'xcode-plugin',
+].each {
+  install(it)
+}
+EOF
+}
+while [[ -n "$(install-plugins)" ]]; do
+    systemctl restart jenkins
+    bash -c 'while ! wget -q --spider http://localhost:8080/cli; do sleep 1; done;'
+done
 
 
 #
