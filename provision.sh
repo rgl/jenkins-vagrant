@@ -22,6 +22,11 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update
 
 
+# enable systemd-journald persistent logs.
+sed -i -E 's,^#?(Storage=).*,\1persistent,' /etc/systemd/journald.conf
+systemctl restart systemd-journald
+
+
 #
 # install vim.
 
