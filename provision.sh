@@ -560,8 +560,11 @@ EOF
 # see http://javadoc.jenkins-ci.org/hudson/model/FreeStyleProject.html
 # see http://javadoc.jenkins-ci.org/hudson/model/Label.html
 # see http://javadoc.jenkins-ci.org/hudson/tasks/Shell.html
+# see http://javadoc.jenkins-ci.org/hudson/tasks/ArtifactArchiver.html
 # see http://javadoc.jenkins-ci.org/hudson/tasks/BatchFile.html
 # see https://github.com/jenkinsci/powershell-plugin/blob/master/src/main/java/hudson/plugins/powershell/PowerShell.java
+# see https://github.com/jenkinsci/git-plugin/blob/master/src/main/java/hudson/plugins/git/GitSCM.java
+# see https://github.com/jenkinsci/git-plugin/blob/master/src/main/java/hudson/plugins/git/extensions/impl/CleanBeforeCheckout.java
 
 jgroovy = <<'EOF'
 import jenkins.model.Jenkins
@@ -621,6 +624,32 @@ env
 locale
 id
 '''))
+
+Jenkins.instance.add(project, project.name)
+EOF
+
+jgroovy = <<'EOF'
+import jenkins.model.Jenkins
+import hudson.model.FreeStyleProject
+import hudson.model.labels.LabelAtom
+import hudson.plugins.git.BranchSpec
+import hudson.plugins.git.GitSCM
+import hudson.plugins.git.extensions.impl.CleanBeforeCheckout
+import hudson.tasks.Shell
+import hudson.tasks.ArtifactArchiver
+
+project = new FreeStyleProject(Jenkins.instance, 'minimal-cocoa-app')
+project.assignedLabel = new LabelAtom('macos')
+project.scm = new GitSCM('https://github.com/rgl/minimal-cocoa-app.git')
+project.scm.branches = [new BranchSpec('*/master')]
+project.scm.extensions.add(new CleanBeforeCheckout())
+project.buildersList.add(new Shell(
+'''\
+make build
+tar czf minimal-cocoa-app.app.tgz minimal-cocoa-app.app
+'''))
+project.publishersList.add(
+    new ArtifactArchiver('minimal-cocoa-app.app.tgz'))
 
 Jenkins.instance.add(project, project.name)
 EOF
