@@ -42,6 +42,9 @@ Vagrant.configure('2') do |config|
   end
 
   config.vm.define :macos do |config|
+    config.vm.provider :virtualbox do |vb|
+      vb.memory = 4096
+    end
     config.vm.box = 'macOS'
     config.vm.hostname = config_macos_fqdn
     config.vm.network :private_network, ip: config_macos_ip
@@ -54,8 +57,14 @@ Vagrant.configure('2') do |config|
     run "sh -c 'mkdir -p tmp && cp #{ldap_ca_cert_path} tmp'" if File.file? ldap_ca_cert_path
   end
 
+  config.trigger.before :up, :vm => 'macos' do
+    raise "You first need to download Xcode_8.1.xip from https://developer.apple.com/download/more/" unless File.file?('Xcode_8.1.xip') || File.file?('Xcode_8.1.cpio.xz')
+  end
+
   config.trigger.after :up, :vm => 'macos' do
     run "sh -c \"vagrant ssh -c 'cat /vagrant/tmp/#{config_macos_fqdn}.ssh_known_hosts' macos >tmp/#{config_macos_fqdn}.ssh_known_hosts\""
+    run "sh -c \"vagrant ssh -c 'cat /vagrant/Xcode_8.1.cpio.xz' macos >Xcode_8.1.cpio.xz.tmp && mv Xcode_8.1.cpio.xz{.tmp,}\"" unless File.file? 'Xcode_8.1.cpio.xz'
+    run "sh -c \"vagrant ssh -c 'cat /vagrant/Xcode_8.1.cpio.xz.shasum' macos >Xcode_8.1.cpio.xz.shasum.tmp && mv Xcode_8.1.cpio.xz.shasum{.tmp,}\"" unless File.file? 'Xcode_8.1.cpio.xz.shasum'
   end
 
   config.trigger.after :up, :vm => ['ubuntu', 'windows', 'macos'] do

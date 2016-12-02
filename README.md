@@ -65,4 +65,5 @@ Run `vagrant up ubuntu` to launch the Ubuntu slave.
 
 Run `vagrant up windows` to launch the Windows slave.
 
-Run `vagrant up macos` to launch the macOS slave.
+Run `vagrant up macos` to launch the macOS slave. **NB** you first need to download [Xcode_8.1.xip](https://developer.apple.com/download/more/).
+After provisioning you can delete it, as `Xcode_8.1.cpio.xz` will take its place as a more efficient way to install Xcode.

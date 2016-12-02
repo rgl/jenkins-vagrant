@@ -6,11 +6,44 @@ config_jenkins_master_fqdn=$(hostname | sed -E 's,^[a-z]+\.,,')
 
 
 #
+# rename the hard disk.
+
+diskutil rename disk0s2 macOS
+
+
+#
+# install Xcode.
+
+if [[ ! -f /vagrant/Xcode_8.1.cpio.xz ]]; then
+pushd /vagrant
+pkgutil --verbose --check-signature Xcode_8.1.xip
+xar -xf Xcode_8.1.xip
+curl -sO https://gist.githubusercontent.com/pudquick/ff412bcb29c9c1fa4b8d/raw/24b25538ea8df8d0634a2a6189aa581ccc6a5b4b/parse_pbzx2.py
+python parse_pbzx2.py Content
+rm Content
+mv Content.part00.cpio.xz Xcode_8.1.cpio.xz
+shasum -a 256 Xcode_8.1.cpio.xz >Xcode_8.1.cpio.xz.shasum
+rm Xcode_8.1.xip
+popd
+fi
+sudo bash <<'SUDO_EOF'
+set -eux
+cd /vagrant
+shasum -c Xcode_8.1.cpio.xz.shasum
+cd /Applications
+cpio -idmu </vagrant/Xcode_8.1.cpio.xz
+xcodebuild -license accept
+for pkg in Xcode.app/Contents/Resources/Packages/*.pkg; do
+    installer -pkg "$pkg" -target /
+done
+SUDO_EOF
+
+
+#
 # install homebrew.
 
 ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" </dev/null
 #brew analytics off
-brew config
 
 
 #
@@ -56,7 +89,6 @@ EOF
 # install dependencies.
 
 brew cask install java
-java -version
 
 
 #
@@ -124,3 +156,21 @@ find \
     >$config_fqdn.ssh_known_hosts
 popd
 SUDO_EOF
+
+
+#
+# show summary.
+
+system_profiler SPSoftwareDataType
+sw_vers
+uname -a
+xcode-select -version
+xcode-select -print-path
+xcodebuild -version
+swift -version
+java -version
+python --version
+ruby --version
+git --version
+brew config
+df -h /
