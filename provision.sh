@@ -646,10 +646,25 @@ project.scm.extensions.add(new CleanBeforeCheckout())
 project.buildersList.add(new Shell(
 '''\
 make build
+'''))
+project.buildersList.add(new Shell(
+'''\
+# package as a tarball
 tar czf minimal-cocoa-app.app.tgz minimal-cocoa-app.app
+
+# package as a dmg
+[[ -d make_dmg ]] || git clone https://github.com/rgl/make_dmg.git
+cd make_dmg
+[[ -f background.png ]] || curl -sLO http://bitbucket.org/rgl/make_dmg/downloads/background.png
+./make_dmg \
+    -image background.png \
+    -file 144,144 ../minimal-cocoa-app.app \
+    -symlink 416,144 /Applications \
+    -convert UDBZ \
+    ../minimal-cocoa-app.dmg
 '''))
 project.publishersList.add(
-    new ArtifactArchiver('minimal-cocoa-app.app.tgz'))
+    new ArtifactArchiver('*.tgz,*.dmg'))
 
 Jenkins.instance.add(project, project.name)
 EOF
