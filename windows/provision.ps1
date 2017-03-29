@@ -6,27 +6,6 @@ param(
     [string]$config_fqdn = 'windows.jenkins.example.com'
 )
 
-Set-StrictMode -Version Latest
-
-$ErrorActionPreference = 'Stop'
-
-trap {
-    Write-Output "`nERROR: $_`n$($_.ScriptStackTrace)"
-    Exit 1
-}
-
-# wrap the choco command (to make sure this script aborts when it fails).
-function Start-Choco([string[]]$Arguments, [int[]]$SuccessExitCodes=@(0)) {
-    &C:\ProgramData\chocolatey\bin\choco.exe @Arguments `
-        | Where-Object { $_ -NotMatch '^Progress: ' }
-    if ($SuccessExitCodes -NotContains $LASTEXITCODE) {
-        throw "$(@('choco')+$Arguments | ConvertTo-Json -Compress) failed with exit code $LASTEXITCODE"
-    }
-}
-function choco {
-    Start-Choco $Args
-}
-
 # install Google Chrome and some useful extensions.
 # see https://developer.chrome.com/extensions/external_extensions
 choco install -y googlechrome

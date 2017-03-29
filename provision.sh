@@ -529,7 +529,7 @@ node = new DumbSlave(
     "C:/jenkins",
     new CommandLauncher("ssh windows.jenkins.example.com C:/jenkins/bin/jenkins-slave"))
 node.numExecutors = 3
-node.labelString = "windows 2012r2 amd64"
+node.labelString = "windows 2016 amd64"
 Jenkins.instance.nodesObject.addNode(node)
 Jenkins.instance.nodesObject.save()
 EOF

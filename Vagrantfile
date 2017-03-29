@@ -33,12 +33,12 @@ Vagrant.configure('2') do |config|
   end
 
   config.vm.define :windows do |config|
-    config.vm.box = 'windows_2012_r2'
+    config.vm.box = 'windows-2016-amd64'
     config.vm.hostname = 'windows'
     config.vm.network :private_network, ip: config_windows_ip
     config.vm.provision :shell, inline: "echo '#{config_jenkins_ip} #{config_jenkins_fqdn}' | Out-File -Encoding ASCII -Append c:/Windows/System32/drivers/etc/hosts"
     config.vm.provision :shell, inline: "$env:chocolateyVersion='0.10.3'; iwr https://chocolatey.org/install.ps1 -UseBasicParsing | iex", name: "Install Chocolatey"
-    config.vm.provision :shell, path: 'provision-windows.ps1', args: [config_jenkins_fqdn, config_windows_fqdn]
+    config.vm.provision :shell, path: 'windows/ps.ps1', args: ['provision.ps1', config_jenkins_fqdn, config_windows_fqdn]
   end
 
   config.vm.define :macos do |config|

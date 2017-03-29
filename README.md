@@ -24,17 +24,7 @@ These are the machines and how they are connected with each other:
 
 Build and install the [Ubuntu Base Box](https://github.com/rgl/ubuntu-vagrant).
 
-Build and install the Windows Base Box with:
-
-```bash
-git clone https://github.com/joefitzgerald/packer-windows
-cd packer-windows
-# this will take ages to build, so leave it running over night...
-packer build windows_2012_r2.json
-vagrant box add windows_2012_r2 windows_2012_r2_virtualbox.box
-rm *.box
-cd ..
-```
+Build and install the [Windows Base Box](https://github.com/rgl/windows-2016-vagrant).
 
 Build and install the [macOS Base Box](https://github.com/rgl/macos-vagrant).
 
