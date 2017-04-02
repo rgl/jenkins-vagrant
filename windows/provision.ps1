@@ -6,22 +6,6 @@ param(
     [string]$config_fqdn = 'windows.jenkins.example.com'
 )
 
-# install Google Chrome and some useful extensions.
-# see https://developer.chrome.com/extensions/external_extensions
-choco install -y googlechrome
-@(
-    # JSON Formatter (https://chrome.google.com/webstore/detail/json-formatter/bcjindcccaagfpapjjmafapmmgkkhgoa).
-    'bcjindcccaagfpapjjmafapmmgkkhgoa'
-    # uBlock Origin (https://chrome.google.com/webstore/detail/ublock-origin/cjpalhdlnbpafiamejdnhcphjbkeiagm).
-    'cjpalhdlnbpafiamejdnhcphjbkeiagm'
-) | ForEach-Object {
-    New-Item -Force -Path "HKLM:Software\Wow6432Node\Google\Chrome\Extensions\$_" `
-        | Set-ItemProperty -Name update_url -Value 'https://clients2.google.com/service/update2/crx'
-}
-
-# replace notepad with notepad2.
-choco install -y notepad2
-
 # install git and related applications.
 choco install -y git --params '/GitOnlyOnPath /NoAutoCrlf'
 choco install -y gitextensions
