@@ -28,6 +28,13 @@ git config --global mergetool.meld.path 'C:/Program Files (x86)/Meld/Meld.exe'
 git config --global mergetool.meld.cmd '\"C:/Program Files (x86)/Meld/Meld.exe\" --diff \"$LOCAL\" \"$BASE\" \"$REMOTE\" --output \"$MERGED\"'
 #git config --list --show-origin
 
+# install visual studio 2017.
+choco install -y visualstudio2017community
+choco install -y visualstudio2017-workload-netcoretools
+
+# add support for .net 4.6.2.
+choco install -y netfx-4.6.2-devpack
+
 # import the Jenkins master site https certificate into the local machine trust store.
 Import-Certificate `
     -FilePath C:/vagrant/tmp/$config_jenkins_master_fqdn-crt.der `

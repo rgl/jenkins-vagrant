@@ -529,7 +529,7 @@ node = new DumbSlave(
     "C:/jenkins",
     new CommandLauncher("ssh windows.jenkins.example.com C:/jenkins/bin/jenkins-slave"))
 node.numExecutors = 3
-node.labelString = "windows 2016 amd64"
+node.labelString = "windows 2016 vs2017 amd64"
 Jenkins.instance.nodesObject.addNode(node)
 Jenkins.instance.nodesObject.save()
 EOF
@@ -625,6 +625,33 @@ env
 locale
 id
 '''))
+
+Jenkins.instance.add(project, project.name)
+EOF
+
+jgroovy = <<'EOF'
+import jenkins.model.Jenkins
+import hudson.model.FreeStyleProject
+import hudson.model.labels.LabelAtom
+import hudson.plugins.git.BranchSpec
+import hudson.plugins.git.GitSCM
+import hudson.plugins.git.extensions.impl.CleanBeforeCheckout
+import hudson.plugins.powershell.PowerShell
+import hudson.tasks.ArtifactArchiver
+
+project = new FreeStyleProject(Jenkins.instance, 'MailBounceDetector')
+project.assignedLabel = new LabelAtom('vs2017')
+project.scm = new GitSCM('https://github.com/rgl/MailBounceDetector.git')
+project.scm.branches = [new BranchSpec('*/master')]
+project.scm.extensions.add(new CleanBeforeCheckout())
+project.buildersList.add(new PowerShell(
+'''\
+$ErrorActionPreference = 'Stop'
+$env:PATH = "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/MSBuild/15.0/Bin;$env:PATH"
+MSBuild -m -p:Configuration=Release -t:restore -t:build
+'''))
+project.publishersList.add(
+    new ArtifactArchiver('MailBounceDetector/bin/Release/*.nupkg'))
 
 Jenkins.instance.add(project, project.name)
 EOF

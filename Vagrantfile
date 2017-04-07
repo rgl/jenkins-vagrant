@@ -33,6 +33,9 @@ Vagrant.configure('2') do |config|
   end
 
   config.vm.define :windows do |config|
+    config.vm.provider :virtualbox do |vb|
+      vb.memory = 4096
+    end
     config.vm.box = 'windows-2016-amd64'
     config.vm.hostname = 'windows'
     config.vm.network :private_network, ip: config_windows_ip
