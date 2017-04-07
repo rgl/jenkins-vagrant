@@ -99,3 +99,18 @@ mkdir -Force C:\vagrant\tmp | Out-Null
     "C:\vagrant\tmp\$config_fqdn.ssh_known_hosts",
     (dir 'C:\Program Files\OpenSSH\etc\ssh_host_*_key.pub' | %{ "$config_fqdn $(Get-Content $_)`n" }) -join ''
 )
+
+# add default desktop shortcuts (called from a provision-base.ps1 generated script).
+[IO.File]::WriteAllText(
+    "$env:USERPROFILE\ConfigureDesktop-Jenkins.ps1",
+@'
+[IO.File]::WriteAllText(
+    "$env:USERPROFILE\Desktop\Jenkins Master.url",
+    @"
+[InternetShortcut]
+URL=https://{0}
+"@)
+'@ -f $config_jenkins_master_fqdn)
+
+# list installed packages.
+choco list -l

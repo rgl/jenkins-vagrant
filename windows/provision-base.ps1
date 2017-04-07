@@ -33,9 +33,9 @@ Set-ItemProperty -Path HKCU:Software\Microsoft\Windows\CurrentVersion\Explorer\A
 # cleanup the taskbar by removing the existing buttons and unpinning all applications; once the user logs on.
 # NB the shell executes these RunOnce commands about ~10s after the user logs on.
 [IO.File]::WriteAllText(
-    "$env:TEMP\ConfigureTaskbar.ps1",
+    "$env:USERPROFILE\ConfigureDesktop.ps1",
 @'
-# unpin all applications.
+# unpin all applications from the taskbar.
 # NB this can only be done in a logged on session.
 $pinnedTaskbarPath = "$env:APPDATA\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar"
 (New-Object -Com Shell.Application).NameSpace($pinnedTaskbarPath).Items() `
@@ -70,11 +70,27 @@ Set-ItemProperty -Path HKCU:SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\A
 #   2: never combine
 Set-ItemProperty -Path HKCU:Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced -Name TaskbarGlomLevel -Value 2
 
+# remove default or uneeded files.
+@(
+    "$env:USERPROFILE\Desktop\desktop.ini"
+    "$env:USERPROFILE\Desktop\*.lnk"
+    "$env:USERPROFILE\Desktop\*.url"
+    "$env:PUBLIC\Desktop\desktop.ini"
+    "$env:PUBLIC\Desktop\*.lnk"
+    "$env:PUBLIC\Desktop\*.url"
+) | Remove-Item -Force
+
+# execute hooks.
+Import-Module C:\ProgramData\chocolatey\helpers\chocolateyInstaller.psm1
+Get-ChildItem "$PSScriptRoot\ConfigureDesktop-*.ps1" `
+    | Sort-Object -Property Name `
+    | ForEach-Object { &$_ }
+
 # restart explorer to apply the changed settings.
 (Get-Process explorer).Kill()
 '@)
 New-Item -Path HKCU:Software\Microsoft\Windows\CurrentVersion\RunOnce -Force `
-    | New-ItemProperty -Name ConfigureTaskbar -Value 'PowerShell -WindowStyle Hidden -File "%TEMP%\ConfigureTaskbar.ps1"' -PropertyType ExpandString `
+    | New-ItemProperty -Name ConfigureDesktop -Value 'PowerShell -WindowStyle Hidden -File "%USERPROFILE%\ConfigureDesktop.ps1"' -PropertyType ExpandString `
     | Out-Null
 
 # set default Explorer location to This PC.
@@ -106,6 +122,6 @@ cp -Force GoogleChrome-master_bookmarks.html "$chromeLocation\master_bookmarks.h
 # replace notepad with notepad2.
 choco install -y notepad2
 
-# defender takes way too many resources for what its worth.
+# we uninstall defender because it takes way too much resources for what its worth.
 Write-Host 'Uninstalling Windows Defender...'
 Uninstall-WindowsFeature Windows-Defender-Features
