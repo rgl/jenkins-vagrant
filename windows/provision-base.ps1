@@ -119,8 +119,10 @@ cp -Force GoogleChrome-external_extensions.json (Get-Item "$chromeLocation\*\def
 cp -Force GoogleChrome-master_preferences.json "$chromeLocation\master_preferences"
 cp -Force GoogleChrome-master_bookmarks.html "$chromeLocation\master_bookmarks.html"
 
-# replace notepad with notepad2.
+# install useful applications.
+choco install -y 7zip
 choco install -y notepad2
+choco install -y visualstudiocode
 
 # we uninstall defender because it takes way too much resources for what its worth.
 Write-Host 'Uninstalling Windows Defender...'
