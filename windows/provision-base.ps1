@@ -30,6 +30,20 @@ Set-ItemProperty -Path HKCU:Software\Microsoft\Windows\CurrentVersion\Explorer\A
 # show file extensions.
 Set-ItemProperty -Path HKCU:Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced -Name HideFileExt -Value 0
 
+# set the desktop wallpaper.
+Add-Type -AssemblyName System.Drawing
+$backgroundColor = [System.Drawing.Color]::FromArgb(75, 117, 139) #4b758b
+$logo = [System.Drawing.Image]::FromFile((Resolve-Path 'jenkins.png'))
+$b = New-Object System.Drawing.Bitmap($logo.Width, $logo.Height)
+$g = [System.Drawing.Graphics]::FromImage($b)
+$g.Clear($backgroundColor)
+$g.DrawImage($logo, 0, 0, $logo.Width, $logo.Height)
+$b.Save('C:\Windows\Web\Wallpaper\Windows\jenkins.png')
+Set-ItemProperty -Path 'HKCU:Control Panel\Desktop' -Name Wallpaper -Value C:\Windows\Web\Wallpaper\Windows\jenkins.png
+Set-ItemProperty -Path 'HKCU:Control Panel\Desktop' -Name WallpaperStyle -Value 0
+Set-ItemProperty -Path 'HKCU:Control Panel\Desktop' -Name TileWallpaper -Value 0
+Set-ItemProperty -Path 'HKCU:Control Panel\Colors' -Name Background -Value ($backgroundColor.R,$backgroundColor.G,$backgroundColor.B -join ' ')
+
 # cleanup the taskbar by removing the existing buttons and unpinning all applications; once the user logs on.
 # NB the shell executes these RunOnce commands about ~10s after the user logs on.
 [IO.File]::WriteAllText(
