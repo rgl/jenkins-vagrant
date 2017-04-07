@@ -601,6 +601,7 @@ set
 '''))
 project.buildersList.add(new PowerShell(
 '''\
+[Environment]::OSVersion | Format-Table -AutoSize
 $PSVersionTable | Format-Table -AutoSize
 '''))
 
