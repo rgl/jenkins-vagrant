@@ -26,11 +26,21 @@ git config --global difftool.meld.path 'C:/Program Files (x86)/Meld/Meld.exe'
 git config --global difftool.meld.cmd '\"C:/Program Files (x86)/Meld/Meld.exe\" \"$LOCAL\" \"$REMOTE\"'
 git config --global merge.tool meld
 git config --global mergetool.meld.path 'C:/Program Files (x86)/Meld/Meld.exe'
-git config --global mergetool.meld.cmd '\"C:/Program Files (x86)/Meld/Meld.exe\" --diff \"$LOCAL\" \"$BASE\" \"$REMOTE\" --output \"$MERGED\"'
+git config --global mergetool.meld.cmd '\"C:/Program Files (x86)/Meld/Meld.exe\" \"$LOCAL\" \"$BASE\" \"$REMOTE\" --auto-merge --output \"$MERGED\"'
 #git config --list --show-origin
+
+# install visual studio 2017 build tools for .net 4.6 and c++ code.
+#choco install -y visualstudio2017buildtools
+
+# install nuget executable.
+#choco install -y nuget.commandline
+#choco install -y gitlink
 
 # install visual studio 2017.
 choco install -y visualstudio2017community
+#choco install -y visualstudio2017-workload-vctools
+#choco install -y visualstudio2017-workload-manageddesktop
+#choco install -y visualstudio2017-workload-webbuildtools
 choco install -y visualstudio2017-workload-netcoretools
 
 # add support for .net 4.6.2.
@@ -43,6 +53,7 @@ Import-Certificate `
 
 # install the JRE.
 choco install -y jre8 -PackageParameters '/exclude:32'
+# TODO install JCE too.
 
 # create the jenkins user account and home directory.
 [Reflection.Assembly]::LoadWithPartialName('System.Web') | Out-Null
