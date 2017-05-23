@@ -33,16 +33,46 @@ Set-ItemProperty -Path HKCU:Software\Microsoft\Windows\CurrentVersion\Explorer\A
 # set the desktop wallpaper.
 Add-Type -AssemblyName System.Drawing
 $backgroundColor = [System.Drawing.Color]::FromArgb(75, 117, 139) #4b758b
+$backgroundPath = 'C:\Windows\Web\Wallpaper\Windows\jenkins.png'
 $logo = [System.Drawing.Image]::FromFile((Resolve-Path 'jenkins.png'))
 $b = New-Object System.Drawing.Bitmap($logo.Width, $logo.Height)
 $g = [System.Drawing.Graphics]::FromImage($b)
 $g.Clear($backgroundColor)
 $g.DrawImage($logo, 0, 0, $logo.Width, $logo.Height)
-$b.Save('C:\Windows\Web\Wallpaper\Windows\jenkins.png')
-Set-ItemProperty -Path 'HKCU:Control Panel\Desktop' -Name Wallpaper -Value C:\Windows\Web\Wallpaper\Windows\jenkins.png
+$b.Save($backgroundPath)
+Set-ItemProperty -Path 'HKCU:Control Panel\Desktop' -Name Wallpaper -Value $backgroundPath
 Set-ItemProperty -Path 'HKCU:Control Panel\Desktop' -Name WallpaperStyle -Value 0
 Set-ItemProperty -Path 'HKCU:Control Panel\Desktop' -Name TileWallpaper -Value 0
 Set-ItemProperty -Path 'HKCU:Control Panel\Colors' -Name Background -Value ($backgroundColor.R,$backgroundColor.G,$backgroundColor.B -join ' ')
+Add-Type @'
+using System;
+using System.Drawing;
+using System.Runtime.InteropServices;
+
+public static class WindowsWallpaper
+{
+    private const int COLOR_DESKTOP = 0x01;
+
+    [DllImport("user32", SetLastError=true)]
+    private static extern bool SetSysColors(int cElements, int[] lpaElements, int[] lpaRgbValues);
+
+    private const uint SPI_SETDESKWALLPAPER = 0x14;
+    private const uint SPIF_UPDATEINIFILE = 0x01;
+    private const uint SPIF_SENDWININICHANGE = 0x02;
+
+    [DllImport("user32", SetLastError=true)]
+    private static extern bool SystemParametersInfo(uint uiAction, uint uiParam, string pvParam, uint fWinIni);
+
+    public static void Set(Color color, string path)
+    {
+        var elements = new int[] { COLOR_DESKTOP };
+        var colors = new int[] { ColorTranslator.ToWin32(color) };
+        SetSysColors(elements.Length, elements, colors);
+        SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, path, SPIF_SENDWININICHANGE);
+    }
+}
+'@ -ReferencedAssemblies System.Drawing
+[WindowsWallpaper]::Set($backgroundColor, $backgroundPath)
 
 # cleanup the taskbar by removing the existing buttons and unpinning all applications; once the user logs on.
 # NB the shell executes these RunOnce commands about ~10s after the user logs on.
