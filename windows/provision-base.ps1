@@ -137,7 +137,3 @@ cp -Force GoogleChrome-master_bookmarks.html "$chromeLocation\master_bookmarks.h
 choco install -y 7zip
 choco install -y notepad2
 choco install -y visualstudiocode
-
-# we uninstall defender because it takes way too much resources for what its worth.
-Write-Host 'Uninstalling Windows Defender...'
-Uninstall-WindowsFeature Windows-Defender-Features
