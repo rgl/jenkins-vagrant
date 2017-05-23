@@ -71,7 +71,7 @@ alias l='ls -lF --color'
 alias ll='l -a'
 alias h='history 25'
 alias j='jobs -l'
-alias jcli='java -jar /var/cache/jenkins/war/WEB-INF/jenkins-cli.jar -s http://localhost:8080 -remoting -i ~/.ssh/id_rsa'
+alias jcli="java -jar /var/cache/jenkins/war/WEB-INF/jenkins-cli.jar -s http://localhost:8080 -http -auth @$HOME/.jenkins-cli"
 alias jgroovy='jcli groovy'
 EOF
 
@@ -202,8 +202,6 @@ xmlstarlet edit --inplace -d '/hudson/authorizationStrategy' config.xml
 xmlstarlet edit --inplace -d '/hudson/securityRealm' config.xml
 # enable CLI/JNLP.
 xmlstarlet edit --inplace -u '/hudson/slaveAgentPort' -v '9090' config.xml
-# enable the CLI -remoting mode.
-echo '<jenkins.CLI><enabled>true</enabled></jenkins.CLI>' >jenkins.CLI.xml
 # bind to localhost.
 sed -i -E 's,^(JENKINS_ARGS="-.+),\1\nJENKINS_ARGS="$JENKINS_ARGS --httpListenAddress=127.0.0.1",' /etc/default/jenkins
 # configure access log.
@@ -319,29 +317,24 @@ done
 #
 # configure security.
 
-# generate a default SSH key-pair for use in the Jenkins CLI authentication.
-ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa
-# also generate one for the jenkins account that communicates with the slaves.
+# generate the SSH key-pair that jenkins master uses to communicates with the slaves.
 su jenkins -c 'ssh-keygen -q -t rsa -N "" -f ~/.ssh/id_rsa'
 
 # enable simple security.
-# also create the vagrant user with an SSH public key. jcli will use this account from now on.
+# also create the vagrant user account. jcli will use this account from now on.
 # see http://javadoc.jenkins-ci.org/hudson/security/HudsonPrivateSecurityRealm.html
 # see http://javadoc.jenkins-ci.org/hudson/model/User.html
-# see https://github.com/jenkinsci/ssh-cli-auth-module/blob/master/src/main/java/org/jenkinsci/main/modules/cli/auth/ssh/UserPropertyImpl.java
-jgroovy = "$(cat ~/.ssh/id_rsa.pub)" <<'EOF'
+jgroovy = <<'EOF'
 import jenkins.model.Jenkins
 import hudson.security.HudsonPrivateSecurityRealm
 import hudson.security.FullControlOnceLoggedInAuthorizationStrategy
 import hudson.tasks.Mailer
-import org.jenkinsci.main.modules.cli.auth.ssh.UserPropertyImpl
 
 Jenkins.instance.securityRealm = new HudsonPrivateSecurityRealm(false)
 
 u = Jenkins.instance.securityRealm.createAccount('vagrant', 'vagrant')
 u.fullName = 'Vagrant'
 u.addProperty(new Mailer.UserProperty('vagrant@example.com'))
-u.addProperty(new UserPropertyImpl(args[0]+"\n"))
 u.save()
 
 Jenkins.instance.authorizationStrategy = new FullControlOnceLoggedInAuthorizationStrategy(
@@ -350,9 +343,25 @@ Jenkins.instance.authorizationStrategy = new FullControlOnceLoggedInAuthorizatio
 Jenkins.instance.save()
 EOF
 
-# redefine jcli to use SSH authentication.
+# get the vagrant user api token.
+# see http://javadoc.jenkins-ci.org/hudson/model/User.html
+# see http://javadoc.jenkins-ci.org/jenkins/security/ApiTokenProperty.html
+# see https://jenkins.io/doc/book/managing/cli/
 function jcli {
-    $JCLI -remoting -i ~/.ssh/id_rsa "$@"
+    $JCLI -http -auth vagrant:vagrant "$@"
+}
+jgroovy = >~/.jenkins-cli <<'EOF'
+import hudson.model.User
+import jenkins.security.ApiTokenProperty
+
+u = User.current()
+println sprintf("%s:%s", u.id, u.getProperty(ApiTokenProperty).apiToken)
+EOF
+chmod 400 ~/.jenkins-cli
+
+# redefine jcli to use the vagrant api token.
+function jcli {
+    $JCLI -http -auth @$HOME/.jenkins-cli "$@"
 }
 
 # show which user is actually being used in jcli. this should show "vagrant".
