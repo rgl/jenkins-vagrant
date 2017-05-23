@@ -71,7 +71,7 @@ alias l='ls -lF --color'
 alias ll='l -a'
 alias h='history 25'
 alias j='jobs -l'
-alias jcli='java -jar /var/cache/jenkins/war/WEB-INF/jenkins-cli.jar -s http://localhost:8080 -i ~/.ssh/id_rsa'
+alias jcli='java -jar /var/cache/jenkins/war/WEB-INF/jenkins-cli.jar -s http://localhost:8080 -remoting -i ~/.ssh/id_rsa'
 alias jgroovy='jcli groovy'
 EOF
 
@@ -202,6 +202,8 @@ xmlstarlet edit --inplace -d '/hudson/authorizationStrategy' config.xml
 xmlstarlet edit --inplace -d '/hudson/securityRealm' config.xml
 # enable CLI/JNLP.
 xmlstarlet edit --inplace -u '/hudson/slaveAgentPort' -v '9090' config.xml
+# enable the CLI -remoting mode.
+echo '<jenkins.CLI><enabled>true</enabled></jenkins.CLI>' >jenkins.CLI.xml
 # bind to localhost.
 sed -i -E 's,^(JENKINS_ARGS="-.+),\1\nJENKINS_ARGS="$JENKINS_ARGS --httpListenAddress=127.0.0.1",' /etc/default/jenkins
 # configure access log.
@@ -350,8 +352,20 @@ EOF
 
 # redefine jcli to use SSH authentication.
 function jcli {
-    $JCLI -i ~/.ssh/id_rsa "$@"
+    $JCLI -remoting -i ~/.ssh/id_rsa "$@"
 }
+
+# show which user is actually being used in jcli. this should show "vagrant".
+# see http://javadoc.jenkins-ci.org/hudson/model/User.html
+jcli who-am-i
+jgroovy = <<'EOF'
+import hudson.model.User
+
+u = User.current()
+println sprintf("User id: %s", u.id)
+println sprintf("User Full Name: %s", u.fullName)
+u.allProperties.each { println sprintf("User property: %s", it) }; null
+EOF
 
 # use LDAP for user authentication (when enabled).
 # NB this assumes you are running the Active Directory from https://github.com/rgl/windows-domain-controller-vagrant.
