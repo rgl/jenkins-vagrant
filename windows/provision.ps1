@@ -29,22 +29,19 @@ git config --global mergetool.meld.path 'C:/Program Files (x86)/Meld/Meld.exe'
 git config --global mergetool.meld.cmd '\"C:/Program Files (x86)/Meld/Meld.exe\" \"$LOCAL\" \"$BASE\" \"$REMOTE\" --auto-merge --output \"$MERGED\"'
 #git config --list --show-origin
 
-# install visual studio 2017 build tools for .net 4.6 and c++ code.
-#choco install -y visualstudio2017buildtools
+# add support for building applications that target the .net 4.7 framework.
+choco install -y netfx-4.7-devpack
 
-# install nuget executable.
-#choco install -y nuget.commandline
-#choco install -y gitlink
+# add support for building applications that target the .net 4.6.2 framework.
+choco install -y netfx-4.6.2-devpack
 
-# install visual studio 2017.
+# add support for building applications that target the .net core, .net 4.5.2 and 4.6.1 frameworks.
+# NB the visualstudio2017buildtools package is not enough for building non .net core applications.
+#    hopefully that will happen at the .NET Core 2.0 timeframe...
+#    see https://github.com/Microsoft/msbuild/issues/1697
 choco install -y visualstudio2017community
-#choco install -y visualstudio2017-workload-vctools
-#choco install -y visualstudio2017-workload-manageddesktop
-#choco install -y visualstudio2017-workload-webbuildtools
 choco install -y visualstudio2017-workload-netcoretools
 
-# add support for .net 4.6.2.
-choco install -y netfx-4.6.2-devpack
 
 # import the Jenkins master site https certificate into the local machine trust store.
 Import-Certificate `
