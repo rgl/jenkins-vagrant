@@ -42,6 +42,11 @@ choco install -y netfx-4.6.2-devpack
 choco install -y visualstudio2017community
 choco install -y visualstudio2017-workload-netcoretools
 
+# add MSBuild to the machine PATH.
+[Environment]::SetEnvironmentVariable(
+    'PATH',
+    "$([Environment]::GetEnvironmentVariable('PATH', 'Machine'));C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin",
+    'Machine')
 
 # import the Jenkins master site https certificate into the local machine trust store.
 Import-Certificate `
@@ -51,6 +56,10 @@ Import-Certificate `
 # install the JRE.
 choco install -y jre8 -PackageParameters '/exclude:32'
 # TODO install JCE too.
+
+# restart the SSH service so it can re-read the environment (e.g. the system environment
+# variables like PATH) after we have installed all this slave node dependencies.
+Restart-Service OpenSSHd
 
 # create the jenkins user account and home directory.
 [Reflection.Assembly]::LoadWithPartialName('System.Web') | Out-Null
@@ -99,8 +108,11 @@ Invoke-WebRequest "https://$config_jenkins_master_fqdn/jnlpJars/slave.jar" -OutF
 mkdir C:\jenkins\bin | Out-Null
 [IO.File]::WriteAllText(
     'C:\jenkins\bin\jenkins-slave',
-    "#!/bin/sh`nexec c:/ProgramData/Oracle/Java/javapath/java -jar c:/jenkins/lib/slave.jar`n"
-)
+    @"
+#!/bin/sh
+#set
+exec c:/ProgramData/Oracle/Java/javapath/java -jar c:/jenkins/lib/slave.jar
+"@)
 
 # create artifacts that need to be shared with the other nodes.
 mkdir -Force C:\vagrant\tmp | Out-Null

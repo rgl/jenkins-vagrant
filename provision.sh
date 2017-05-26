@@ -619,6 +619,7 @@ project.assignedLabel = new LabelAtom('windows')
 project.buildersList.add(new BatchFile(
 '''\
 set
+whoami /all
 '''))
 project.buildersList.add(new PowerShell(
 '''\
@@ -668,7 +669,6 @@ project.scm.extensions.add(new CleanBeforeCheckout())
 project.buildersList.add(new PowerShell(
 '''\
 $ErrorActionPreference = 'Stop'
-$env:PATH = "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/MSBuild/15.0/Bin;$env:PATH"
 MSBuild -m -p:Configuration=Release -t:restore -t:build
 '''))
 project.publishersList.add(
