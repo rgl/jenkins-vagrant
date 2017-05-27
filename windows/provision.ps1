@@ -11,9 +11,21 @@ choco install -y git --params '/GitOnlyOnPath /NoAutoCrlf'
 choco install -y gitextensions
 choco install -y meld
 
+# install troubeshooting tools.
+choco install -y procexp
+choco install -y procmon
+
 # update $env:PATH with the recently installed Chocolatey packages.
 Import-Module C:\ProgramData\chocolatey\helpers\chocolateyInstaller.psm1
 Update-SessionEnvironment
+
+# add start menu entries.
+Install-ChocolateyShortcut `
+  -ShortcutFilePath 'C:\Users\All Users\Microsoft\Windows\Start Menu\Programs\Process Explorer.lnk' `
+  -TargetPath 'C:\ProgramData\chocolatey\lib\procexp\tools\procexp64.exe'
+Install-ChocolateyShortcut `
+  -ShortcutFilePath 'C:\Users\All Users\Microsoft\Windows\Start Menu\Programs\Process Monitor.lnk' `
+  -TargetPath 'C:\ProgramData\chocolatey\lib\procmon\tools\procmon.exe'
 
 # configure git.
 # see http://stackoverflow.com/a/12492094/477532
