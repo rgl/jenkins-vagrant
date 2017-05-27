@@ -123,7 +123,7 @@ mkdir C:\jenkins\bin | Out-Null
     @"
 #!/bin/sh
 #set
-exec c:/ProgramData/Oracle/Java/javapath/java -jar c:/jenkins/lib/slave.jar
+exec java -jar c:/jenkins/lib/slave.jar
 "@)
 
 # create artifacts that need to be shared with the other nodes.
