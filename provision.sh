@@ -301,6 +301,7 @@ def install(id) {
     'git',
     'powershell',
     'xcode-plugin',
+    'xunit',
 ].each {
   install(it)
 }
@@ -586,6 +587,7 @@ EOF
 # see https://github.com/jenkinsci/powershell-plugin/blob/master/src/main/java/hudson/plugins/powershell/PowerShell.java
 # see https://github.com/jenkinsci/git-plugin/blob/master/src/main/java/hudson/plugins/git/GitSCM.java
 # see https://github.com/jenkinsci/git-plugin/blob/master/src/main/java/hudson/plugins/git/extensions/impl/CleanBeforeCheckout.java
+# see https://github.com/jenkinsci/xunit-plugin/blob/master/src/main/java/org/jenkinsci/plugins/xunit/XUnitBuilder.java
 
 jgroovy = <<'EOF'
 import jenkins.model.Jenkins
@@ -660,6 +662,12 @@ import hudson.plugins.git.GitSCM
 import hudson.plugins.git.extensions.impl.CleanBeforeCheckout
 import hudson.plugins.powershell.PowerShell
 import hudson.tasks.ArtifactArchiver
+import org.jenkinsci.plugins.xunit.XUnitBuilder
+import org.jenkinsci.lib.dtkit.type.TestType
+import org.jenkinsci.plugins.xunit.types.XUnitDotNetTestType
+import org.jenkinsci.plugins.xunit.threshold.XUnitThreshold
+import org.jenkinsci.plugins.xunit.threshold.FailedThreshold
+import org.jenkinsci.plugins.xunit.threshold.SkippedThreshold
 
 project = new FreeStyleProject(Jenkins.instance, 'MailBounceDetector')
 project.assignedLabel = new LabelAtom('vs2017')
@@ -669,8 +677,46 @@ project.scm.extensions.add(new CleanBeforeCheckout())
 project.buildersList.add(new PowerShell(
 '''\
 $ErrorActionPreference = 'Stop'
+
 MSBuild -m -p:Configuration=Release -t:restore -t:build
+if ($LastExitCode) {
+    Exit $LastExitCode
+}
+
+dir -Recurse */bin/*.Tests.dll | ForEach-Object {
+    Push-Location $_.Directory
+    Write-Host "Running the unit tests in $($_.Name)..."
+    xunit.console $_.Name -nologo -xml xunit-test-results.xml
+    Pop-Location
+}
 '''))
+project.buildersList.add(new XUnitBuilder(
+    [
+        new XUnitDotNetTestType(
+            '**/xunit-test-results.xml', // pattern
+            false,  // skipNoTestFiles
+            true,   // failIfNotNew
+            true,   // deleteOutputFiles
+            true    // stopProcessingIfError
+        )
+    ] as TestType[], // types
+    [
+        new FailedThreshold(
+            '',     // unstableThreshold
+            '',     // unstableNewThreshold
+            '0',    // failureThreshold
+            '',     // failureNewThreshold
+        ),
+        new SkippedThreshold(
+            '',     // unstableThreshold
+            '',     // unstableNewThreshold
+            '',     // failureThreshold
+            '',     // failureNewThreshold
+        )
+    ] as XUnitThreshold[], // thresholds
+    1,      // thresholdMode
+    '3000'  // testTimeMargin
+))
 project.publishersList.add(
     new ArtifactArchiver('MailBounceDetector/bin/Release/*.nupkg'))
 

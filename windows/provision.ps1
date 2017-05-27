@@ -11,6 +11,9 @@ choco install -y git --params '/GitOnlyOnPath /NoAutoCrlf'
 choco install -y gitextensions
 choco install -y meld
 
+# install xUnit.
+choco install -y xunit
+
 # install troubeshooting tools.
 choco install -y procexp
 choco install -y procmon
