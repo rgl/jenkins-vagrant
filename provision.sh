@@ -772,6 +772,7 @@ systemctl status jenkins
 jcli version
 jcli list-plugins | sort
 jgroovy = <<'EOF'
+import hudson.model.AbstractItem
 import hudson.model.User
 import jenkins.model.Jenkins
 
