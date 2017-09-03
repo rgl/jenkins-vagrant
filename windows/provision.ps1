@@ -148,5 +148,8 @@ URL=https://{0}
 "@)
 '@ -f $config_jenkins_master_fqdn)
 
-# list installed packages.
+# show installation summary.
+Write-Host 'Installed DotNet version:'
+Write-Host (Get-DotNetVersion)
+Write-Host 'Installed chocolatey packages:'
 choco list -l

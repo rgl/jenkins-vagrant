@@ -41,6 +41,33 @@ function choco {
     Start-Choco $Args
 }
 
+function Get-DotNetVersion {
+    # see https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed#net_d
+    $release = [int](Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full' -Name Release).Release
+    if ($release -ge 460798) {
+        return '4.7 or later'
+    }
+    if ($release -ge 394802) {
+        return '4.6.2'
+    }
+    if ($release -ge 394254) {
+        return '4.6.1'
+    }
+    if ($release -ge 393295) {
+        return '4.6'
+    }
+    if ($release -ge 379893) {
+        return '4.5.2'
+    }
+    if ($release -ge 378675) {
+        return '4.5.1'
+    }
+    if ($release -ge 378389) {
+        return '4.5'
+    }
+    return 'No 4.5 or later version detected'
+}
+
 Set-Location c:\vagrant\windows
 
 $script = Resolve-Path $script
