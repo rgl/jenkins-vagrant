@@ -40,7 +40,7 @@ Vagrant.configure('2') do |config|
     config.vm.hostname = 'windows'
     config.vm.network :private_network, ip: config_windows_ip
     config.vm.provision :shell, inline: "echo '#{config_jenkins_ip} #{config_jenkins_fqdn}' | Out-File -Encoding ASCII -Append c:/Windows/System32/drivers/etc/hosts"
-    config.vm.provision :shell, inline: "$env:chocolateyVersion='0.10.5'; iwr https://chocolatey.org/install.ps1 -UseBasicParsing | iex", name: "Install Chocolatey"
+    config.vm.provision :shell, inline: "$env:chocolateyVersion='0.10.8'; iwr https://chocolatey.org/install.ps1 -UseBasicParsing | iex", name: "Install Chocolatey"
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-dotnet.ps1'
     config.vm.provision :reload
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-base.ps1'
