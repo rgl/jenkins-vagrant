@@ -678,7 +678,12 @@ project.buildersList.add(new PowerShell(
 '''\
 $ErrorActionPreference = 'Stop'
 
-MSBuild -m -p:Configuration=Release -t:restore -t:build
+nuget restore
+if ($LastExitCode) {
+    Exit $LastExitCode
+}
+
+MSBuild -m -p:Configuration=Release -t:build
 if ($LastExitCode) {
     Exit $LastExitCode
 }

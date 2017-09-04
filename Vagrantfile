@@ -44,7 +44,8 @@ Vagrant.configure('2') do |config|
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-dotnet.ps1'
     config.vm.provision :reload
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-base.ps1'
-    config.vm.provision :shell, path: 'windows/ps.ps1', args: ['provision.ps1', config_jenkins_fqdn, config_windows_fqdn]
+    config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-vs-build-tools.ps1'
+    config.vm.provision :shell, path: 'windows/ps.ps1', args: ['provision-jenkins-slave.ps1', config_jenkins_fqdn, config_windows_fqdn]
   end
 
   config.vm.define :macos do |config|

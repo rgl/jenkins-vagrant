@@ -24,11 +24,11 @@ Update-SessionEnvironment
 
 # add start menu entries.
 Install-ChocolateyShortcut `
-  -ShortcutFilePath 'C:\Users\All Users\Microsoft\Windows\Start Menu\Programs\Process Explorer.lnk' `
-  -TargetPath 'C:\ProgramData\chocolatey\lib\procexp\tools\procexp64.exe'
+    -ShortcutFilePath 'C:\Users\All Users\Microsoft\Windows\Start Menu\Programs\Process Explorer.lnk' `
+    -TargetPath 'C:\ProgramData\chocolatey\lib\procexp\tools\procexp64.exe'
 Install-ChocolateyShortcut `
-  -ShortcutFilePath 'C:\Users\All Users\Microsoft\Windows\Start Menu\Programs\Process Monitor.lnk' `
-  -TargetPath 'C:\ProgramData\chocolatey\lib\procmon\tools\procmon.exe'
+    -ShortcutFilePath 'C:\Users\All Users\Microsoft\Windows\Start Menu\Programs\Process Monitor.lnk' `
+    -TargetPath 'C:\ProgramData\chocolatey\lib\procmon\tools\procmon.exe'
 
 # configure git.
 # see http://stackoverflow.com/a/12492094/477532
@@ -43,25 +43,6 @@ git config --global merge.tool meld
 git config --global mergetool.meld.path 'C:/Program Files (x86)/Meld/Meld.exe'
 git config --global mergetool.meld.cmd '\"C:/Program Files (x86)/Meld/Meld.exe\" \"$LOCAL\" \"$BASE\" \"$REMOTE\" --auto-merge --output \"$MERGED\"'
 #git config --list --show-origin
-
-# add support for building applications that target the .net 4.7 framework.
-choco install -y netfx-4.7-devpack
-
-# add support for building applications that target the .net 4.6.2 framework.
-choco install -y netfx-4.6.2-devpack
-
-# add support for building applications that target the .net core, .net 4.5.2 and 4.6.1 frameworks.
-# NB the visualstudio2017buildtools package is not enough for building non .net core applications.
-#    hopefully that will happen at the .NET Core 2.0 timeframe...
-#    see https://github.com/Microsoft/msbuild/issues/1697
-choco install -y visualstudio2017community
-choco install -y visualstudio2017-workload-netcoretools
-
-# add MSBuild to the machine PATH.
-[Environment]::SetEnvironmentVariable(
-    'PATH',
-    "$([Environment]::GetEnvironmentVariable('PATH', 'Machine'));C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin",
-    'Machine')
 
 # import the Jenkins master site https certificate into the local machine trust store.
 Import-Certificate `
