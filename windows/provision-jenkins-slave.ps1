@@ -104,11 +104,16 @@ Invoke-WebRequest "https://$config_jenkins_master_fqdn/jnlpJars/slave.jar" -OutF
 mkdir C:\jenkins\bin | Out-Null
 [IO.File]::WriteAllText(
     'C:\jenkins\bin\jenkins-slave',
-    @"
+    @'
 #!/bin/sh
 #set
+# set the temporary environment variables, because, for some reason,
+# cygwin from the mls OpenSSH distribution is not setting them.
+export TMP="$USERPROFILE\\AppData\\Local\\Temp"
+export TEMP="$TMP"
+# execute the agent.
 exec java -jar c:/jenkins/lib/slave.jar
-"@)
+'@)
 
 # create artifacts that need to be shared with the other nodes.
 mkdir -Force C:\vagrant\tmp | Out-Null
