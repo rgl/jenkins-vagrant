@@ -242,12 +242,13 @@ Jenkins.instance.mode = Mode.EXCLUSIVE
 Jenkins.instance.save()
 EOF
 
-# set the administrator email.
+# set the jenkins url and administrator email.
 # see http://javadoc.jenkins-ci.org/jenkins/model/JenkinsLocationConfiguration.html
-jgroovy = <<'EOF'
+jgroovy = <<EOF
 import jenkins.model.JenkinsLocationConfiguration
 
 c = JenkinsLocationConfiguration.get()
+c.url = 'https://$domain'
 c.adminAddress = 'Admin <admin@example.com>'
 c.save()
 EOF
@@ -810,6 +811,6 @@ Jenkins.instance.getAllItems(AbstractItem.class).sort { it.fullName }.each {
     println sprintf("jenkins job: %s (%s)", it.fullName, it.class)
 }
 EOF
-echo "jenkins is installed at https://jenkins.example.com"
+echo "jenkins is installed at https://$domain"
 echo "the admin password is $(cat /var/lib/jenkins/secrets/initialAdminPassword)"
 echo "you can also use the vagrant user with the vagrant password"
