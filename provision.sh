@@ -298,6 +298,7 @@ def install(id) {
 }
 
 [
+    'cloudbees-folder',
     'git',
     'powershell',
     'xcode-plugin',
@@ -589,13 +590,25 @@ EOF
 # see https://github.com/jenkinsci/git-plugin/blob/master/src/main/java/hudson/plugins/git/extensions/impl/CleanBeforeCheckout.java
 # see https://github.com/jenkinsci/xunit-plugin/blob/master/src/main/java/org/jenkinsci/plugins/xunit/XUnitBuilder.java
 
+# create the dump-environment folder to contain all of our dump jobs.
+jgroovy = <<'EOF'
+import jenkins.model.Jenkins
+import com.cloudbees.hudson.plugins.folder.Folder
+
+folder = new Folder(Jenkins.instance, 'dump-environment')
+
+Jenkins.instance.add(folder, folder.name)
+EOF
+
 jgroovy = <<'EOF'
 import jenkins.model.Jenkins
 import hudson.model.FreeStyleProject
 import hudson.model.labels.LabelAtom
 import hudson.tasks.Shell
 
-project = new FreeStyleProject(Jenkins.instance, 'dump-environment-linux')
+folder = Jenkins.instance.getItem('dump-environment')
+
+project = new FreeStyleProject(folder, 'linux')
 project.assignedLabel = new LabelAtom('linux')
 project.buildersList.add(new Shell(
 '''\
@@ -606,7 +619,7 @@ locale
 id
 '''))
 
-Jenkins.instance.add(project, project.name)
+folder.add(project, project.name)
 EOF
 
 jgroovy = <<'EOF'
@@ -616,7 +629,9 @@ import hudson.model.labels.LabelAtom
 import hudson.plugins.powershell.PowerShell
 import hudson.tasks.BatchFile
 
-project = new FreeStyleProject(Jenkins.instance, 'dump-environment-windows')
+folder = Jenkins.instance.getItem('dump-environment')
+
+project = new FreeStyleProject(folder, 'windows')
 project.assignedLabel = new LabelAtom('windows')
 project.buildersList.add(new BatchFile(
 '''\
@@ -629,7 +644,7 @@ project.buildersList.add(new PowerShell(
 $PSVersionTable | Format-Table -AutoSize
 '''))
 
-Jenkins.instance.add(project, project.name)
+folder.add(project, project.name)
 EOF
 
 jgroovy = <<'EOF'
@@ -638,7 +653,9 @@ import hudson.model.FreeStyleProject
 import hudson.model.labels.LabelAtom
 import hudson.tasks.Shell
 
-project = new FreeStyleProject(Jenkins.instance, 'dump-environment-macos')
+folder = Jenkins.instance.getItem('dump-environment')
+
+project = new FreeStyleProject(folder, 'macos')
 project.assignedLabel = new LabelAtom('macos')
 project.buildersList.add(new Shell(
 '''\
@@ -650,7 +667,7 @@ locale
 id
 '''))
 
-Jenkins.instance.add(project, project.name)
+folder.add(project, project.name)
 EOF
 
 jgroovy = <<'EOF'
