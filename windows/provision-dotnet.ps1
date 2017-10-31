@@ -1,1 +1,1 @@
-Start-Choco install,-y,dotnet4.7 @(3010)
+Start-Choco install,-y,dotnet4.7.1 @(3010)
