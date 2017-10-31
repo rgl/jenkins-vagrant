@@ -1,17 +1,17 @@
-# see https://github.com/dotnet/core/blob/master/release-notes/download-archives/2.0.0-download.md
+# see https://github.com/dotnet/core/blob/master/release-notes/download-archives/2.0.2-sdk-download.md
 
 # opt-out from dotnet telemetry.
 [Environment]::SetEnvironmentVariable('DOTNET_CLI_TELEMETRY_OPTOUT', '1', 'Machine')
 $env:DOTNET_CLI_TELEMETRY_OPTOUT = '1'
 
 # install the dotnet sdk.
-$archiveUrl = 'https://download.microsoft.com/download/0/F/D/0FD852A4-7EA1-4E2A-983A-0484AC19B92C/dotnet-sdk-2.0.0-win-x64.exe'
-$archiveHash = 'cc490d28f55b67185688ff51dc6274aea6a582e47a07e9d084437e940c69f7a0'
+$archiveUrl = 'https://download.microsoft.com/download/7/3/A/73A3E4DC-F019-47D1-9951-0453676E059B/dotnet-sdk-2.0.2-win-x64.exe'
+$archiveHash = '0b3682c4c7b3b81906d3f011d8a45e06ec2470721a21693ad8040502f201008161f1d4ad73e05763386272c50bfe90be4e2a660734096b4d52e4997bb618a80c'
 $archiveName = Split-Path -Leaf $archiveUrl
 $archivePath = "$env:TEMP\$archiveName"
 Write-Host "Downloading $archiveName..."
 Invoke-WebRequest $archiveUrl -UseBasicParsing -OutFile $archivePath
-$archiveActualHash = (Get-FileHash $archivePath -Algorithm SHA256).Hash
+$archiveActualHash = (Get-FileHash $archivePath -Algorithm SHA512).Hash
 if ($archiveHash -ne $archiveActualHash) {
     throw "$archiveName downloaded from $archiveUrl to $archivePath has $archiveActualHash hash witch does not match the expected $archiveHash"
 }
