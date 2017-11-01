@@ -709,14 +709,27 @@ if ($LastExitCode) {
 dir -Recurse */bin/*.Tests.dll | ForEach-Object {
     Push-Location $_.Directory
     Write-Host "Running the unit tests in $($_.Name)..."
-    xunit.console $_.Name -nologo -xml xunit-test-results.xml
+    # NB maybe you should also use -skipautoprops
+    OpenCover.Console.exe `
+        -output:opencover-results.xml `
+        -register:path64 `
+        '-filter:+[*]* -[*.Tests*]* -[*]*.*Config' `
+        '-target:xunit.console.exe' `
+        "-targetargs:$($_.Name) -nologo -noshadow -xml xunit-results.xml"
+    ReportGenerator.exe `
+        -reports:opencover-results.xml `
+        -targetdir:coverage-report
+    Compress-Archive `
+        -CompressionLevel Optimal `
+        -Path coverage-report\* `
+        -DestinationPath coverage-report.zip
     Pop-Location
 }
 '''))
 project.buildersList.add(new XUnitBuilder(
     [
         new XUnitDotNetTestType(
-            '**/xunit-test-results.xml', // pattern
+            '**/xunit-results.xml', // pattern
             false,  // skipNoTestFiles
             true,   // failIfNotNew
             true,   // deleteOutputFiles
@@ -741,7 +754,7 @@ project.buildersList.add(new XUnitBuilder(
     '3000'  // testTimeMargin
 ))
 project.publishersList.add(
-    new ArtifactArchiver('MailBounceDetector/bin/Release/*.nupkg'))
+    new ArtifactArchiver('**/*.nupkg,**/xunit-results.xml,**/opencover-results.xml,**/coverage-report.zip'))
 
 Jenkins.instance.add(project, project.name)
 EOF

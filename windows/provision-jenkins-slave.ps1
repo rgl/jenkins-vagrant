@@ -11,8 +11,15 @@ choco install -y git --params '/GitOnlyOnPath /NoAutoCrlf'
 choco install -y gitextensions
 choco install -y meld
 
-# install xUnit.
+# install testing tools.
 choco install -y xunit
+choco install -y reportgenerator.portable
+# NB we need to install a recent (non-released) version due
+#    to https://github.com/OpenCover/opencover/issues/736
+Push-Location opencover.portable
+choco pack
+choco install -y opencover.portable -Source $PWD
+Pop-Location
 
 # install troubeshooting tools.
 choco install -y procexp

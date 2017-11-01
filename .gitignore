@@ -2,3 +2,4 @@
 tmp/
 *.xip
 *.cpio.xz*
+*.nupkg
