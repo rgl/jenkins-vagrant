@@ -766,6 +766,56 @@ import hudson.model.labels.LabelAtom
 import hudson.plugins.git.BranchSpec
 import hudson.plugins.git.GitSCM
 import hudson.plugins.git.extensions.impl.CleanBeforeCheckout
+import hudson.plugins.powershell.PowerShell
+
+project = new FreeStyleProject(Jenkins.instance, 'example-dotnet-source-link')
+project.assignedLabel = new LabelAtom('vs2017')
+project.scm = new GitSCM('https://github.com/rgl/example-dotnet-source-link.git')
+project.scm.branches = [new BranchSpec('*/master')]
+project.scm.extensions.add(new CleanBeforeCheckout())
+project.buildersList.add(new PowerShell(
+'''\
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+$ProgressPreference = 'SilentlyContinue'
+trap {
+    Write-Output "ERROR: $_"
+    Write-Output (($_.ScriptStackTrace -split '\\r?\\n') -replace '^(.*)$','ERROR: $1')
+    Write-Output (($_.Exception.ToString() -split '\\r?\\n') -replace '^(.*)$','ERROR EXCEPTION: $1')
+    Exit 1
+}
+function exec([ScriptBlock]$externalCommand) {
+    &$externalCommand
+    if ($LASTEXITCODE) {
+        throw "$externalCommand failed with exit code $LASTEXITCODE"
+    }
+}
+
+cd ExampleLibrary
+exec {dotnet build -v n -c Release}
+exec {dotnet pack -v n -c Release --no-build -p:PackageVersion=0.0.1 --output .}
+
+cd ../ExampleApplication
+exec {dotnet build -v n -c Release}
+exec {dotnet sourcelink print-urls bin/Release/netcoreapp2.0/ExampleApplication.dll}
+exec {dotnet sourcelink print-json bin/Release/netcoreapp2.0/ExampleApplication.dll | ConvertFrom-Json | ConvertTo-Json -Depth 100}
+exec {dotnet sourcelink print-documents bin/Release/netcoreapp2.0/ExampleApplication.dll}
+dotnet run
+# force a success exit code because dotnet run is expected to fail due
+# to an expected unhandled exception being raised by the application.
+$LASTEXITCODE = 0
+'''))
+
+Jenkins.instance.add(project, project.name)
+EOF
+
+jgroovy = <<'EOF'
+import jenkins.model.Jenkins
+import hudson.model.FreeStyleProject
+import hudson.model.labels.LabelAtom
+import hudson.plugins.git.BranchSpec
+import hudson.plugins.git.GitSCM
+import hudson.plugins.git.extensions.impl.CleanBeforeCheckout
 import hudson.tasks.Shell
 import hudson.tasks.ArtifactArchiver
 
