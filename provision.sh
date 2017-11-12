@@ -249,7 +249,7 @@ import jenkins.model.JenkinsLocationConfiguration
 
 c = JenkinsLocationConfiguration.get()
 c.url = 'https://$domain'
-c.adminAddress = 'Admin <admin@example.com>'
+c.adminAddress = 'Jenkins <jenkins@example.com>'
 c.save()
 EOF
 
@@ -313,6 +313,16 @@ while [[ -n "$(install-plugins)" ]]; do
     systemctl restart jenkins
     bash -c 'while ! wget -q --spider http://localhost:8080/cli; do sleep 1; done;'
 done
+
+# use the local SMTP MailHog server.
+jgroovy = <<'EOF'
+import jenkins.model.Jenkins
+
+c = Jenkins.instance.getDescriptor('hudson.tasks.Mailer')
+c.smtpHost = 'localhost'
+c.smtpPort = '1025'
+c.save()
+EOF
 
 
 #
@@ -586,6 +596,7 @@ EOF
 # see http://javadoc.jenkins-ci.org/hudson/tasks/Shell.html
 # see http://javadoc.jenkins-ci.org/hudson/tasks/ArtifactArchiver.html
 # see http://javadoc.jenkins-ci.org/hudson/tasks/BatchFile.html
+# see http://javadoc.jenkins.io/plugin/mailer/hudson/tasks/Mailer.html
 # see https://github.com/jenkinsci/powershell-plugin/blob/master/src/main/java/hudson/plugins/powershell/PowerShell.java
 # see https://github.com/jenkinsci/git-plugin/blob/master/src/main/java/hudson/plugins/git/GitSCM.java
 # see https://github.com/jenkinsci/git-plugin/blob/master/src/main/java/hudson/plugins/git/extensions/impl/CleanBeforeCheckout.java
@@ -680,6 +691,7 @@ import hudson.plugins.git.GitSCM
 import hudson.plugins.git.extensions.impl.CleanBeforeCheckout
 import hudson.plugins.powershell.PowerShell
 import hudson.tasks.ArtifactArchiver
+import hudson.tasks.Mailer
 import org.jenkinsci.plugins.xunit.XUnitBuilder
 import org.jenkinsci.lib.dtkit.type.TestType
 import org.jenkinsci.plugins.xunit.types.XUnitDotNetTestType
@@ -755,6 +767,9 @@ project.buildersList.add(new XUnitBuilder(
 ))
 project.publishersList.add(
     new ArtifactArchiver('**/*.nupkg,**/xunit-results.xml,**/opencover-results.xml,**/coverage-report.zip'))
+
+project.publishersList.add(
+    new Mailer('jenkins@example.com', true, false))
 
 Jenkins.instance.add(project, project.name)
 EOF
