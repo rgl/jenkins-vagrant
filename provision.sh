@@ -721,7 +721,7 @@ dir -Recurse */bin/*.Tests.dll | ForEach-Object {
         -targetdir:coverage-report
     Compress-Archive `
         -CompressionLevel Optimal `
-        -Path coverage-report\* `
+        -Path coverage-report/* `
         -DestinationPath coverage-report.zip
     Pop-Location
 }
