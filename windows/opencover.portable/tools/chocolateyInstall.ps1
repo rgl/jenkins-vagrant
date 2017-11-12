@@ -1,6 +1,6 @@
-# NB this version came from https://github.com/opencover/opencover/commit/c1e519513cd46d076da25bf036304ba97c169c5e
-$url = 'https://ci.appveyor.com/api/buildjobs/q56vm4ilns3x7q9q/artifacts/main%2Fbin%2Fzip%2Fopencover.4.6.793.zip'
-$checksum = '7dca757b4ff8c8f4f227b6bdf9289c267fbffce3116922386004a3b27a6ea473'
+# NB this version came from https://github.com/opencover/opencover/commit/2010793db8e4288accaf3484a76e072cb253eac8
+$url = 'https://ci.appveyor.com/api/buildjobs/v57oxenhb8sogf6p/artifacts/main%2Fbin%2Fzip%2Fopencover.4.6.796.zip'
+$checksum = '444a336ee4049f1ee5e9c305942a8988c3974fb9679aeaa0d9b611e471f0feb9'
 $installPath = "$env:ChocolateyPackageFolder\tools"
 
 Install-ChocolateyZipPackage `
