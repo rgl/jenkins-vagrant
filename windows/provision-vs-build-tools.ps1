@@ -1,7 +1,8 @@
 # add support for building .net applications.
 # NB we have to install netfx-4.7.1-devpack manually, because for some odd reason,
-#    the setup is returning the -1073741819 exit code even thou it installs
-#    successfully.
+#    the setup is returning the -1073741819 (0xc0000005 STATUS_ACCESS_VIOLATION)
+#    exit code even thou it installs successfully.
+#    see https://github.com/jberezanski/ChocolateyPackages/issues/22
 $archiveUrl = 'https://packages.chocolatey.org/netfx-4.7.1-devpack.4.7.2558.0.nupkg'
 $archiveHash = 'e293769f03da7a42ed72d37a92304854c4a61db279987fc459d3ec7aaffecf93'
 $archiveName = Split-Path $archiveUrl -Leaf
