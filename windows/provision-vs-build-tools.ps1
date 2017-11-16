@@ -24,11 +24,6 @@ choco install -y netfx-4.7.1-devpack -Source $PWD
 Pop-Location
 choco install -y netfx-4.5.2-devpack
 
-# install NuGet.
-# NB MSBuild from the build tools does not have nuget integration (i.e.
-#    there is no support for the restore target), as such, we need nuget.
-choco install -y nuget.commandline
-
 # install the Visual Studio Build Tools.
 # see https://www.visualstudio.com/downloads/
 # see https://docs.microsoft.com/en-us/visualstudio/install/use-command-line-parameters-to-install-visual-studio
