@@ -59,3 +59,8 @@ Run `vagrant up macos` to launch the macOS slave. **NB** you first need to downl
 After provisioning you can delete it, as `Xcode_8.1.cpio.xz` will take its place as a more efficient way to install Xcode.
 
 Email notifications are sent to a local [MailHog](https://github.com/mailhog/MailHog) SMTP server running at localhost:1025 and you can browse them at [http://jenkins.example.com:8025](http://jenkins.example.com:8025).
+
+
+# Reference
+
+* [Jenkins Handbook](https://jenkins.io/doc/book/)
