@@ -11,8 +11,33 @@ choco install -y git --params '/GitOnlyOnPath /NoAutoCrlf'
 choco install -y gitextensions
 choco install -y meld
 
+# update $env:PATH with the recently installed Chocolatey packages.
+Import-Module C:\ProgramData\chocolatey\helpers\chocolateyInstaller.psm1
+Update-SessionEnvironment
+
+# configure git.
+# see http://stackoverflow.com/a/12492094/477532
+git config --global user.name 'Rui Lopes'
+git config --global user.email 'rgl@ruilopes.com'
+git config --global http.sslbackend schannel
+git config --global push.default simple
+git config --global core.autocrlf false
+git config --global diff.guitool meld
+git config --global difftool.meld.path 'C:/Program Files (x86)/Meld/Meld.exe'
+git config --global difftool.meld.cmd '\"C:/Program Files (x86)/Meld/Meld.exe\" \"$LOCAL\" \"$REMOTE\"'
+git config --global merge.tool meld
+git config --global mergetool.meld.path 'C:/Program Files (x86)/Meld/Meld.exe'
+git config --global mergetool.meld.cmd '\"C:/Program Files (x86)/Meld/Meld.exe\" \"$LOCAL\" \"$BASE\" \"$REMOTE\" --auto-merge --output \"$MERGED\"'
+#git config --list --show-origin
+
 # install testing tools.
-choco install -y xunit
+# NB manually install a recent version of xunit until its available on chocolatey.org.
+Push-Location $env:TEMP
+git clone -q https://github.com/rgl/xunit-chocolatey-package
+cd xunit-chocolatey-package
+.\package.ps1
+choco install -y xunit -Source tmp/pkg
+Pop-Location
 choco install -y reportgenerator.portable
 # NB we need to install a recent (non-released) version due
 #    to https://github.com/OpenCover/opencover/issues/736
@@ -25,10 +50,6 @@ Pop-Location
 choco install -y procexp
 choco install -y procmon
 
-# update $env:PATH with the recently installed Chocolatey packages.
-Import-Module C:\ProgramData\chocolatey\helpers\chocolateyInstaller.psm1
-Update-SessionEnvironment
-
 # add start menu entries.
 Install-ChocolateyShortcut `
     -ShortcutFilePath 'C:\Users\All Users\Microsoft\Windows\Start Menu\Programs\Process Explorer.lnk' `
@@ -36,20 +57,6 @@ Install-ChocolateyShortcut `
 Install-ChocolateyShortcut `
     -ShortcutFilePath 'C:\Users\All Users\Microsoft\Windows\Start Menu\Programs\Process Monitor.lnk' `
     -TargetPath 'C:\ProgramData\chocolatey\lib\procmon\tools\procmon.exe'
-
-# configure git.
-# see http://stackoverflow.com/a/12492094/477532
-git config --global user.name 'Rui Lopes'
-git config --global user.email 'rgl@ruilopes.com'
-git config --global push.default simple
-git config --global core.autocrlf false
-git config --global diff.guitool meld
-git config --global difftool.meld.path 'C:/Program Files (x86)/Meld/Meld.exe'
-git config --global difftool.meld.cmd '\"C:/Program Files (x86)/Meld/Meld.exe\" \"$LOCAL\" \"$REMOTE\"'
-git config --global merge.tool meld
-git config --global mergetool.meld.path 'C:/Program Files (x86)/Meld/Meld.exe'
-git config --global mergetool.meld.cmd '\"C:/Program Files (x86)/Meld/Meld.exe\" \"$LOCAL\" \"$BASE\" \"$REMOTE\" --auto-merge --output \"$MERGED\"'
-#git config --list --show-origin
 
 # import the Jenkins master site https certificate into the local machine trust store.
 Import-Certificate `

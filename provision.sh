@@ -720,7 +720,7 @@ dir -Recurse */bin/*.Tests.dll | ForEach-Object {
     OpenCover.Console.exe `
         -output:opencover-results.xml `
         -register:path64 `
-        '-filter:+[*]* -[*.Tests*]* -[*]*.*Config' `
+        '-filter:+[*]* -[*.Tests*]* -[*]*.*Config -[xunit.*]*' `
         '-target:xunit.console.exe' `
         "-targetargs:$($_.Name) -nologo -noshadow -xml xunit-results.xml"
     ReportGenerator.exe `
