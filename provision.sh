@@ -331,6 +331,15 @@ EOF
 # generate the SSH key-pair that jenkins master uses to communicates with the slaves.
 su jenkins -c 'ssh-keygen -q -t rsa -N "" -f ~/.ssh/id_rsa'
 
+# disable all JNLP agent protocols.
+# see http://javadoc.jenkins-ci.org/jenkins/model/Jenkins.html
+jgroovy = <<'EOF'
+import jenkins.model.Jenkins
+
+Jenkins.instance.agentProtocols = Jenkins.instance.agentProtocols.grep { !it.matches('^JNLP.+-connect$') }
+Jenkins.instance.save()
+EOF
+
 # enable simple security.
 # also create the vagrant user account. jcli will use this account from now on.
 # see http://javadoc.jenkins-ci.org/hudson/security/HudsonPrivateSecurityRealm.html
