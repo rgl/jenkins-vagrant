@@ -618,6 +618,7 @@ import jenkins.model.Jenkins
 import com.cloudbees.hudson.plugins.folder.Folder
 
 folder = new Folder(Jenkins.instance, 'dump-environment')
+folder.save()
 
 Jenkins.instance.add(folder, folder.name)
 EOF
