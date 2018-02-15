@@ -200,6 +200,7 @@ pushd /var/lib/jenkins
 xmlstarlet edit --inplace -u '/hudson/useSecurity' -v 'false' config.xml
 xmlstarlet edit --inplace -d '/hudson/authorizationStrategy' config.xml
 xmlstarlet edit --inplace -d '/hudson/securityRealm' config.xml
+xmlstarlet edit --inplace -u '/hudson/installState/name' -v 'NEW' config.xml
 # bind to localhost.
 sed -i -E 's,^(JENKINS_ARGS="-.+),\1\nJENKINS_ARGS="$JENKINS_ARGS --httpListenAddress=127.0.0.1",' /etc/default/jenkins
 # configure access log.
