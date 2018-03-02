@@ -437,7 +437,7 @@ Jenkins.instance.securityRealm = new LDAPSecurityRealm(
     // NB this is used to determine that a group exists.
     // NB the search is scoped to groupSearchBase.
     // NB {0} is replaced with the groupname.
-    '(&(objectCategory=group)(cn={0}))',
+    '(&(objectCategory=group)(sAMAccountName={0}))',
 
     // LDAPGroupMembershipStrategy groupMembershipStrategy:
     // NB this is used to determine a user groups.
