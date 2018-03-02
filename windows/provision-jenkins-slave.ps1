@@ -31,13 +31,7 @@ git config --global mergetool.meld.cmd '\"C:/Program Files (x86)/Meld/Meld.exe\"
 #git config --list --show-origin
 
 # install testing tools.
-# NB manually install a recent version of xunit until its available on chocolatey.org.
-Push-Location $env:TEMP
-git clone -q https://github.com/rgl/xunit-chocolatey-package
-cd xunit-chocolatey-package
-.\package.ps1
-choco install -y xunit -Source tmp/pkg
-Pop-Location
+choco install -y xunit
 choco install -y reportgenerator.portable
 # NB we need to install a recent (non-released) version due
 #    to https://github.com/OpenCover/opencover/issues/736
