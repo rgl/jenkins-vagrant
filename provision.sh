@@ -729,13 +729,13 @@ dir -Recurse */bin/*.Tests.dll | ForEach-Object {
     Write-Host "Running the unit tests in $($_.Name)..."
     # NB maybe you should also use -skipautoprops
     OpenCover.Console.exe `
-        -output:opencover-results.xml `
+        -output:opencover-report.xml `
         -register:path64 `
         '-filter:+[*]* -[*.Tests*]* -[*]*.*Config -[xunit.*]*' `
         '-target:xunit.console.exe' `
-        "-targetargs:$($_.Name) -nologo -noshadow -xml xunit-results.xml"
+        "-targetargs:$($_.Name) -nologo -noshadow -xml xunit-report.xml"
     ReportGenerator.exe `
-        -reports:opencover-results.xml `
+        -reports:opencover-report.xml `
         -targetdir:coverage-report
     Compress-Archive `
         -CompressionLevel Optimal `
@@ -747,7 +747,7 @@ dir -Recurse */bin/*.Tests.dll | ForEach-Object {
 project.buildersList.add(new XUnitBuilder(
     [
         new XUnitDotNetTestType(
-            '**/xunit-results.xml', // pattern
+            '**/xunit-report.xml', // pattern
             false,  // skipNoTestFiles
             true,   // failIfNotNew
             true,   // deleteOutputFiles
@@ -772,7 +772,7 @@ project.buildersList.add(new XUnitBuilder(
     '3000'  // testTimeMargin
 ))
 project.publishersList.add(
-    new ArtifactArchiver('**/*.nupkg,**/xunit-results.xml,**/opencover-results.xml,**/coverage-report.zip'))
+    new ArtifactArchiver('**/*.nupkg,**/*-report.*'))
 
 project.publishersList.add(
     new Mailer('jenkins@example.com', true, false))
