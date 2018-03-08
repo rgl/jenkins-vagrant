@@ -66,7 +66,7 @@ Copy-Item "$jceInstallPath\policy\unlimited\*.jar" $jceInstallPath
 
 # restart the SSH service so it can re-read the environment (e.g. the system environment
 # variables like PATH) after we have installed all this slave node dependencies.
-Restart-Service OpenSSHd
+Restart-Service sshd
 
 # create the jenkins user account and home directory.
 [Reflection.Assembly]::LoadWithPartialName('System.Web') | Out-Null
@@ -112,25 +112,12 @@ $jenkinsDirectory.SetAccessControl($acl)
 # download the slave jar and install it.
 mkdir C:\jenkins\lib | Out-Null
 Invoke-WebRequest "https://$config_jenkins_master_fqdn/jnlpJars/slave.jar" -OutFile C:\jenkins\lib\slave.jar
-mkdir C:\jenkins\bin | Out-Null
-[IO.File]::WriteAllText(
-    'C:\jenkins\bin\jenkins-slave',
-    @'
-#!/bin/sh
-#set
-# set the temporary environment variables, because, for some reason,
-# cygwin from the mls OpenSSH distribution is not setting them.
-export TMP="$USERPROFILE\\AppData\\Local\\Temp"
-export TEMP="$TMP"
-# execute the agent.
-exec java -jar c:/jenkins/lib/slave.jar
-'@)
 
 # create artifacts that need to be shared with the other nodes.
 mkdir -Force C:\vagrant\tmp | Out-Null
 [IO.File]::WriteAllText(
     "C:\vagrant\tmp\$config_fqdn.ssh_known_hosts",
-    (dir 'C:\Program Files\OpenSSH\etc\ssh_host_*_key.pub' | %{ "$config_fqdn $(Get-Content $_)`n" }) -join ''
+    (dir 'C:\ProgramData\ssh\ssh_host_*_key.pub' | %{ "$config_fqdn $(Get-Content $_)`n" }) -join ''
 )
 
 # add default desktop shortcuts (called from a provision-base.ps1 generated script).

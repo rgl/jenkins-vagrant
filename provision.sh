@@ -571,7 +571,7 @@ import hudson.slaves.CommandLauncher
 node = new DumbSlave(
     "windows",
     "C:/jenkins",
-    new CommandLauncher("ssh windows.jenkins.example.com C:/jenkins/bin/jenkins-slave"))
+    new CommandLauncher("ssh windows.jenkins.example.com java -jar C:/jenkins/lib/slave.jar"))
 node.numExecutors = 3
 node.labelString = "windows 2016 vs2017 amd64"
 Jenkins.instance.nodesObject.addNode(node)
