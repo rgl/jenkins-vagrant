@@ -43,8 +43,11 @@ function choco {
 function Get-DotNetVersion {
     # see https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed#net_d
     $release = [int](Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full' -Name Release).Release
+    if ($release -ge 461808) {
+        return '4.7.2 or later'
+    }
     if ($release -ge 461308) {
-        return '4.7.1 or later'
+        return '4.7.1'
     }
     if ($release -ge 460798) {
         return '4.7'
