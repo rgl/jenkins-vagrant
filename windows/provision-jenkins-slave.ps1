@@ -58,10 +58,10 @@ Import-Certificate `
     -CertStoreLocation Cert:/LocalMachine/Root
 
 # install the JRE.
-choco install -y jre8 -PackageParameters '/exclude:32'
+choco install -y server-jre8
+Update-SessionEnvironment
 Write-Output 'Enabling the unlimited JCE policy...'
-$javaHome = (Get-ItemProperty -Path "HKLM:\SOFTWARE\JavaSoft\Java Runtime Environment\1.8" -Name JavaHome).JavaHome
-$jceInstallPath = "$javaHome\lib\security"
+$jceInstallPath = "$env:JAVA_HOME\jre\lib\security"
 Copy-Item "$jceInstallPath\policy\unlimited\*.jar" $jceInstallPath
 
 # restart the SSH service so it can re-read the environment (e.g. the system environment

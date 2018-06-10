@@ -59,7 +59,7 @@ EOF
 #
 # install dependencies.
 
-apt-get install -y default-jre
+apt-get install -y openjdk-8-jre-headless
 
 
 #
