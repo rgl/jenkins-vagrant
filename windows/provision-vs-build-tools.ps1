@@ -1,27 +1,49 @@
-# add support for building .net applications.
+function Install-ModifiedChocolateyPackage($name, $version, $checksum, [scriptblock]$modifier) {
+    $archiveUrl = "https://packages.chocolatey.org/$name.$version.nupkg"
+    $archiveHash = $checksum
+    $archiveName = Split-Path $archiveUrl -Leaf
+    $archivePath = "$env:TEMP\$archiveName.zip"
+    Write-Host "Downloading the $name package..."
+    (New-Object Net.WebClient).DownloadFile($archiveUrl, $archivePath)
+    $archiveActualHash = (Get-FileHash $archivePath -Algorithm SHA256).Hash
+    if ($archiveHash -ne $archiveActualHash) {
+        throw "$archiveName downloaded from $archiveUrl to $archivePath has $archiveActualHash hash witch does not match the expected $archiveHash"
+    }
+    Expand-Archive $archivePath "$archivePath.tmp"
+    Push-Location "$archivePath.tmp"
+    Remove-Item -Recurse _rels,package,*.xml
+    &$modifier
+    choco pack
+    choco install -y $name -Source $PWD
+    Pop-Location
+}
+
+# add support for building applications that target the .net 4.7.2 framework.
+# NB we have to install netfx-4.7.2-devpack manually, because for some odd reason,
+#    the setup is returning the -1073741819 (0xc0000005 STATUS_ACCESS_VIOLATION)
+#    exit code even thou it installs successfully.
+Install-ModifiedChocolateyPackage netfx-4.7.2-devpack 4.7.2.0 f55b99592230c1a5617d4be099789841aa209e9e05fc7eef9e2c750f5d9fe6a0 {
+    Set-Content -Encoding Ascii `
+        tools/ChocolateyInstall.ps1 `
+        ((Get-Content tools/ChocolateyInstall.ps1) -replace '0, # success','0,-1073741819, # success')
+}
+
+# add support for building applications that target the .net 4.7.1 framework.
 # NB we have to install netfx-4.7.1-devpack manually, because for some odd reason,
 #    the setup is returning the -1073741819 (0xc0000005 STATUS_ACCESS_VIOLATION)
 #    exit code even thou it installs successfully.
 #    see https://github.com/jberezanski/ChocolateyPackages/issues/22
-$archiveUrl = 'https://packages.chocolatey.org/netfx-4.7.1-devpack.4.7.2558.0.nupkg'
-$archiveHash = 'e293769f03da7a42ed72d37a92304854c4a61db279987fc459d3ec7aaffecf93'
-$archiveName = Split-Path $archiveUrl -Leaf
-$archivePath = "$env:TEMP\$archiveName.zip"
-Write-Host 'Downloading the netfx-4.7.1-devpack package...'
-Invoke-WebRequest $archiveUrl -UseBasicParsing -OutFile $archivePath
-$archiveActualHash = (Get-FileHash $archivePath -Algorithm SHA256).Hash
-if ($archiveHash -ne $archiveActualHash) {
-    throw "$archiveName downloaded from $archiveUrl to $archivePath has $archiveActualHash hash witch does not match the expected $archiveHash"
+Install-ModifiedChocolateyPackage netfx-4.7.1-devpack 4.7.2558.0 e293769f03da7a42ed72d37a92304854c4a61db279987fc459d3ec7aaffecf93 {
+    Set-Content -Encoding Ascii `
+        tools/ChocolateyInstall.ps1 `
+        ((Get-Content tools/ChocolateyInstall.ps1) -replace '0, # success','0,-1073741819, # success')
+    # do not depend on dotnet, as we already installed a recent version of dotnet from another package.
+    Set-Content -Encoding Ascii `
+        netfx-4.7.1-devpack.nuspec `
+        ((Get-Content netfx-4.7.1-devpack.nuspec) -replace '.+dotnet4.7.1.+','')
 }
-Expand-Archive $archivePath "$archivePath.tmp"
-Push-Location "$archivePath.tmp"
-Remove-Item -Recurse _rels,package,*.xml
-Set-Content -Encoding Ascii `
-    tools/ChocolateyInstall.ps1 `
-    ((Get-Content tools/ChocolateyInstall.ps1) -replace '0, # success','0,-1073741819, # success')
-choco pack
-choco install -y netfx-4.7.1-devpack -Source $PWD
-Pop-Location
+
+# add support for building applications that target the .net 4.5.2 framework.
 choco install -y netfx-4.5.2-devpack
 
 # install the Visual Studio Build Tools.
