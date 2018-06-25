@@ -187,6 +187,7 @@ systemctl restart nginx
 # install dependencies.
 
 apt-get install -y openjdk-8-jre-headless
+apt-get install -y gnupg
 
 
 #
