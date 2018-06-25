@@ -188,6 +188,7 @@ systemctl restart nginx
 
 apt-get install -y openjdk-8-jre-headless
 apt-get install -y gnupg
+apt-get install -y xmlstarlet
 
 
 #
@@ -197,11 +198,11 @@ wget -qO- https://pkg.jenkins.io/debian-stable/jenkins.io.key | apt-key add -
 echo 'deb http://pkg.jenkins.io/debian-stable binary/' >/etc/apt/sources.list.d/jenkins.list
 apt-get update
 apt-get install -y --no-install-recommends jenkins
-bash -c 'while [ ! -s /var/lib/jenkins/secrets/initialAdminPassword ]; do sleep 1; done'
-systemctl stop jenkins
-apt-get install -y xmlstarlet
-chmod 751 /var/cache/jenkins
 pushd /var/lib/jenkins
+# wait for initialization to finish.
+bash -c 'while [ "$(xmlstarlet sel -t -v /hudson/installStateName config.xml 2>/dev/null)" != "NEW" ]; do sleep 1; done'
+systemctl stop jenkins
+chmod 751 /var/cache/jenkins
 mv config.xml{,.orig}
 # remove the xml 1.1 declaration because xmlstarlet does not support it... and xml 1.1 is not really needed.
 tail -n +2 config.xml.orig >config.xml
