@@ -1,3 +1,7 @@
+# to make sure the jenkins node is created before the other nodes, we
+# have to force a --no-parallel execution.
+ENV['VAGRANT_NO_PARALLEL'] = 'yes'
+
 config_jenkins_fqdn = 'jenkins.example.com'
 config_jenkins_ip   = '10.10.10.100'
 config_ubuntu_fqdn  = "ubuntu.#{config_jenkins_fqdn}"
@@ -10,15 +14,25 @@ config_macos_ip     = '10.10.10.103'
 Vagrant.configure('2') do |config|
   config.vm.box = 'ubuntu-18.04-amd64'
 
+  config.vm.provider :libvirt do |lv, config|
+    lv.memory = 2048
+    lv.cpus = 2
+    lv.cpu_mode = 'host-passthrough'
+    # lv.nested = true
+    lv.keymap = 'pt'
+    config.vm.synced_folder '.', '/vagrant', type: 'nfs'
+  end
+
   config.vm.provider :virtualbox do |vb|
     vb.linked_clone = true
     vb.memory = 2048
+    vb.cpus = 2
     vb.customize ['modifyvm', :id, '--cableconnected1', 'on']
   end
 
   config.vm.define :jenkins do |config|
     config.vm.hostname = config_jenkins_fqdn
-    config.vm.network :private_network, ip: config_jenkins_ip
+    config.vm.network :private_network, ip: config_jenkins_ip, libvirt__forward_mode: 'none', libvirt__dhcp_enabled: false
     config.vm.provision :shell, inline: "echo '#{config_ubuntu_ip} #{config_ubuntu_fqdn}' >>/etc/hosts"
     config.vm.provision :shell, inline: "echo '#{config_windows_ip} #{config_windows_fqdn}' >>/etc/hosts"
     config.vm.provision :shell, inline: "echo '#{config_macos_ip} #{config_macos_fqdn}' >>/etc/hosts"
@@ -28,18 +42,22 @@ Vagrant.configure('2') do |config|
 
   config.vm.define :ubuntu do |config|
     config.vm.hostname = config_ubuntu_fqdn
-    config.vm.network :private_network, ip: config_ubuntu_ip
+    config.vm.network :private_network, ip: config_ubuntu_ip, libvirt__forward_mode: 'none', libvirt__dhcp_enabled: false
     config.vm.provision :shell, inline: "echo '#{config_jenkins_ip} #{config_jenkins_fqdn}' >>/etc/hosts"
     config.vm.provision :shell, path: 'provision-ubuntu.sh'
   end
 
   config.vm.define :windows do |config|
+    config.vm.provider :libvirt do |lv, config|
+      lv.memory = 4096
+      config.vm.synced_folder '.', '/vagrant', type: 'smb', smb_username: ENV['USER'], smb_password: ENV['VAGRANT_SMB_PASSWORD']
+    end
     config.vm.provider :virtualbox do |vb|
       vb.memory = 4096
     end
     config.vm.box = 'windows-2016-amd64'
     config.vm.hostname = 'windows'
-    config.vm.network :private_network, ip: config_windows_ip
+    config.vm.network :private_network, ip: config_windows_ip, libvirt__forward_mode: 'none', libvirt__dhcp_enabled: false
     config.vm.provision :shell, inline: "echo '#{config_jenkins_ip} #{config_jenkins_fqdn}' | Out-File -Encoding ASCII -Append c:/Windows/System32/drivers/etc/hosts"
     config.vm.provision :shell, inline: "$env:chocolateyVersion='0.10.11'; iwr https://chocolatey.org/install.ps1 -UseBasicParsing | iex", name: "Install Chocolatey"
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-dotnet.ps1'
@@ -56,7 +74,7 @@ Vagrant.configure('2') do |config|
     end
     config.vm.box = 'macOS'
     config.vm.hostname = config_macos_fqdn
-    config.vm.network :private_network, ip: config_macos_ip
+    config.vm.network :private_network, ip: config_macos_ip, libvirt__forward_mode: 'none', libvirt__dhcp_enabled: false
     config.vm.provision :shell, inline: "echo '#{config_jenkins_ip} #{config_jenkins_fqdn}' >>/etc/hosts"
     config.vm.provision :shell, path: 'provision-macos.sh', privileged: false
   end
