@@ -83,7 +83,7 @@ wmic useraccount where "name='$jenkinsAccountName'" set PasswordExpires=FALSE | 
 # NB the home directory will have the correct permissions, only the
 #    SYSTEM, Administrators and the jenkins account are granted full
 #    permissions to it.
-Start-Process cmd /c -WindowStyle Hidden -Credential $jenkinsAccountCredential
+Start-Process -WindowStyle Hidden -Credential $jenkinsAccountCredential -WorkingDirectory 'C:\' -FilePath cmd -ArgumentList '/c'
 mkdir C:\Users\$jenkinsAccountName\.ssh | Out-Null
 copy C:\vagrant\tmp\$config_jenkins_master_fqdn-ssh-rsa.pub C:\Users\$jenkinsAccountName\.ssh\authorized_keys
 
