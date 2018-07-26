@@ -22,7 +22,7 @@ function Install-ModifiedChocolateyPackage($name, $version, $checksum, [scriptbl
 # NB we have to install netfx-4.7.2-devpack manually, because for some odd reason,
 #    the setup is returning the -1073741819 (0xc0000005 STATUS_ACCESS_VIOLATION)
 #    exit code even thou it installs successfully.
-Install-ModifiedChocolateyPackage netfx-4.7.2-devpack 4.7.2.0 f55b99592230c1a5617d4be099789841aa209e9e05fc7eef9e2c750f5d9fe6a0 {
+Install-ModifiedChocolateyPackage netfx-4.7.2-devpack 4.7.2.20180712 142a56fa770f6398156ad6cd6c3c0f8a6aed91697b20fd3a96daa457a58d40e4 {
     Set-Content -Encoding Ascii `
         tools/ChocolateyInstall.ps1 `
         ((Get-Content tools/ChocolateyInstall.ps1) -replace '0, # success','0,-1073741819, # success')
