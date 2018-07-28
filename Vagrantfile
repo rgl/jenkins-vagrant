@@ -38,6 +38,8 @@ Vagrant.configure('2') do |config|
     config.vm.provision :shell, inline: "echo '#{config_macos_ip} #{config_macos_fqdn}' >>/etc/hosts"
     config.vm.provision :shell, path: 'provision-mailhog.sh'
     config.vm.provision :shell, path: 'provision.sh'
+    config.vm.provision :shell, path: 'provision-example-jobs.sh'
+    config.vm.provision :shell, path: 'provision-summary.sh'
   end
 
   config.vm.define :ubuntu do |config|
