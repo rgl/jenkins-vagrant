@@ -5,8 +5,11 @@ source /vagrant/jenkins-cli.sh
 
 
 #
-# create example free style jobs.
+# create example jobs.
+# see https://jenkins.io/doc/pipeline/steps/
 # see http://javadoc.jenkins-ci.org/jenkins/model/Jenkins.html
+# see http://javadoc.jenkins.io/plugin/workflow-job/org/jenkinsci/plugins/workflow/job/WorkflowJob.html
+# see http://javadoc.jenkins.io/plugin/workflow-cps/org/jenkinsci/plugins/workflow/cps/CpsFlowDefinition.html
 # see http://javadoc.jenkins-ci.org/hudson/model/FreeStyleProject.html
 # see http://javadoc.jenkins-ci.org/hudson/model/Label.html
 # see http://javadoc.jenkins-ci.org/hudson/tasks/Shell.html
@@ -53,6 +56,39 @@ EOF
 
 jgroovy = <<'EOF'
 import jenkins.model.Jenkins
+import org.jenkinsci.plugins.workflow.job.WorkflowJob
+import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition
+
+folder = Jenkins.instance.getItem('dump-environment')
+
+project = new WorkflowJob(folder, 'linux-pipeline')
+project.definition = new CpsFlowDefinition("""\
+pipeline {
+    agent {
+        label 'linux'
+    }
+    stages {
+        stage('Build') {
+            steps {
+                sh '''
+cat /etc/lsb-release
+uname -a
+env
+locale
+id
+'''
+            }
+        }
+    }
+}
+""",
+true)
+
+folder.add(project, project.name)
+EOF
+
+jgroovy = <<'EOF'
+import jenkins.model.Jenkins
 import hudson.model.FreeStyleProject
 import hudson.model.labels.LabelAtom
 import hudson.plugins.powershell.PowerShell
@@ -72,6 +108,40 @@ project.buildersList.add(new PowerShell(
 [Environment]::OSVersion | Format-Table -AutoSize
 $PSVersionTable | Format-Table -AutoSize
 '''))
+
+folder.add(project, project.name)
+EOF
+
+jgroovy = <<'EOF'
+import jenkins.model.Jenkins
+import org.jenkinsci.plugins.workflow.job.WorkflowJob
+import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition
+
+folder = Jenkins.instance.getItem('dump-environment')
+
+project = new WorkflowJob(folder, 'windows-pipeline')
+project.definition = new CpsFlowDefinition("""\
+pipeline {
+    agent {
+        label 'windows'
+    }
+    stages {
+        stage('Build') {
+            steps {
+                bat '''
+set
+whoami /all
+'''
+                powershell '''
+[Environment]::OSVersion | Format-Table -AutoSize
+\$PSVersionTable | Format-Table -AutoSize
+'''
+            }
+        }
+    }
+}
+""",
+true)
 
 folder.add(project, project.name)
 EOF
@@ -182,6 +252,77 @@ project.publishersList.add(
 
 project.publishersList.add(
     new Mailer('jenkins@example.com', true, false))
+
+Jenkins.instance.add(project, project.name)
+EOF
+
+jgroovy = <<'EOF'
+import jenkins.model.Jenkins
+import org.jenkinsci.plugins.workflow.job.WorkflowJob
+import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition
+
+project = new WorkflowJob(Jenkins.instance, 'MailBounceDetector-pipeline')
+project.definition = new CpsFlowDefinition("""\
+pipeline {
+    agent {
+        label 'windows'
+    }
+    stages {
+        stage('Build') {
+            steps {
+                checkout \$class: 'GitSCM',
+                    userRemoteConfigs: [[url: 'https://github.com/rgl/MailBounceDetector.git']],
+                    branches: [[name: '*/master']],
+                    extensions: [[\$class: 'CleanBeforeCheckout']]
+                bat 'MSBuild -m -p:Configuration=Release -t:restore -t:build'
+            }
+        }
+        stage('Test') {
+            steps {
+                powershell '''
+                    Set-StrictMode -Version Latest
+                    \$ErrorActionPreference = 'Stop'
+                    dir -Recurse */bin/*.Tests.dll | ForEach-Object {
+                        Push-Location \$_.Directory
+                        Write-Host "Running the unit tests in \$(\$_.Name)..."
+                        # NB maybe you should also use -skipautoprops
+                        OpenCover.Console.exe `
+                            -output:opencover-report.xml `
+                            -register:path64 `
+                            '-filter:+[*]* -[*.Tests*]* -[*]*.*Config -[xunit.*]*' `
+                            '-target:xunit.console.exe' `
+                            "-targetargs:\$(\$_.Name) -nologo -noshadow -xml xunit-report.xml"
+                        ReportGenerator.exe `
+                            -reports:opencover-report.xml `
+                            -targetdir:coverage-report
+                        Compress-Archive `
+                            -CompressionLevel Optimal `
+                            -Path coverage-report/* `
+                            -DestinationPath coverage-report.zip
+                        Pop-Location
+                    }
+                    '''
+            }
+        }
+    }
+    post {
+        success {
+            archiveArtifacts '**/*.nupkg,**/*-report.*'
+            xunit tools: [xUnitDotNet(pattern: '**/xunit-report.xml')],
+                thresholds: [skipped(failureThreshold: '0'), failed(failureThreshold: '0')],
+                thresholdMode: 1,
+                testTimeMargin: '3000'
+        }
+        always {
+            step \$class: 'Mailer',
+                recipients: 'jenkins@example.com',
+                notifyEveryUnstableBuild: true,
+                sendToIndividuals: false
+        }
+    }
+}
+""",
+true)
 
 Jenkins.instance.add(project, project.name)
 EOF
