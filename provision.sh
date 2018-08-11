@@ -192,6 +192,13 @@ apt-get install -y xmlstarlet
 
 
 #
+# fix "java.lang.NoClassDefFoundError: Could not initialize class org.jfree.chart.JFreeChart"
+# error while rendering the xUnit Test Result Trend chart on the job page.
+
+sed -i -E 's,^(\s*assistive_technologies\s*=.*),#\1,' /etc/java-8-openjdk/accessibility.properties 
+
+
+#
 # install Jenkins.
 
 wget -qO- https://pkg.jenkins.io/debian-stable/jenkins.io.key | apt-key add -
