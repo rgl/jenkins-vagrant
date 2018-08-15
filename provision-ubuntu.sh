@@ -97,6 +97,19 @@ popd
 
 
 #
+# install and configure git.
+
+apt-get install -y git-core
+su jenkins -c bash <<'EOF'
+set -eux
+git config --global user.email 'jenkins@example.com'
+git config --global user.name 'Jenkins'
+git config --global push.default simple
+git config --global core.autocrlf false
+EOF
+
+
+#
 # create artifacts that need to be shared with the other nodes.
 
 mkdir -p /vagrant/tmp
