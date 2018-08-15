@@ -320,6 +320,7 @@ def install(id) {
     'powershell',
     'xcode-plugin',
     'xunit',
+    'conditional-buildstep',
     'workflow-aggregator', // aka Pipeline; see https://plugins.jenkins.io/workflow-aggregator
 ].each {
   install(it)

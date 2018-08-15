@@ -178,9 +178,13 @@ import hudson.plugins.git.GitSCM
 import hudson.plugins.git.extensions.impl.CleanBeforeCheckout
 import hudson.plugins.powershell.PowerShell
 import hudson.tasks.ArtifactArchiver
+import hudson.tasks.BatchFile
 import hudson.tasks.Mailer
 import org.jenkinsci.plugins.xunit.XUnitBuilder
 import org.jenkinsci.lib.dtkit.type.TestType
+import org.jenkins_ci.plugins.run_condition.core.StatusCondition
+import org.jenkins_ci.plugins.run_condition.BuildStepRunner
+import org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder
 import org.jenkinsci.plugins.xunit.types.XUnitDotNetTestType
 import org.jenkinsci.plugins.xunit.threshold.XUnitThreshold
 import org.jenkinsci.plugins.xunit.threshold.FailedThreshold
@@ -188,9 +192,17 @@ import org.jenkinsci.plugins.xunit.threshold.SkippedThreshold
 
 project = new FreeStyleProject(Jenkins.instance, 'MailBounceDetector')
 project.assignedLabel = new LabelAtom('vs2017')
+
+//
+// add the git repository.
+
 project.scm = new GitSCM('https://github.com/rgl/MailBounceDetector.git')
 project.scm.branches = [new BranchSpec('*/master')]
 project.scm.extensions.add(new CleanBeforeCheckout())
+
+//
+// add build steps.
+
 project.buildersList.add(new PowerShell(
 '''\
 $ErrorActionPreference = 'Stop'
@@ -240,16 +252,33 @@ project.buildersList.add(new XUnitBuilder(
         new SkippedThreshold(
             unstableThreshold: '',
             unstableNewThreshold: '',
-            failureThreshold: '',
+            failureThreshold: '0',
             failureNewThreshold: '',
         )
     ] as XUnitThreshold[], // thresholds
     1,      // thresholdMode
     '3000'  // testTimeMargin
 ))
+project.buildersList.add(new SingleConditionalBuilder(
+    new BatchFile(                  // buildStep
+'''\
+:: when there are tests failures, the previous xUnit build-step only
+:: marks the build as failed, it does not aborts it. this step will
+:: really abort it.
+:: see https://github.com/jenkinsci/xunit-plugin/pull/62
+@echo Aborting the build due to test failures...
+@exit 1
+'''),
+    new StatusCondition(            // condition
+        'FAILURE',  // worstResult
+        'FAILURE'), // bestResult
+    new BuildStepRunner.Fail()))    // runner
+
+//
+// add post-build steps.
+
 project.publishersList.add(
     new ArtifactArchiver('**/*.nupkg,**/*-report.*'))
-
 project.publishersList.add(
     new Mailer('jenkins@example.com', true, false))
 
@@ -302,16 +331,25 @@ pipeline {
                         Pop-Location
                     }
                     '''
+                xunit tools: [xUnitDotNet(pattern: '**/xunit-report.xml')],
+                    thresholds: [skipped(failureThreshold: '0'), failed(failureThreshold: '0')],
+                    thresholdMode: 1,
+                    testTimeMargin: '3000'
+                // when there are tests failures, the previous xunit step only marks
+                // the build as failed and does not abort it. this step will really
+                // abort it.
+                // see https://github.com/jenkinsci/xunit-plugin/pull/62
+                script {
+                    if (currentBuild.result != 'SUCCESS') {
+                        error 'Aborting the build due to test failures...'
+                    }
+                }
             }
         }
     }
     post {
         success {
             archiveArtifacts '**/*.nupkg,**/*-report.*'
-            xunit tools: [xUnitDotNet(pattern: '**/xunit-report.xml')],
-                thresholds: [skipped(failureThreshold: '0'), failed(failureThreshold: '0')],
-                thresholdMode: 1,
-                testTimeMargin: '3000'
         }
         always {
             step \$class: 'Mailer',
