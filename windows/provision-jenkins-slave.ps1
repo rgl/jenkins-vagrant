@@ -12,7 +12,7 @@ choco install -y gitextensions
 choco install -y meld
 
 # update $env:PATH with the recently installed Chocolatey packages.
-Import-Module C:\ProgramData\chocolatey\helpers\chocolateyInstaller.psm1
+Import-Module "$env:ChocolateyInstall\helpers\chocolateyInstaller.psm1"
 Update-SessionEnvironment
 
 # configure git.
@@ -133,7 +133,12 @@ URL=https://{0}
 '@ -f $config_jenkins_master_fqdn)
 
 # show installation summary.
-Write-Host 'Installed DotNet version:'
+function Write-Title($title) {
+    Write-Host "`n#`n# $title`n"
+}
+Write-Title 'Installed DotNet version'
 Write-Host (Get-DotNetVersion)
-Write-Host 'Installed chocolatey packages:'
+Write-Title 'Installed MSBuild version'
+MSBuild -version
+Write-Title 'Installed chocolatey packages'
 choco list -l
