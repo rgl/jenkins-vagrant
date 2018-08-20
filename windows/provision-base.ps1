@@ -166,4 +166,4 @@ cp -Force GoogleChrome-master_bookmarks.html "$chromeLocation\master_bookmarks.h
 # install useful applications.
 choco install -y 7zip
 choco install -y notepad2
-choco install -y visualstudiocode
+choco install -y vscode
