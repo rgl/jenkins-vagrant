@@ -7,7 +7,7 @@ param(
 )
 
 # install git and related applications.
-choco install -y git --params '/GitOnlyOnPath /NoAutoCrlf'
+choco install -y git --params '/GitOnlyOnPath /NoAutoCrlf /SChannel'
 choco install -y gitextensions
 choco install -y meld
 
