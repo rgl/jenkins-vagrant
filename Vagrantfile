@@ -11,6 +11,10 @@ config_windows_ip   = '10.10.10.102'
 config_macos_fqdn   = "macos.#{config_jenkins_fqdn}"
 config_macos_ip     = '10.10.10.103'
 
+# link to the gitlab-vagrant environment.
+config_gitlab_fqdn  = 'gitlab.example.com'
+config_gitlab_ip    = '10.10.9.99'
+
 Vagrant.configure('2') do |config|
   config.vm.box = 'ubuntu-18.04-amd64'
 
@@ -36,6 +40,7 @@ Vagrant.configure('2') do |config|
     config.vm.provision :shell, inline: "echo '#{config_ubuntu_ip} #{config_ubuntu_fqdn}' >>/etc/hosts"
     config.vm.provision :shell, inline: "echo '#{config_windows_ip} #{config_windows_fqdn}' >>/etc/hosts"
     config.vm.provision :shell, inline: "echo '#{config_macos_ip} #{config_macos_fqdn}' >>/etc/hosts"
+    config.vm.provision :shell, inline: "echo '#{config_gitlab_ip} #{config_gitlab_fqdn}' >>/etc/hosts"
     config.vm.provision :shell, path: 'provision-mailhog.sh'
     config.vm.provision :shell, path: 'provision.sh'
     config.vm.provision :shell, path: 'provision-example-jobs.sh'
@@ -46,6 +51,7 @@ Vagrant.configure('2') do |config|
     config.vm.hostname = config_ubuntu_fqdn
     config.vm.network :private_network, ip: config_ubuntu_ip, libvirt__forward_mode: 'route', libvirt__dhcp_enabled: false
     config.vm.provision :shell, inline: "echo '#{config_jenkins_ip} #{config_jenkins_fqdn}' >>/etc/hosts"
+    config.vm.provision :shell, inline: "echo '#{config_gitlab_ip} #{config_gitlab_fqdn}' >>/etc/hosts"
     config.vm.provision :shell, path: 'provision-ubuntu.sh'
   end
 
@@ -61,6 +67,7 @@ Vagrant.configure('2') do |config|
     config.vm.hostname = 'windows'
     config.vm.network :private_network, ip: config_windows_ip, libvirt__forward_mode: 'route', libvirt__dhcp_enabled: false
     config.vm.provision :shell, inline: "echo '#{config_jenkins_ip} #{config_jenkins_fqdn}' | Out-File -Encoding ASCII -Append c:/Windows/System32/drivers/etc/hosts"
+    config.vm.provision :shell, inline: "echo '#{config_gitlab_ip} #{config_gitlab_fqdn}' | Out-File -Encoding ASCII -Append c:/Windows/System32/drivers/etc/hosts"
     config.vm.provision :shell, inline: "$env:chocolateyVersion='0.10.11'; iwr https://chocolatey.org/install.ps1 -UseBasicParsing | iex", name: "Install Chocolatey"
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-dotnet.ps1'
     config.vm.provision :reload
@@ -78,13 +85,27 @@ Vagrant.configure('2') do |config|
     config.vm.hostname = config_macos_fqdn
     config.vm.network :private_network, ip: config_macos_ip, libvirt__forward_mode: 'route', libvirt__dhcp_enabled: false
     config.vm.provision :shell, inline: "echo '#{config_jenkins_ip} #{config_jenkins_fqdn}' >>/etc/hosts"
+    config.vm.provision :shell, inline: "echo '#{config_gitlab_ip} #{config_gitlab_fqdn}' >>/etc/hosts"
     config.vm.provision :shell, path: 'provision-macos.sh', privileged: false
   end
 
   config.trigger.before :up do |trigger|
     trigger.only_on = 'jenkins'
-    ldap_ca_cert_path = '../windows-domain-controller-vagrant/tmp/ExampleEnterpriseRootCA.der'
-    trigger.run = {inline: "sh -c 'mkdir -p tmp && cp #{ldap_ca_cert_path} tmp'"} if File.file? ldap_ca_cert_path
+      trigger.run = {
+        inline: '''bash -euc \'
+certs=(
+  ../windows-domain-controller-vagrant/tmp/ExampleEnterpriseRootCA.der
+  ../gitlab-vagrant/tmp/gitlab.example.com-crt.der
+)
+for cert_path in "${certs[@]}"; do
+  if [ -f $cert_path ]; then
+    mkdir -p tmp
+    cp $cert_path tmp
+  fi
+done
+\'
+'''
+    }
   end
 
   config.trigger.before :up do |trigger|

@@ -113,6 +113,18 @@ popd
 
 
 #
+# trust the gitlab-vagrant environment certificate.
+
+if [ -f /vagrant/tmp/gitlab.example.com-crt.der ]; then
+    openssl x509 \
+        -inform der \
+        -in /vagrant/tmp/gitlab.example.com-crt.der \
+        -out /usr/local/share/ca-certificates/gitlab.example.com.crt
+    update-ca-certificates
+fi
+
+
+#
 # install nginx as a proxy to Jenkins.
 
 apt-get install -y --no-install-recommends nginx
@@ -419,7 +431,7 @@ EOF
 if [ "$config_authentication" = 'ldap' ]; then
 echo '192.168.56.2 dc.example.com' >>/etc/hosts
 openssl x509 -inform der -in /vagrant/tmp/ExampleEnterpriseRootCA.der -out /usr/local/share/ca-certificates/ExampleEnterpriseRootCA.crt
-update-ca-certificates
+update-ca-certificates # NB this also updates the default java key store at /etc/ssl/certs/java/cacerts.
 jgroovy = <<'EOF'
 import jenkins.model.Jenkins
 import jenkins.security.plugins.ldap.FromUserRecordLDAPGroupMembershipStrategy
@@ -539,6 +551,28 @@ import hudson.tasks.Mailer
 }
 EOF
 fi
+
+
+#
+# add gitlab.example.com credentials.
+
+jgroovy = <<'EOF'
+import com.cloudbees.plugins.credentials.CredentialsScope
+import com.cloudbees.plugins.credentials.domains.Domain
+import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl
+import com.cloudbees.plugins.credentials.SystemCredentialsProvider
+
+c = new UsernamePasswordCredentialsImpl(
+    CredentialsScope.GLOBAL,
+    "gitlab.example.com",     // id
+    "gitlab.example.com",     // description
+    "root",                   // username
+    "password")               // password
+
+SystemCredentialsProvider.instance.store.addCredentials(
+    Domain.global(),
+    c); null
+EOF
 
 
 #

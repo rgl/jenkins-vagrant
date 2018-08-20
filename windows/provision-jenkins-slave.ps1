@@ -57,6 +57,13 @@ Import-Certificate `
     -FilePath C:/vagrant/tmp/$config_jenkins_master_fqdn-crt.der `
     -CertStoreLocation Cert:/LocalMachine/Root
 
+# import the gitlab-vagrant environment site https certificate into the local machine trust store.
+if (Test-Path C:/vagrant/tmp/gitlab.example.com-crt.der) {
+    Import-Certificate `
+        -FilePath C:/vagrant/tmp/gitlab.example.com-crt.der `
+        -CertStoreLocation Cert:/LocalMachine/Root
+}
+
 # install the JRE.
 choco install -y server-jre8
 Update-SessionEnvironment
