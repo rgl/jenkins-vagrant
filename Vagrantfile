@@ -91,8 +91,8 @@ Vagrant.configure('2') do |config|
 
   config.trigger.before :up do |trigger|
     trigger.only_on = 'jenkins'
-      trigger.run = {
-        inline: '''bash -euc \'
+    trigger.run = {
+      inline: '''bash -euc \'
 certs=(
   ../windows-domain-controller-vagrant/tmp/ExampleEnterpriseRootCA.der
   ../gitlab-vagrant/tmp/gitlab.example.com-crt.der
