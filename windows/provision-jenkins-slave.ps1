@@ -79,13 +79,17 @@ Restart-Service sshd
 [Reflection.Assembly]::LoadWithPartialName('System.Web') | Out-Null
 $jenkinsAccountName = 'jenkins'
 $jenkinsAccountPassword = [Web.Security.Membership]::GeneratePassword(32, 8)
+$jenkinsAccountPasswordSecureString = ConvertTo-SecureString $jenkinsAccountPassword -AsPlainText -Force
 $jenkinsAccountCredential = New-Object `
     Management.Automation.PSCredential `
     -ArgumentList `
         $jenkinsAccountName,
-        (ConvertTo-SecureString $jenkinsAccountPassword -AsPlainText -Force)
-net user $jenkinsAccountName $jenkinsAccountPassword /add /y /fullname:"Jenkins Slave" | Out-Null
-wmic useraccount where "name='$jenkinsAccountName'" set PasswordExpires=FALSE | Out-Null
+        $jenkinsAccountPasswordSecureString
+New-LocalUser `
+    -Name $jenkinsAccountName `
+    -FullName 'Jenkins Slave' `
+    -Password $jenkinsAccountPasswordSecureString `
+    -PasswordNeverExpires
 # login to force the system to create the home directory.
 # NB the home directory will have the correct permissions, only the
 #    SYSTEM, Administrators and the jenkins account are granted full
