@@ -95,8 +95,22 @@ New-LocalUser `
 #    SYSTEM, Administrators and the jenkins account are granted full
 #    permissions to it.
 Start-Process -WindowStyle Hidden -Credential $jenkinsAccountCredential -WorkingDirectory 'C:\' -FilePath cmd -ArgumentList '/c'
+
+# configure the account to allow ssh connections from the jenkins master.
 mkdir C:\Users\$jenkinsAccountName\.ssh | Out-Null
 copy C:\vagrant\tmp\$config_jenkins_master_fqdn-ssh-rsa.pub C:\Users\$jenkinsAccountName\.ssh\authorized_keys
+
+# configure the jenkins home.
+choco install -y pstools
+Copy-Item C:\vagrant\windows\configure-jenkins-home.ps1 C:\tmp
+psexec `
+    -accepteula `
+    -nobanner `
+    -u $jenkinsAccountName `
+    -p $jenkinsAccountPassword `
+    -h `
+    PowerShell -File C:\tmp\configure-jenkins-home.ps1
+Remove-Item C:\tmp\configure-jenkins-home.ps1
 
 # create the storage directory hierarchy.
 # grant the SYSTEM, Administrators and $jenkinsAccountName accounts
