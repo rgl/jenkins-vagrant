@@ -399,14 +399,14 @@ function exec([ScriptBlock]$externalCommand) {
 
 cd ExampleLibrary
 exec {dotnet build -v n -c Release}
-exec {dotnet pack -v n -c Release --no-build -p:PackageVersion=0.0.1 --output .}
+exec {dotnet pack -v n -c Release --no-build -p:PackageVersion=0.0.2 --output .}
 
 cd ../ExampleApplication
 exec {dotnet build -v n -c Release}
-exec {dotnet sourcelink print-urls bin/Release/netcoreapp2.0/ExampleApplication.dll}
-exec {dotnet sourcelink print-json bin/Release/netcoreapp2.0/ExampleApplication.dll | ConvertFrom-Json | ConvertTo-Json -Depth 100}
-exec {dotnet sourcelink print-documents bin/Release/netcoreapp2.0/ExampleApplication.dll}
-dotnet run
+exec {sourcelink print-urls bin/Release/netcoreapp2.1/ExampleApplication.dll}
+exec {sourcelink print-json bin/Release/netcoreapp2.1/ExampleApplication.dll | ConvertFrom-Json | ConvertTo-Json -Depth 100}
+exec {sourcelink print-documents bin/Release/netcoreapp2.1/ExampleApplication.dll}
+dotnet run -v n -c Release --no-build
 # force a success exit code because dotnet run is expected to fail due
 # to an expected unhandled exception being raised by the application.
 $LASTEXITCODE = 0
