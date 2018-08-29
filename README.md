@@ -34,12 +34,6 @@ Add the following entry to your `/etc/hosts` file:
 10.10.10.100 jenkins.example.com
 ```
 
-Install the following Vagrant plugin:
-
-```bash
-vagrant plugin install vagrant-triggers # see https://github.com/emyl/vagrant-triggers
-```
-
 If you want to use LDAP for user authentication, you have to:
 
 1. have [rgl/windows-domain-controller-vagrant](https://github.com/rgl/windows-domain-controller-vagrant) up and running at `../windows-domain-controller-vagrant`.
