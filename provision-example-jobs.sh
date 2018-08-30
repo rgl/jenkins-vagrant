@@ -366,6 +366,24 @@ Jenkins.instance.add(project, project.name)
 EOF
 
 jgroovy = <<'EOF'
+import hudson.plugins.git.BranchSpec
+import hudson.plugins.git.extensions.impl.CleanBeforeCheckout
+import hudson.plugins.git.GitSCM
+import jenkins.model.Jenkins
+import org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition
+import org.jenkinsci.plugins.workflow.job.WorkflowJob
+
+scm = new GitSCM('https://github.com/rgl/example-dotnet-source-link.git')
+scm.branches = [new BranchSpec('*/master')]
+scm.extensions.add(new CleanBeforeCheckout())
+
+project = new WorkflowJob(Jenkins.instance, 'example-dotnet-source-link-pipeline')
+project.definition = new CpsScmFlowDefinition(scm, 'Jenkinsfile')
+
+Jenkins.instance.add(project, project.name)
+EOF
+
+jgroovy = <<'EOF'
 import jenkins.model.Jenkins
 import hudson.model.FreeStyleProject
 import hudson.model.labels.LabelAtom
