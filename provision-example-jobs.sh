@@ -286,81 +286,19 @@ Jenkins.instance.add(project, project.name)
 EOF
 
 jgroovy = <<'EOF'
+import hudson.plugins.git.BranchSpec
+import hudson.plugins.git.extensions.impl.CleanBeforeCheckout
+import hudson.plugins.git.GitSCM
 import jenkins.model.Jenkins
+import org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition
 import org.jenkinsci.plugins.workflow.job.WorkflowJob
-import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition
+
+scm = new GitSCM('https://github.com/rgl/MailBounceDetector.git')
+scm.branches = [new BranchSpec('*/master')]
+scm.extensions.add(new CleanBeforeCheckout())
 
 project = new WorkflowJob(Jenkins.instance, 'MailBounceDetector-pipeline')
-project.definition = new CpsFlowDefinition("""\
-pipeline {
-    agent {
-        label 'windows'
-    }
-    stages {
-        stage('Build') {
-            steps {
-                checkout \$class: 'GitSCM',
-                    userRemoteConfigs: [[url: 'https://github.com/rgl/MailBounceDetector.git']],
-                    branches: [[name: '*/master']],
-                    extensions: [[\$class: 'CleanBeforeCheckout']]
-                bat 'MSBuild -m -p:Configuration=Release -t:restore -t:build'
-            }
-        }
-        stage('Test') {
-            steps {
-                powershell '''
-                    Set-StrictMode -Version Latest
-                    \$ErrorActionPreference = 'Stop'
-                    dir -Recurse */bin/*.Tests.dll | ForEach-Object {
-                        Push-Location \$_.Directory
-                        Write-Host "Running the unit tests in \$(\$_.Name)..."
-                        # NB maybe you should also use -skipautoprops
-                        OpenCover.Console.exe `
-                            -output:opencover-report.xml `
-                            -register:path64 `
-                            '-filter:+[*]* -[*.Tests*]* -[*]*.*Config -[xunit.*]*' `
-                            '-target:xunit.console.exe' `
-                            "-targetargs:\$(\$_.Name) -nologo -noshadow -xml xunit-report.xml"
-                        ReportGenerator.exe `
-                            -reports:opencover-report.xml `
-                            -targetdir:coverage-report
-                        Compress-Archive `
-                            -CompressionLevel Optimal `
-                            -Path coverage-report/* `
-                            -DestinationPath coverage-report.zip
-                        Pop-Location
-                    }
-                    '''
-                xunit tools: [xUnitDotNet(pattern: '**/xunit-report.xml')],
-                    thresholds: [skipped(failureThreshold: '0'), failed(failureThreshold: '0')],
-                    thresholdMode: 1,
-                    testTimeMargin: '3000'
-                // when there are tests failures, the previous xunit step only marks
-                // the build as failed and does not abort it. this step will really
-                // abort it.
-                // see https://github.com/jenkinsci/xunit-plugin/pull/62
-                script {
-                    if (currentBuild.result != 'SUCCESS') {
-                        error 'Aborting the build due to test failures...'
-                    }
-                }
-            }
-        }
-    }
-    post {
-        success {
-            archiveArtifacts '**/*.nupkg,**/*-report.*'
-        }
-        always {
-            step \$class: 'Mailer',
-                recipients: 'jenkins@example.com',
-                notifyEveryUnstableBuild: true,
-                sendToIndividuals: false
-        }
-    }
-}
-""",
-true)
+project.definition = new CpsScmFlowDefinition(scm, 'Jenkinsfile')
 
 Jenkins.instance.add(project, project.name)
 EOF
