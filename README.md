@@ -8,7 +8,9 @@ This configures Jenkins through [CLI/JNLP](https://wiki.jenkins-ci.org/display/J
 * Add and list users.
 * Install and configure plugins.
 * Setup nginx as a Jenkins HTTPS proxy and static file server.
-* Create a simple Free Style Project job.
+* Create Freestyle project job.
+* Create Pipeline job.
+* Create Multibranch Pipeline job.
 * Add a Ubuntu Linux slave node.
 * Add a Windows slave node.
 * Add a macOS slave node.
@@ -53,6 +55,28 @@ Run `vagrant up macos` to launch the macOS slave. **NB** you first need to downl
 After provisioning you can delete it, as `Xcode_8.1.cpio.xz` will take its place as a more efficient way to install Xcode.
 
 Email notifications are sent to a local [MailHog](https://github.com/mailhog/MailHog) SMTP server running at localhost:1025 and you can browse them at [http://jenkins.example.com:8025](http://jenkins.example.com:8025).
+
+
+# Groovy Snippets
+
+```groovy
+def getObjectProperties(obj) {
+    def filtered = ['class', 'active']
+
+    properties = obj.metaClass.properties
+        .findAll {it.name != 'class' && it.name != 'metaClass'}
+        .inject([:]) {acc, e -> acc[e.name] = e.getProperty(obj); acc}
+
+    properties
+        .sort {it.key}
+        .collect {it}
+        .findAll {!filtered.contains(it.key)}
+        .join('\n')
+}
+
+project = Jenkins.instance.getItem('MailBounceDetector-multibranch-pipeline')
+getObjectProperties(project)
+```
 
 
 # Reference

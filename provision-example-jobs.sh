@@ -304,6 +304,34 @@ Jenkins.instance.add(project, project.name)
 EOF
 
 jgroovy = <<'EOF'
+import com.cloudbees.hudson.plugins.folder.computed.DefaultOrphanedItemStrategy
+import com.cloudbees.hudson.plugins.folder.computed.PeriodicFolderTrigger
+import jenkins.branch.BranchSource
+import jenkins.model.Jenkins
+import jenkins.plugins.git.GitSCMSource
+import jenkins.plugins.git.traits.BranchDiscoveryTrait
+import jenkins.plugins.git.traits.CleanBeforeCheckoutTrait
+import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
+
+scm = new GitSCMSource('https://github.com/rgl/MailBounceDetector.git')
+scm.traits = [
+    new BranchDiscoveryTrait(),
+    new CleanBeforeCheckoutTrait()]
+
+project = new WorkflowMultiBranchProject(Jenkins.instance, 'MailBounceDetector-multibranch-pipeline')
+project.sourcesList.add(new BranchSource(scm))
+project.projectFactory.scriptPath = 'Jenkinsfile'
+project.addTrigger(new PeriodicFolderTrigger('1d'))
+project.orphanedItemStrategy = new DefaultOrphanedItemStrategy(
+    true,   // pruneDeadBranches
+    -1,     // daysToKeepStr
+    3)      // numToKeepStr
+//project.scheduleBuild2(0) // schedule a Scan Multibranch Pipeline and Build all branches.
+
+Jenkins.instance.add(project, project.name)
+EOF
+
+jgroovy = <<'EOF'
 import hudson.plugins.git.BranchSpec
 import hudson.plugins.git.extensions.impl.CleanBeforeCheckout
 import hudson.plugins.git.GitSCM
