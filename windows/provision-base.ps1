@@ -8,11 +8,12 @@ Set-Culture pt-PT
 
 # set the welcome screen culture and keyboard layout.
 # NB the .DEFAULT key is for the local SYSTEM account (S-1-5-18).
-New-PSDrive -PSProvider Registry -Name HKU -Root HKEY_USERS | Out-Null
+New-PSDrive -Name HKU -PSProvider Registry -Root HKEY_USERS | Out-Null
 'Control Panel\International','Keyboard Layout' | ForEach-Object {
     Remove-Item -Path "HKU:.DEFAULT\$_" -Recurse -Force
     Copy-Item -Path "HKCU:$_" -Destination "HKU:.DEFAULT\$_" -Recurse -Force
 }
+Remove-PSDrive HKU
 
 # set the timezone.
 # tzutil /l lists all available timezone ids
