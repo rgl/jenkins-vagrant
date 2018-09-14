@@ -393,7 +393,7 @@ Jenkins.instance.authorizationStrategy = new FullControlOnceLoggedInAuthorizatio
 Jenkins.instance.save()
 EOF
 
-# get the vagrant user api token.
+# create the vagrant user api token.
 # see http://javadoc.jenkins-ci.org/hudson/model/User.html
 # see http://javadoc.jenkins-ci.org/jenkins/security/ApiTokenProperty.html
 # see https://jenkins.io/doc/book/managing/cli/
@@ -405,7 +405,9 @@ import hudson.model.User
 import jenkins.security.ApiTokenProperty
 
 u = User.current()
-println sprintf("%s:%s", u.id, u.getProperty(ApiTokenProperty).apiToken)
+p = u.getProperty(ApiTokenProperty)
+t = p.tokenStore.generateNewToken('vagrant')
+println sprintf("%s:%s", u.id, t.plainValue)
 EOF
 chmod 400 ~/.jenkins-cli
 
