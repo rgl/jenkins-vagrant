@@ -12,4 +12,9 @@ trap {
 
 # install the sourcelink dotnet global tool.
 # NB this is installed at %USERPROFILE%\.dotnet\tools.
+# see https://github.com/dotnet/sourcelink
 dotnet tool install --global sourcelink
+
+# install the xUnit to JUnit report converter.
+# see https://github.com/gabrielweyer/xunit-to-junit
+dotnet tool install --global dotnet-xunit-to-junit
