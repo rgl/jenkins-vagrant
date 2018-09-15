@@ -16,8 +16,8 @@ New-PSDrive -Name HKU -PSProvider Registry -Root HKEY_USERS | Out-Null
 Remove-PSDrive HKU
 
 # set the timezone.
-# tzutil /l lists all available timezone ids
-& $env:windir\system32\tzutil /s "GMT Standard Time"
+# use Get-TimeZone -ListAvailable to list the available timezone ids.
+Set-TimeZone -Id 'GMT Standard Time'
 
 # show window content while dragging.
 Set-ItemProperty -Path 'HKCU:Control Panel\Desktop' -Name DragFullWindows -Value 1
