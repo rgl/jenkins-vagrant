@@ -105,7 +105,17 @@ whoami /all
 '''))
 project.buildersList.add(new PowerShell(
 '''\
+function Write-Title($title) {
+    Write-Host "`n#`n# $title`n"
+}
+
+Write-Title 'PATH Environment Variable'
+$env:PATH -split ';'
+
+Write-Title '[Environment]::OSVersion'
 [Environment]::OSVersion | Format-Table -AutoSize
+
+Write-Title '$PSVersionTable'
 $PSVersionTable | Format-Table -AutoSize
 '''))
 
@@ -133,7 +143,17 @@ set
 whoami /all
 '''
                 powershell '''
+function Write-Title(\$title) {
+    Write-Host "`n#`n# \$title`n"
+}
+
+Write-Title 'PATH Environment Variable'
+\$env:PATH -split ';'
+
+Write-Title '[Environment]::OSVersion'
 [Environment]::OSVersion | Format-Table -AutoSize
+
+Write-Title '\$PSVersionTable'
 \$PSVersionTable | Format-Table -AutoSize
 '''
             }
