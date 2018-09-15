@@ -30,3 +30,18 @@ dotnet --info
 
 # install the sourcelink dotnet global tool.
 dotnet tool install --global sourcelink
+
+# make sure the SYSTEM account PATH environment variable is empty because,
+# for some reason, the sdk setup changes it to include private directories
+# which cannot be accessed by anyone but the user that installed the sdk.
+# see https://github.com/dotnet/core/issues/1942.
+# NB the .DEFAULT key is for the local SYSTEM account (S-1-5-18).
+New-PSDrive -Name HKU -PSProvider Registry -Root HKEY_USERS | Out-Null
+New-ItemProperty `
+    -Path HKU:\.DEFAULT\Environment `
+    -Name Path `
+    -Value '' `
+    -PropertyType ExpandString `
+    -Force `
+    | Out-Null
+Remove-PSDrive HKU
