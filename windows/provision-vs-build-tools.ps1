@@ -94,3 +94,10 @@ for ($try = 1; ; ++$try) {
     'PATH',
     "$([Environment]::GetEnvironmentVariable('PATH', 'Machine'));$vsBuildToolsHome\MSBuild\15.0\Bin",
     'Machine')
+
+# prevent msbuild from running in background, as that will interfere with
+# cleaning the job workspace due to open files/directories.
+[Environment]::SetEnvironmentVariable(
+    'MSBUILDDISABLENODEREUSE',
+    '1',
+    'Machine')
