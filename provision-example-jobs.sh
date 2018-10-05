@@ -225,26 +225,53 @@ project.scm.extensions.add(new CleanBeforeCheckout())
 
 project.buildersList.add(new PowerShell(
 '''\
+Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
-
-MSBuild -m -p:Configuration=Release -t:restore -t:build
-if ($LastExitCode) {
-    Exit $LastExitCode
+$ProgressPreference = 'SilentlyContinue'
+trap {
+    Write-Output "ERROR: $_"
+    Write-Output (($_.ScriptStackTrace -split '\\r?\\n') -replace '^(.*)$','ERROR: $1')
+    Write-Output (($_.Exception.ToString() -split '\\r?\\n') -replace '^(.*)$','ERROR EXCEPTION: $1')
+    Exit 1
 }
+function exec([ScriptBlock]$externalCommand, [string]$stderrPrefix='', [int[]]$successExitCodes=@(0)) {
+    $eap = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        &$externalCommand 2>&1 | ForEach-Object {
+            if ($_ -is [System.Management.Automation.ErrorRecord]) {
+                "$stderrPrefix$_"
+            } else {
+                "$_"
+            }
+        }
+        if ($LASTEXITCODE -notin $successExitCodes) {
+            throw "$externalCommand failed with exit code $LASTEXITCODE"
+        }
+    } finally {
+        $ErrorActionPreference = $eap
+    }
+}
+
+exec {MSBuild -m -p:Configuration=Release -t:restore -t:build}
 
 dir -Recurse */bin/*.Tests.dll | ForEach-Object {
     Push-Location $_.Directory
     Write-Host "Running the unit tests in $($_.Name)..."
-    # NB maybe you should also use -skipautoprops
-    OpenCover.Console.exe `
-        -output:opencover-report.xml `
-        -register:path64 `
-        '-filter:+[*]* -[*.Tests*]* -[*]*.*Config -[xunit.*]*' `
-        '-target:xunit.console.exe' `
-        "-targetargs:$($_.Name) -nologo -noshadow -xml xunit-report.xml"
-    ReportGenerator.exe `
-        -reports:opencover-report.xml `
-        -targetdir:coverage-report
+    exec {
+        # NB maybe you should also use -skipautoprops
+        OpenCover.Console.exe `
+            -output:opencover-report.xml `
+            -register:path64 `
+            '-filter:+[*]* -[*.Tests*]* -[*]*.*Config -[xunit.*]*' `
+            '-target:xunit.console.exe' `
+            "-targetargs:$($_.Name) -nologo -noshadow -xml xunit-report.xml"
+    }
+    exec {
+        ReportGenerator.exe `
+            -reports:opencover-report.xml `
+            -targetdir:coverage-report
+    }
     Compress-Archive `
         -CompressionLevel Optimal `
         -Path coverage-report/* `
@@ -394,10 +421,22 @@ trap {
     Write-Output (($_.Exception.ToString() -split '\\r?\\n') -replace '^(.*)$','ERROR EXCEPTION: $1')
     Exit 1
 }
-function exec([ScriptBlock]$externalCommand) {
-    &$externalCommand
-    if ($LASTEXITCODE) {
-        throw "$externalCommand failed with exit code $LASTEXITCODE"
+function exec([ScriptBlock]$externalCommand, [string]$stderrPrefix='', [int[]]$successExitCodes=@(0)) {
+    $eap = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        &$externalCommand 2>&1 | ForEach-Object {
+            if ($_ -is [System.Management.Automation.ErrorRecord]) {
+                "$stderrPrefix$_"
+            } else {
+                "$_"
+            }
+        }
+        if ($LASTEXITCODE -notin $successExitCodes) {
+            throw "$externalCommand failed with exit code $LASTEXITCODE"
+        }
+    } finally {
+        $ErrorActionPreference = $eap
     }
 }
 
@@ -410,10 +449,10 @@ exec {dotnet build -v n -c Release}
 exec {sourcelink print-urls bin/Release/netcoreapp2.1/ExampleApplication.dll}
 exec {sourcelink print-json bin/Release/netcoreapp2.1/ExampleApplication.dll | ConvertFrom-Json | ConvertTo-Json -Depth 100}
 exec {sourcelink print-documents bin/Release/netcoreapp2.1/ExampleApplication.dll}
-dotnet run -v n -c Release --no-build
+exec {dotnet run -v n -c Release --no-build} -successExitCodes -532462766
 # force a success exit code because dotnet run is expected to fail due
 # to an expected unhandled exception being raised by the application.
-$LASTEXITCODE = 0
+Exit 0
 '''))
 
 Jenkins.instance.add(project, project.name)
