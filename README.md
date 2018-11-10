@@ -13,6 +13,7 @@ This configures Jenkins through [CLI/JNLP](https://wiki.jenkins-ci.org/display/J
 * Create Multibranch Pipeline job.
 * Add a Ubuntu Linux slave node.
 * Add a Windows slave node.
+  * With enabled long path support on the OS and chocolatey.
 * Add a macOS slave node.
 
 **NB** If you are new to Groovy, be sure to check the [Groovy Learn X in Y minutes page](https://learnxinyminutes.com/docs/groovy/).

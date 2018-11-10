@@ -232,6 +232,15 @@ xmlstarlet edit --inplace -d '/hudson/authorizationStrategy' config.xml
 xmlstarlet edit --inplace -d '/hudson/securityRealm' config.xml
 # disable the install wizard.
 xmlstarlet edit --inplace -u '/hudson/installStateName' -v 'RUNNING' config.xml
+# modify the slave workspace directory name to be just "w" as a way to minimize
+# path-too-long errors on windows slaves.
+# NB unfortunately this setting applies to all slaves.
+# NB in a pipeline job you can also use the customWorkspace option.
+# see windows/provision-jenkins-slaves.ps1.
+# see https://issues.jenkins-ci.org/browse/JENKINS-12667
+# see https://wiki.jenkins.io/display/JENKINS/Features+controlled+by+system+properties
+# see https://github.com/jenkinsci/jenkins/blob/jenkins-2.138.2/core/src/main/java/hudson/model/Slave.java#L722
+sed -i -E 's,^(JAVA_ARGS="-.+),\1\nJAVA_ARGS="$JAVA_ARGS -Dhudson.model.Slave.workspaceRoot=w",' /etc/default/jenkins
 # bind to localhost.
 sed -i -E 's,^(JENKINS_ARGS="-.+),\1\nJENKINS_ARGS="$JENKINS_ARGS --httpListenAddress=127.0.0.1",' /etc/default/jenkins
 # configure access log.
@@ -621,8 +630,8 @@ import hudson.slaves.CommandLauncher
 
 node = new DumbSlave(
     "windows",
-    "C:/jenkins",
-    new CommandLauncher("ssh windows.jenkins.example.com java -jar C:/jenkins/lib/slave.jar"))
+    "c:/j",
+    new CommandLauncher("ssh windows.jenkins.example.com java -jar c:/j/lib/slave.jar"))
 node.numExecutors = 3
 node.labelString = "windows 2016 vs2017 amd64"
 Jenkins.instance.nodesObject.addNode(node)

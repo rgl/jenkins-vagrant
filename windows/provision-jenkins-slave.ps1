@@ -114,8 +114,8 @@ Remove-Item C:\tmp\configure-jenkins-home.ps1
 
 # create the storage directory hierarchy.
 # grant the SYSTEM, Administrators and $jenkinsAccountName accounts
-# Full Permissions to the C:\jenkins directory and children.
-$jenkinsDirectory = mkdir C:\jenkins
+# Full Permissions to the c:\j directory and children.
+$jenkinsDirectory = mkdir c:\j
 $acl = New-Object Security.AccessControl.DirectorySecurity
 $acl.SetAccessRuleProtection($true, $false)
 @(
@@ -135,8 +135,8 @@ $acl.SetAccessRuleProtection($true, $false)
 $jenkinsDirectory.SetAccessControl($acl)
 
 # download the slave jar and install it.
-mkdir C:\jenkins\lib | Out-Null
-Invoke-WebRequest "https://$config_jenkins_master_fqdn/jnlpJars/slave.jar" -OutFile C:\jenkins\lib\slave.jar
+mkdir $jenkinsDirectory\lib | Out-Null
+Invoke-WebRequest "https://$config_jenkins_master_fqdn/jnlpJars/slave.jar" -OutFile $jenkinsDirectory\lib\slave.jar
 
 # create artifacts that need to be shared with the other nodes.
 mkdir -Force C:\vagrant\tmp | Out-Null
