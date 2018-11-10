@@ -1,6 +1,5 @@
-# NB this version came from https://github.com/opencover/opencover/commit/416acac2c32ca572726735f7c22c3673d85a95aa
-$url = 'https://ci.appveyor.com/api/buildjobs/782sipil03c8sd3l/artifacts/main%2Fbin%2Fzip%2Fopencover.4.6.829.zip'
-$checksum = '95a4ffa444b875ea881c38598a33380aba92279dc24dbaacbefb450a8620b451'
+$url = 'https://github.com/rgl/opencover/releases/download/v20181110/opencover-v20181110.zip'
+$checksum = '25a3e5281200edbf1c428ef382fd2e1778294a5909595b95eeab0870a9f03d81'
 $installPath = "$env:ChocolateyPackageFolder\tools"
 
 Install-ChocolateyZipPackage `

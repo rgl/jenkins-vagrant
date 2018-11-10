@@ -1,21 +1,21 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
-    <id>opencover.portable</id>
-    <version>4.7.829</version>
+    <id>opencover-rgl.portable</id>
+    <version>0.0.20181110</version>
     <title>OpenCover Code Coverage (Portable)</title>
     <authors>OpenCover</authors>
-    <owners>Roemer</owners>
-    <licenseUrl>https://github.com/OpenCover/opencover/blob/master/License.md</licenseUrl>
-    <projectUrl>https://github.com/OpenCover/opencover</projectUrl>
+    <owners>rgl</owners>
+    <licenseUrl>https://github.com/rgl/opencover/blob/master/License.md</licenseUrl>
+    <projectUrl>https://github.com/rgl/opencover</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>A code coverage tool for .NET 2 and above, support for 32 and 64 processes with both branch and sequence points; roots proudly based in PartCover
 http://scubamunki.blogspot.com/</description>
     <summary>A code coverage tool for .NET 2 and above, support for 32 and 64 processes with both branch and sequence points; roots proudly based in PartCover 
 http://scubamunki.blogspot.com/</summary>
     <tags>opencover coverage</tags>
-    <projectSourceUrl>https://github.com/OpenCover/opencover</projectSourceUrl>
-    <packageSourceUrl>https://github.com/Roemer/Chocolatey-Packages</packageSourceUrl>
+    <projectSourceUrl>https://github.com/rgl/opencover</projectSourceUrl>
+    <packageSourceUrl>https://github.com/rgl/opencover</packageSourceUrl>
     <docsUrl>https://github.com/OpenCover/opencover/wiki</docsUrl>
     <bugTrackerUrl>https://github.com/OpenCover/opencover/issues</bugTrackerUrl>
   </metadata>
