@@ -1,13 +1,13 @@
 # see https://dotnet.microsoft.com/download/dotnet-core/2.1
-# see https://github.com/dotnet/core/blob/master/release-notes/2.1/2.1.502-SDK/2.1.502.md
+# see https://github.com/dotnet/core/blob/master/release-notes/2.1/2.1.7/2.1.7.md
 
 # opt-out from dotnet telemetry.
 [Environment]::SetEnvironmentVariable('DOTNET_CLI_TELEMETRY_OPTOUT', '1', 'Machine')
 $env:DOTNET_CLI_TELEMETRY_OPTOUT = '1'
 
 # install the dotnet sdk.
-$archiveUrl = 'https://download.visualstudio.microsoft.com/download/pr/70b3a142-06fa-4d86-b1cc-67a48c1eaacb/55e147bd47db930a642a8f8176949a76/dotnet-sdk-2.1.502-win-x64.exe'
-$archiveHash = '20e5d2e54ccad8ce2c5eed0effcba5d610c8bf1d15f8d2ee2e792547b35697ea408a415d2f580e0e2f693339e5e10f0a46b82b88171016378afbba4bf4a55227'
+$archiveUrl = 'https://download.visualstudio.microsoft.com/download/pr/9afc36fb-48ba-43ae-9f37-df634383ae84/2c1329b490c8d4b2787164286bde115c/dotnet-sdk-2.1.503-win-x64.exe'
+$archiveHash = '338fe1d8552d871a4d0716c3e3c044826e723466cd8565e22863d1976e32b7334c8e299fe04597c7cd323066a1150041a7c97bd29ec88ff836b3339e16af55bc'
 $archiveName = Split-Path -Leaf $archiveUrl
 $archivePath = "$env:TEMP\$archiveName"
 Write-Host "Downloading $archiveName..."
