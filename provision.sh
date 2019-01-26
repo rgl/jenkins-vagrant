@@ -337,6 +337,7 @@ def install(id) {
 
 [
     'cloudbees-folder',
+    'email-ext',
     'git',
     'powershell',
     'xcode-plugin',
