@@ -24,6 +24,7 @@ Vagrant.configure('2') do |config|
     lv.cpu_mode = 'host-passthrough'
     # lv.nested = true
     lv.keymap = 'pt'
+    lv.random :model => 'random'
     config.vm.synced_folder '.', '/vagrant', type: 'nfs'
   end
 
@@ -44,6 +45,8 @@ Vagrant.configure('2') do |config|
     config.vm.provision :shell, path: 'provision-mailhog.sh'
     config.vm.provision :shell, path: 'provision.sh'
     config.vm.provision :shell, path: 'provision-example-jobs.sh'
+    config.vm.provision :shell, path: 'provision-example-test-jenkins-gitlab-plugin.sh'
+    config.vm.provision :reload
     config.vm.provision :shell, path: 'provision-summary.sh'
   end
 

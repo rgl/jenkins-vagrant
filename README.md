@@ -7,6 +7,7 @@ This configures Jenkins through [CLI/JNLP](https://wiki.jenkins-ci.org/display/J
 * Optionally use LDAP user authentication.
 * Add and list users.
 * Install and configure plugins.
+* Setup GitLab integration (assumes [rgl/gitlab-vagrant](https://github.com/rgl/gitlab-vagrant) is already deployed)
 * Setup nginx as a Jenkins HTTPS proxy and static file server.
 * Create Freestyle project job.
 * Create Pipeline job.
