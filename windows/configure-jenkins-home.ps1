@@ -10,6 +10,13 @@ trap {
     Exit 1
 }
 
+# configure git.
+git config --global user.email 'jenkins@example.com'
+git config --global user.name 'Jenkins'
+git config --global http.sslbackend schannel
+git config --global push.default simple
+git config --global core.autocrlf false
+
 # install the sourcelink dotnet global tool.
 # NB this is installed at %USERPROFILE%\.dotnet\tools.
 # see https://github.com/dotnet/sourcelink
