@@ -61,6 +61,8 @@ Email notifications are sent to a local [MailHog](https://github.com/mailhog/Mai
 
 # Groovy Snippets
 
+## Show Object Properties
+
 ```groovy
 def getObjectProperties(obj) {
     def filtered = ['class', 'active']
@@ -80,6 +82,22 @@ project = Jenkins.instance.getItem('MailBounceDetector-multibranch-pipeline')
 getObjectProperties(project)
 ```
 
+## Create Api Token
+
+```groovy
+// create an user api token.
+// see http://javadoc.jenkins-ci.org/hudson/model/User.html
+// see http://javadoc.jenkins-ci.org/jenkins/security/ApiTokenProperty.html
+// see https://jenkins.io/doc/book/managing/cli/
+import hudson.model.User
+import jenkins.security.ApiTokenProperty
+
+u = User.getById('alice.doe', false)
+p = u.getProperty(ApiTokenProperty)
+t = p.tokenStore.generateNewToken('token-name')
+u.save()
+println t.plainValue
+```
 
 # Reference
 
