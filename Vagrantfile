@@ -100,6 +100,7 @@ Vagrant.configure('2') do |config|
 certs=(
   ../windows-domain-controller-vagrant/tmp/ExampleEnterpriseRootCA.der
   ../gitlab-vagrant/tmp/gitlab.example.com-crt.der
+  ../gitlab-vagrant/tmp/gitlab-jenkins-impersonation-token.txt
 )
 for cert_path in "${certs[@]}"; do
   if [ -f $cert_path ]; then
