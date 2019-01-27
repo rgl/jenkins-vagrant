@@ -439,6 +439,7 @@ import jenkins.security.ApiTokenProperty
 u = User.current()
 p = u.getProperty(ApiTokenProperty)
 t = p.tokenStore.generateNewToken('vagrant')
+u.save()
 println sprintf("%s:%s", u.id, t.plainValue)
 EOF
 chmod 400 ~/.jenkins-cli
