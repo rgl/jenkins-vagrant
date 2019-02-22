@@ -272,7 +272,6 @@ sed -i -E 's,^(/var/log/jenkins/)jenkins.log,\1*.log,' /etc/logrotate.d/jenkins
 diff -u config.xml{.orig,} || true
 popd
 systemctl start jenkins
-bash -c 'while ! wget -q --spider http://localhost:8080/cli; do sleep 1; done;'
 
 
 #
@@ -283,6 +282,9 @@ source /vagrant/jenkins-cli.sh
 function jcli {
     $JCLI -noKeyAuth "$@"
 }
+
+# wait for the cli endpoint to be available.
+jcliwait
 
 # customize.
 # see http://javadoc.jenkins-ci.org/jenkins/model/Jenkins.html
@@ -373,7 +375,7 @@ EOF
 }
 while [[ -n "$(install-plugins)" ]]; do
     systemctl restart jenkins
-    bash -c 'while ! wget -q --spider http://localhost:8080/cli; do sleep 1; done;'
+    jcliwait
 done
 
 # use the local SMTP MailHog server.

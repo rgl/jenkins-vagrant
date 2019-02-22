@@ -8,6 +8,7 @@ source /vagrant/jenkins-cli.sh
 # show install summary.
 
 systemctl status jenkins
+jcliwait
 jcli version
 jcli list-plugins | sort
 jgroovy = <<'EOF'
