@@ -53,8 +53,8 @@ choco install -y netfx-4.5.2-devpack
 # see https://docs.microsoft.com/en-us/visualstudio/install/command-line-parameter-examples
 # see https://docs.microsoft.com/en-us/visualstudio/install/workload-and-component-ids
 # see https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-build-tools
-$archiveUrl = 'https://download.visualstudio.microsoft.com/download/pr/cbd6f837-08c6-4965-aa4d-99f6699a9689/472e894c5015dcc90e5c367f99d98bb9/vs_buildtools.exe'
-$archiveHash = 'd2299e942320c82e2b424b3f29124bab293e20e16dadee5168b042087ec0f8a3'
+$archiveUrl = 'https://download.visualstudio.microsoft.com/download/pr/f8db94a7-42dc-4413-b987-b21dcb0b1661/5e24cf2c187f46bde25c5515250fa9a0/vs_buildtools.exe'
+$archiveHash = 'f5162fdef68bc22dbcb52a6558725aed951b0ace15885e526817831eb6f5ba72'
 $archiveName = Split-Path $archiveUrl -Leaf
 $archivePath = "$env:TEMP\$archiveName"
 Write-Host 'Downloading the Visual Studio Build Tools Setup Bootstrapper...'
