@@ -65,11 +65,7 @@ if (Test-Path C:/vagrant/tmp/gitlab.example.com-crt.der) {
 }
 
 # install the JRE.
-choco install -y server-jre8
-Update-SessionEnvironment
-Write-Output 'Enabling the unlimited JCE policy...'
-$jceInstallPath = "$env:JAVA_HOME\jre\lib\security"
-Copy-Item "$jceInstallPath\policy\unlimited\*.jar" $jceInstallPath
+choco install -y adoptopenjdk8jre
 
 # restart the SSH service so it can re-read the environment (e.g. the system environment
 # variables like PATH) after we have installed all this slave node dependencies.
