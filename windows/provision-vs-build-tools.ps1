@@ -48,13 +48,13 @@ choco install -y netfx-4.5.2-devpack
 
 # install the Visual Studio Build Tools.
 # see https://www.visualstudio.com/downloads/
-# see https://www.visualstudio.com/en-us/news/releasenotes/vs2017-relnotes
-# see https://docs.microsoft.com/en-us/visualstudio/install/use-command-line-parameters-to-install-visual-studio
-# see https://docs.microsoft.com/en-us/visualstudio/install/command-line-parameter-examples
-# see https://docs.microsoft.com/en-us/visualstudio/install/workload-and-component-ids
-# see https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-build-tools
-$archiveUrl = 'https://download.visualstudio.microsoft.com/download/pr/1e95b092-e7f0-4a8a-95f1-e728cb99a2be/f77fe662671f06de3f8ae4da3ba21208/vs_buildtools.exe'
-$archiveHash = '6117f135dbf87bb3a6b4d04af1f431f247750495de15bbdb3941d01aa07e6781'
+# see https://docs.microsoft.com/en-us/visualstudio/releases/2019/release-notes
+# see https://docs.microsoft.com/en-us/visualstudio/install/use-command-line-parameters-to-install-visual-studio?view=vs-2019
+# see https://docs.microsoft.com/en-us/visualstudio/install/command-line-parameter-examples?view=vs-2019
+# see https://docs.microsoft.com/en-us/visualstudio/install/workload-and-component-ids?view=vs-2019
+# see https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-build-tools?view=vs-2019
+$archiveUrl = 'https://download.visualstudio.microsoft.com/download/pr/132e0a34-74d0-4898-8e97-4b0be453109f/129df5ac4bc87c09e78198069aec4d93/vs_buildtools.exe'
+$archiveHash = '84c809cc967e4f14677371818138931d6c55063ecc6ebe940b0a51d7f7620173'
 $archiveName = Split-Path $archiveUrl -Leaf
 $archivePath = "$env:TEMP\$archiveName"
 Write-Host 'Downloading the Visual Studio Build Tools Setup Bootstrapper...'
@@ -64,7 +64,7 @@ if ($archiveHash -ne $archiveActualHash) {
     throw "$archiveName downloaded from $archiveUrl to $archivePath has $archiveActualHash hash witch does not match the expected $archiveHash"
 }
 Write-Host 'Installing the Visual Studio Build Tools...'
-$vsBuildToolsHome = 'C:\VS2017BuildTools'
+$vsBuildToolsHome = 'C:\VS2019BuildTools'
 for ($try = 1; ; ++$try) {
     &$archivePath `
         --installPath $vsBuildToolsHome `
@@ -73,7 +73,7 @@ for ($try = 1; ; ++$try) {
         --add Microsoft.VisualStudio.Workload.VCTools `
         --add Microsoft.VisualStudio.Component.VC.CLI.Support `
         --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
-        --add Microsoft.VisualStudio.Component.Windows10SDK.15063.Desktop `
+        --add Microsoft.VisualStudio.Component.Windows10SDK.17763 `
         --norestart `
         --quiet `
         --wait `
@@ -92,7 +92,7 @@ for ($try = 1; ; ++$try) {
 # add MSBuild to the machine PATH.
 [Environment]::SetEnvironmentVariable(
     'PATH',
-    "$([Environment]::GetEnvironmentVariable('PATH', 'Machine'));$vsBuildToolsHome\MSBuild\15.0\Bin",
+    "$([Environment]::GetEnvironmentVariable('PATH', 'Machine'));$vsBuildToolsHome\MSBuild\Current\Bin",
     'Machine')
 
 # prevent msbuild from running in background, as that will interfere with

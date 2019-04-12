@@ -637,7 +637,7 @@ node = new DumbSlave(
     "c:/j",
     new CommandLauncher("ssh windows.jenkins.example.com java -jar c:/j/lib/slave.jar"))
 node.numExecutors = 3
-node.labelString = "windows 2016 vs2017 amd64"
+node.labelString = "windows 2019 vs2019 amd64"
 Jenkins.instance.nodesObject.addNode(node)
 Jenkins.instance.nodesObject.save()
 EOF
