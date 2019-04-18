@@ -92,6 +92,32 @@ New-LocalUser `
 #    permissions to it.
 Start-Process -WindowStyle Hidden -Credential $jenkinsAccountCredential -WorkingDirectory 'C:\' -FilePath cmd -ArgumentList '/c'
 
+# To be able to run unity under the jenkins account (which is not an Administrator) we need to allow
+# the "Remote Enable" permission to the ROOT\CIMV2 WMI namespace.
+# see https://docs.microsoft.com/en-us/windows/desktop/wmisdk/securing-a-remote-wmi-connection#allowing-users-access-to-a-specific-wmi-namespace
+# NB you can manually manage these permissions with the wmimgmt.msc mmc snap-in.
+# NB without this change unity fails to start with:
+#       Initiating legacy licensing moduleAssertion failed on expression: 'SUCCEEDED(hr)'
+#       (Filename: C:\buildslave\unity\build\PlatformDependent/Win/SystemInfo.cpp Line: 760)
+#       Assertion failed on expression: 'wmiOpened'
+#       (Filename: C:\buildslave\unity\build\PlatformDependent/Win/SystemInfo.cpp Line: 1015)
+#       LICENSE SYSTEM [2019416 9:48:22] Next license update check is after 2019-04-17T07:59:57
+#       LICENSE SYSTEM [2019416 9:48:22]  != MA==
+#       BatchMode: Unity has not been activated with a valid License. Could be a new activation or renewal...
+#       (Filename: C:/buildslave/unity/build/Platforms/Windows/Modules/LicensingLegacy/WinILicensingAdapter.cpp Line: 43)
+#       DisplayProgressbar: Unity license
+Install-PackageProvider NuGet -Force | Out-Null
+Set-PSRepository PSGallery -InstallationPolicy Trusted
+Install-Module WmiNamespaceSecurity
+Invoke-DscResource -ModuleName WmiNamespaceSecurity -Name WmiNamespaceSecurity -Method Set -Property @{
+    Path = "ROOT\CIMV2"
+    Principal = "$env:COMPUTERNAME\$jenkinsAccountName"
+    AppliesTo = "Self"
+    AccessType = "Allow"
+    Permission = @("RemoteAccess")
+    Ensure = "Present"
+} | Out-Null
+
 # configure the account to allow ssh connections from the jenkins master.
 mkdir C:\Users\$jenkinsAccountName\.ssh | Out-Null
 copy C:\vagrant\tmp\$config_jenkins_master_fqdn-ssh-rsa.pub C:\Users\$jenkinsAccountName\.ssh\authorized_keys

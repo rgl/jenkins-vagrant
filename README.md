@@ -15,6 +15,9 @@ This configures Jenkins through [CLI/JNLP](https://wiki.jenkins-ci.org/display/J
 * Add a Ubuntu Linux slave node.
 * Add a Windows slave node.
   * With enabled long path support on the OS and chocolatey.
+  * With Unity Editor.
+    * You still need to [activate](https://docs.unity3d.com/Manual/LicensesAndActivation.html) it by
+running Unity Hub.
 * Add a macOS slave node.
 
 **NB** If you are new to Groovy, be sure to check the [Groovy Learn X in Y minutes page](https://learnxinyminutes.com/docs/groovy/).

@@ -386,6 +386,24 @@ import jenkins.model.Jenkins
 import org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition
 import org.jenkinsci.plugins.workflow.job.WorkflowJob
 
+scm = new GitSCM('https://github.com/rgl/unity-example-windows-vagrant.git')
+scm.branches = [new BranchSpec('*/master')]
+scm.extensions.add(new CleanBeforeCheckout())
+
+project = new WorkflowJob(Jenkins.instance, 'unity-example-windows')
+project.definition = new CpsScmFlowDefinition(scm, 'Jenkinsfile')
+
+Jenkins.instance.add(project, project.name)
+EOF
+
+jgroovy = <<'EOF'
+import hudson.plugins.git.BranchSpec
+import hudson.plugins.git.extensions.impl.CleanBeforeCheckout
+import hudson.plugins.git.GitSCM
+import jenkins.model.Jenkins
+import org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition
+import org.jenkinsci.plugins.workflow.job.WorkflowJob
+
 scm = new GitSCM('https://github.com/rgl/example-dotnet-source-link.git')
 scm.branches = [new BranchSpec('*/master')]
 scm.extensions.add(new CleanBeforeCheckout())
