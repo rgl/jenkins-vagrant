@@ -10,6 +10,12 @@ trap {
     Exit 1
 }
 
+# to use the execute shell build step add msys2 to the PATH.
+[Environment]::SetEnvironmentVariable(
+    'PATH',
+    "$([Environment]::GetEnvironmentVariable('PATH', 'User'));C:\tools\msys64\usr\bin",
+    'User')
+
 # configure git.
 git config --global user.email 'jenkins@example.com'
 git config --global user.name 'Jenkins'

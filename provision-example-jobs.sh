@@ -193,6 +193,60 @@ jgroovy = <<'EOF'
 import jenkins.model.Jenkins
 import hudson.model.FreeStyleProject
 import hudson.model.labels.LabelAtom
+import hudson.tasks.Shell
+
+project = new FreeStyleProject(Jenkins.instance, 'example-execute-shell-windows')
+project.assignedLabel = new LabelAtom('windows')
+project.buildersList.add(new Shell(
+'''\
+#!bash
+# NB The above line resets the shell shebang line from the default "#!sh -xe".
+#    See https://wiki.jenkins.io/display/JENKINS/Shells
+# initialize the shell in msys mode.
+MSYS2_PATH_TYPE=inherit; source shell msys; set -eux
+echo "The shell is at $SHELL"
+echo "The shell options are $-"
+echo 'The PATH is:'
+echo "$PATH" | tr : '\\n' | sed -E 's,(.+),    \\1,g'
+uname -a
+mount
+df -h
+env | sort
+pacman -Q
+'''))
+project.buildersList.add(new Shell(
+'''\
+#!bash
+# initialize the shell in mingw64 mode to have access to gcc from the mingw-w64-x86_64-gcc package.
+MSYS2_PATH_TYPE=inherit; source shell mingw64; set -eux
+echo "The shell is at $SHELL"
+echo "The shell options are $-"
+echo 'The PATH is:'
+echo "$PATH" | tr : '\\n' | sed -E 's,(.+),    \\1,g'
+uname -a
+mount
+df -h
+env | sort
+gcc --version
+cat >hello-world.c <<"EOC"
+#include <stdio.h>
+void main() {
+	puts("Hello World!");
+}
+EOC
+gcc -O2 -ohello-world.exe hello-world.c
+strip hello-world.exe
+ldd hello-world.exe
+./hello-world.exe
+'''))
+
+Jenkins.instance.add(project, project.name)
+EOF
+
+jgroovy = <<'EOF'
+import jenkins.model.Jenkins
+import hudson.model.FreeStyleProject
+import hudson.model.labels.LabelAtom
 import hudson.plugins.git.BranchSpec
 import hudson.plugins.git.GitSCM
 import hudson.plugins.git.extensions.impl.CleanBeforeCheckout

@@ -15,6 +15,8 @@ This configures Jenkins through [CLI/JNLP](https://wiki.jenkins-ci.org/display/J
 * Add a Ubuntu Linux slave node.
 * Add a Windows slave node.
   * With enabled long path support on the OS and chocolatey.
+  * With [MSYS2](https://github.com/msys2/msys2/wiki/MSYS2-introduction) to be able to use the `Execute shell` build step.
+    * See the [example-execute-shell-windows](https://jenkins.example.com/job/example-execute-shell-windows) job.
   * With Unity Editor.
     * You still need to [activate](https://docs.unity3d.com/Manual/LicensesAndActivation.html) it by
 running Unity Hub.
