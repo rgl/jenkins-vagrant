@@ -106,8 +106,14 @@ autocmd FileType go set smartindent cinwords=if,else,switch,for,func
 EOF
 '@
 
-# install mingw gcc.
-Bash 'pacman --noconfirm -Sy mingw-w64-x86_64-gcc'
+# install mingw based tools.
+# see https://github.com/msys2/MINGW-packages
+Bash @'
+pacman --noconfirm -Sy mingw-w64-x86_64-gcc
+pacman --noconfirm -Sy mingw-w64-x86_64-jq
+pacman --noconfirm -Sy mingw-w64-x86_64-python3 mingw-w64-x86_64-python3-pip
+pacman --noconfirm -Sy mingw-w64-x86_64-python3-pygments; pip3 install httpie
+'@
 
 # add MSYS2 shortcut to the Desktop and Start Menu.
 Install-ChocolateyShortcut `
