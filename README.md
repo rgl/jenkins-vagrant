@@ -4,6 +4,7 @@ This configures Jenkins through [CLI/JNLP](https://wiki.jenkins-ci.org/display/J
 
 * Enable the simple `Logged-in users can do anything` Authorization security policy.
 * Add a SSH public key to `vagrant` user account and use it to access the CLI.
+  * Except on Windows; there it uses JNLP4/HTTPS to connect to the Jenkins Master from a Windows Service. Only a Windows Service has the needed permissions to run integration tests that use the WCF net.pipe transport and to build unity projects.
 * Optionally use LDAP user authentication.
 * Add and list users.
 * Install and configure plugins.

@@ -247,6 +247,39 @@ jgroovy = <<'EOF'
 import jenkins.model.Jenkins
 import hudson.model.FreeStyleProject
 import hudson.model.labels.LabelAtom
+import hudson.model.labels.LabelAtom
+import hudson.plugins.git.BranchSpec
+import hudson.plugins.git.GitSCM
+import hudson.plugins.git.extensions.impl.CleanBeforeCheckout
+import hudson.tasks.Shell
+
+project = new FreeStyleProject(Jenkins.instance, 'example-greeter-service-wcf-netframework')
+project.assignedLabel = new LabelAtom('windows')
+
+project.scm = new GitSCM('https://github.com/rgl/example-greeter-service-wcf-netframework.git')
+project.scm.branches = [new BranchSpec('*/master')]
+project.scm.extensions.add(new CleanBeforeCheckout())
+
+project.buildersList.add(new Shell(
+'''\
+#!bash
+MSYS2_PATH_TYPE=inherit; source shell mingw64; set -eux
+
+/c/Windows/System32/whoami.exe -all
+
+MSBuild.exe -m -p:Configuration=Debug -t:restore -t:build
+
+#./GreeterService/bin/Debug/GreeterService.exe --wait-for-debugger
+./GreeterService/bin/Debug/GreeterService.exe --endpoints pipe
+'''))
+
+Jenkins.instance.add(project, project.name)
+EOF
+
+jgroovy = <<'EOF'
+import jenkins.model.Jenkins
+import hudson.model.FreeStyleProject
+import hudson.model.labels.LabelAtom
 import hudson.plugins.git.BranchSpec
 import hudson.plugins.git.GitSCM
 import hudson.plugins.git.extensions.impl.CleanBeforeCheckout

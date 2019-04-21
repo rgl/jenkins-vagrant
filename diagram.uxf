@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<diagram program="umlet" version="14.2">
+<diagram program="umlet" version="14.3.0">
   <zoom_level>10</zoom_level>
   <element>
     <id>UMLDeployment</id>
@@ -68,26 +68,26 @@ r1=ssh
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>380</x>
+      <x>370</x>
       <y>180</y>
-      <w>100</w>
-      <h>40</h>
+      <w>110</w>
+      <h>50</h>
     </coordinates>
-    <panel_attributes>lt=()-
-r1=ssh
+    <panel_attributes>lt=)-
+
 </panel_attributes>
-    <additional_attributes>10.0;20.0;80.0;20.0</additional_attributes>
+    <additional_attributes>20.0;20.0;90.0;20.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
       <x>280</x>
       <y>180</y>
-      <w>120</w>
-      <h>50</h>
+      <w>110</w>
+      <h>40</h>
     </coordinates>
-    <panel_attributes>lt=-(
-</panel_attributes>
+    <panel_attributes>lt=-()
+r2=jnlp4</panel_attributes>
     <additional_attributes>10.0;20.0;90.0;20.0</additional_attributes>
   </element>
   <element>

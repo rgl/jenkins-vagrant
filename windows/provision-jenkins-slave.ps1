@@ -66,10 +66,54 @@ if (Test-Path C:/vagrant/tmp/gitlab.example.com-crt.der) {
 
 # install the JRE.
 choco install -y adoptopenjdk8jre
+Update-SessionEnvironment
 
-# restart the SSH service so it can re-read the environment (e.g. the system environment
-# variables like PATH) after we have installed all this slave node dependencies.
-Restart-Service sshd
+# add our jenkins master self-signed certificate to the default java trust store.
+@(
+    'C:\Program Files\Java\jre*\lib\security\cacerts'
+    'C:\Program Files\Java\jdk*\jre\lib\security\cacerts'
+    'C:\Program Files\AdoptOpenJDK\*jre\lib\security\cacerts'
+    'C:\Program Files\AdoptOpenJDK\*jdk\jre\lib\security\cacerts'
+) | ForEach-Object {Get-ChildItem $_ -ErrorAction SilentlyContinue} | ForEach-Object {
+    $keyStore = $_
+    $alias = $config_jenkins_master_fqdn
+    $keytool = Resolve-Path "$keyStore\..\..\..\bin\keytool.exe"
+    $keytoolOutput = &$keytool `
+        -noprompt `
+        -list `
+        -storepass changeit `
+        -keystore "$keyStore" `
+        -alias "$alias"
+    if ($keytoolOutput -match 'keytool error: java.lang.Exception: Alias .+ does not exist') {
+        Write-Host "Adding $alias to the java $keyStore keystore..."
+        # NB we use Start-Process because keytool writes to stderr... and that
+        #    triggers PowerShell to fail, so we work around this by redirecting
+        #    stdout and stderr to a temporary file.
+        # NB keytool exit code is always 1, so we cannot rely on that.
+        Start-Process `
+            -FilePath $keytool `
+            -ArgumentList `
+                '-noprompt',
+                '-import',
+                '-trustcacerts',
+                '-storepass changeit',
+                "-keystore `"$keyStore`"",
+                "-alias `"$alias`"",
+                "-file c:\vagrant\tmp\$config_jenkins_master_fqdn-crt.der" `
+            -RedirectStandardOutput "$env:TEMP\keytool-stdout.txt" `
+            -RedirectStandardError "$env:TEMP\keytool-stderr.txt" `
+            -NoNewWindow `
+            -Wait
+        $keytoolOutput = Get-Content -Raw "$env:TEMP\keytool-stdout.txt","$env:TEMP\keytool-stderr.txt"
+        if ($keytoolOutput -notmatch 'Certificate was added to keystore') {
+            Write-Host $keytoolOutput
+            throw "failed to import $alias to keystore"
+        }
+    } elseif ($LASTEXITCODE) {
+        Write-Host $keytoolOutput
+        throw "failed to list keystore with exit code $LASTEXITCODE"
+    }
+}
 
 # create the jenkins user account and home directory.
 [Reflection.Assembly]::LoadWithPartialName('System.Web') | Out-Null
@@ -91,36 +135,6 @@ New-LocalUser `
 #    SYSTEM, Administrators and the jenkins account are granted full
 #    permissions to it.
 Start-Process -WindowStyle Hidden -Credential $jenkinsAccountCredential -WorkingDirectory 'C:\' -FilePath cmd -ArgumentList '/c'
-
-# To be able to run unity under the jenkins account (which is not an Administrator) we need to allow
-# the "Remote Enable" permission to the ROOT\CIMV2 WMI namespace.
-# see https://docs.microsoft.com/en-us/windows/desktop/wmisdk/securing-a-remote-wmi-connection#allowing-users-access-to-a-specific-wmi-namespace
-# NB you can manually manage these permissions with the wmimgmt.msc mmc snap-in.
-# NB without this change unity fails to start with:
-#       Initiating legacy licensing moduleAssertion failed on expression: 'SUCCEEDED(hr)'
-#       (Filename: C:\buildslave\unity\build\PlatformDependent/Win/SystemInfo.cpp Line: 760)
-#       Assertion failed on expression: 'wmiOpened'
-#       (Filename: C:\buildslave\unity\build\PlatformDependent/Win/SystemInfo.cpp Line: 1015)
-#       LICENSE SYSTEM [2019416 9:48:22] Next license update check is after 2019-04-17T07:59:57
-#       LICENSE SYSTEM [2019416 9:48:22]  != MA==
-#       BatchMode: Unity has not been activated with a valid License. Could be a new activation or renewal...
-#       (Filename: C:/buildslave/unity/build/Platforms/Windows/Modules/LicensingLegacy/WinILicensingAdapter.cpp Line: 43)
-#       DisplayProgressbar: Unity license
-Install-PackageProvider NuGet -Force | Out-Null
-Set-PSRepository PSGallery -InstallationPolicy Trusted
-Install-Module WmiNamespaceSecurity
-Invoke-DscResource -ModuleName WmiNamespaceSecurity -Name WmiNamespaceSecurity -Method Set -Property @{
-    Path = "ROOT\CIMV2"
-    Principal = "$env:COMPUTERNAME\$jenkinsAccountName"
-    AppliesTo = "Self"
-    AccessType = "Allow"
-    Permission = @("RemoteAccess")
-    Ensure = "Present"
-} | Out-Null
-
-# configure the account to allow ssh connections from the jenkins master.
-mkdir C:\Users\$jenkinsAccountName\.ssh | Out-Null
-copy C:\vagrant\tmp\$config_jenkins_master_fqdn-ssh-rsa.pub C:\Users\$jenkinsAccountName\.ssh\authorized_keys
 
 # configure the jenkins home.
 choco install -y pstools
@@ -156,16 +170,42 @@ $acl.SetAccessRuleProtection($true, $false)
 }
 $jenkinsDirectory.SetAccessControl($acl)
 
-# download the slave jar and install it.
+# download the jnlp jar and install it.
 mkdir $jenkinsDirectory\lib | Out-Null
-Invoke-WebRequest "https://$config_jenkins_master_fqdn/jnlpJars/slave.jar" -OutFile $jenkinsDirectory\lib\slave.jar
+Invoke-WebRequest "https://$config_jenkins_master_fqdn/jnlpJars/agent.jar" -OutFile $jenkinsDirectory\lib\agent.jar
 
-# create artifacts that need to be shared with the other nodes.
-mkdir -Force C:\vagrant\tmp | Out-Null
-[IO.File]::WriteAllText(
-    "C:\vagrant\tmp\$config_fqdn.ssh_known_hosts",
-    (dir 'C:\ProgramData\ssh\ssh_host_*_key.pub' | %{ "$config_fqdn $(Get-Content $_)`n" }) -join ''
-)
+# install jenkins as a service.
+# NB jenkins cannot run from a OpenSSH session because it will end up without required groups and rights.
+# NB this is needed to run integration tests that use WCF named pipes (WCF creates a Memory Section in the Global namespace with CreateFileMapping).
+#    see https://support.microsoft.com/en-us/help/821546/overview-of-the-impersonate-a-client-after-authentication-and-the-crea
+# NB this is needed to build unity projects (it needs WMI permissions to get the machine manifest for its activation mechanism).
+choco install -y nssm
+$serviceUsername = $jenkinsAccountName
+$servicePassword = $jenkinsAccountPassword
+$serviceName = $jenkinsAccountName
+$serviceHome = $jenkinsDirectory.FullName
+Write-Host "Creating the $serviceName service..."
+mkdir -Force "$serviceHome\logs" | Out-Null
+nssm install $serviceName (Get-Command java.exe).Path
+nssm set $serviceName AppParameters `
+    -jar lib/agent.jar `
+    -jnlpUrl "https://$config_jenkins_master_fqdn/computer/windows/slave-agent.jnlp" `
+    -secret (Get-Content -Raw c:\vagrant\tmp\slave-jnlp-secret-windows.txt) `
+    -workDir $serviceHome
+nssm set $serviceName AppDirectory $serviceHome
+nssm set $serviceName Start SERVICE_AUTO_START
+nssm set $serviceName AppRotateFiles 1
+nssm set $serviceName AppRotateOnline 1
+nssm set $serviceName AppRotateSeconds 86400
+nssm set $serviceName AppRotateBytes 1048576
+nssm set $serviceName AppStdout $serviceHome\logs\$serviceName-stdout.log
+nssm set $serviceName AppStderr $serviceHome\logs\$serviceName-stderr.log
+nssm set $serviceName ObjectName ".\$serviceUsername" $servicePassword
+[string[]]$result = sc.exe failure $serviceName reset= 0 actions= restart/60000
+if ($result -ne '[SC] ChangeServiceConfig2 SUCCESS') {
+    throw "sc.exe failure failed with $result"
+}
+Start-Service $serviceName
 
 # add default desktop shortcuts (called from a provision-base.ps1 generated script).
 [IO.File]::WriteAllText(

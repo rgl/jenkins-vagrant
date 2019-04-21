@@ -395,12 +395,14 @@ EOF
 # generate the SSH key-pair that jenkins master uses to communicates with the slaves.
 su jenkins -c 'ssh-keygen -q -t rsa -N "" -f ~/.ssh/id_rsa'
 
-# disable all JNLP agent protocols.
+# set the allowed agent protocols.
+# NB JNLP4-connect will be used by windows nodes.
 # see http://javadoc.jenkins-ci.org/jenkins/model/Jenkins.html
 jgroovy = <<'EOF'
 import jenkins.model.Jenkins
 
-Jenkins.instance.agentProtocols = Jenkins.instance.agentProtocols.grep { !it.matches('^JNLP.+-connect$') }
+Jenkins.instance.agentProtocols = ["JNLP4-connect", "Ping"]
+Jenkins.instance.slaveAgentPort = 50000
 Jenkins.instance.save()
 EOF
 
@@ -630,12 +632,12 @@ EOF
 jgroovy = <<'EOF'
 import jenkins.model.Jenkins
 import hudson.slaves.DumbSlave
-import hudson.slaves.CommandLauncher
+import hudson.slaves.JNLPLauncher
 
 node = new DumbSlave(
     "windows",
     "c:/j",
-    new CommandLauncher("ssh windows.jenkins.example.com java -jar c:/j/lib/slave.jar"))
+    new JNLPLauncher(true))
 node.numExecutors = 3
 node.labelString = "windows 2019 vs2019 unity amd64"
 Jenkins.instance.nodesObject.addNode(node)
@@ -660,3 +662,18 @@ node.labelString = "macos 10.12 amd64"
 Jenkins.instance.nodesObject.addNode(node)
 Jenkins.instance.nodesObject.save()
 EOF
+
+
+#
+# share the slave jnlp secrets with the other nodes.
+
+(
+jgroovy = <<'EOF'
+import jenkins.model.Jenkins
+import hudson.slaves.SlaveComputer
+
+Jenkins.instance.computers
+        .findAll { it instanceof SlaveComputer }
+        .each { println("${it.name}\t${it.jnlpMac}") }
+EOF
+) | awk '/.+\t.+/ { printf "%s",$2 > "/vagrant/tmp/slave-jnlp-secret-" $1 ".txt" }'
