@@ -128,7 +128,7 @@ done
   end
 
   config.trigger.after :up do |trigger|
-    trigger.only_on = ['ubuntu', 'windows', 'macos']
+    trigger.only_on = ['ubuntu', 'macos']
     trigger.run = {inline: "vagrant ssh -c 'cat /vagrant/tmp/*.ssh_known_hosts | sudo tee /etc/ssh/ssh_known_hosts' jenkins"}
   end
 end
