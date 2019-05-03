@@ -388,6 +388,18 @@ c.smtpPort = '1025'
 c.save()
 EOF
 
+# configure the default pipeline durability setting as performance-optimized.
+# see https://jenkins.io/doc/book/pipeline/scaling-pipeline/
+# see https://javadoc.jenkins.io/plugin/workflow-api/org/jenkinsci/plugins/workflow/flow/GlobalDefaultFlowDurabilityLevel.DescriptorImpl.html
+jgroovy = <<'EOF'
+import jenkins.model.Jenkins
+import org.jenkinsci.plugins.workflow.flow.GlobalDefaultFlowDurabilityLevel
+
+d = Jenkins.instance.getDescriptor('org.jenkinsci.plugins.workflow.flow.GlobalDefaultFlowDurabilityLevel')
+d.durabilityHint = 'PERFORMANCE_OPTIMIZED'
+d.save()
+EOF
+
 
 #
 # configure security.
