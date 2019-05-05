@@ -130,6 +130,14 @@ New-LocalUser `
     -FullName 'Jenkins Slave' `
     -Password $jenkinsAccountPasswordSecureString `
     -PasswordNeverExpires
+# allow the jenkins user to logon into the Desktop (e.g. to start the Remote Debugger).
+Add-LocalGroupMember `
+    -Group Users `
+    -Member $jenkinsAccountName
+# allow the jenkins user to use the docker named pipe.
+Add-LocalGroupMember `
+    -Group docker-users `
+    -Member $jenkinsAccountName
 # login to force the system to create the home directory.
 # NB the home directory will have the correct permissions, only the
 #    SYSTEM, Administrators and the jenkins account are granted full
@@ -150,8 +158,8 @@ Remove-Item C:\tmp\configure-jenkins-home.ps1
 
 # create the storage directory hierarchy.
 # grant the SYSTEM, Administrators and $jenkinsAccountName accounts
-# Full Permissions to the c:\j directory and children.
-$jenkinsDirectory = mkdir c:\j
+# Full permissions to the c:\j directory and children.
+$jenkinsDirectory = mkdir -Force c:\j
 $acl = New-Object Security.AccessControl.DirectorySecurity
 $acl.SetAccessRuleProtection($true, $false)
 @(
@@ -168,7 +176,45 @@ $acl.SetAccessRuleProtection($true, $false)
                 'None',
                 'Allow')))
 }
+# also grant the ContainerAdministrator and ContainerUser accounts
+# Traverse permissions.
+# NB this is needed for the containers to access the job workspace
+#    directory when docker is started as:
+#       docker run -v "%WORKSPACE%:%WORKSPACE" -w "%WORKSPACE%"
+@(
+    'S-1-5-93-2-1' # ContainerAdministrator
+    'S-1-5-93-2-2' # ContainerUser
+) | ForEach-Object {
+    $sid = New-Object System.Security.Principal.SecurityIdentifier $_
+    $acl.AddAccessRule((
+        New-Object `
+            Security.AccessControl.FileSystemAccessRule(
+                $sid,
+                'Traverse',
+                'None',
+                'None',
+                'Allow')))
+}
 $jenkinsDirectory.SetAccessControl($acl)
+# also grant the ContainerAdministrator and ContainerUser accounts
+# Full permissions to the c:\j\w directory and children.
+$jenkinsWorkspaceDirectory = mkdir -Force "$jenkinsDirectory\w"
+$acl = Get-Acl $jenkinsDirectory
+@(
+    'S-1-5-93-2-1' # ContainerAdministrator
+    'S-1-5-93-2-2' # ContainerUser
+) | ForEach-Object {
+    $sid = New-Object System.Security.Principal.SecurityIdentifier $_
+    $acl.AddAccessRule((
+        New-Object `
+            Security.AccessControl.FileSystemAccessRule(
+                $sid,
+                'FullControl',
+                'ContainerInherit,ObjectInherit',
+                'None',
+                'Allow')))
+}
+$jenkinsWorkspaceDirectory.SetAccessControl($acl)
 
 # download the jnlp jar and install it.
 mkdir $jenkinsDirectory\lib | Out-Null
@@ -216,6 +262,12 @@ Start-Service $serviceName
     @"
 [InternetShortcut]
 URL=https://{0}
+"@)
+[IO.File]::WriteAllText(
+    "$env:USERPROFILE\Desktop\Portainer.url",
+    @"
+[InternetShortcut]
+URL=http://localhost:9000
 "@)
 '@ -f $config_jenkins_master_fqdn)
 

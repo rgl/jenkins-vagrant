@@ -15,6 +15,7 @@ This configures Jenkins through [CLI/JNLP](https://wiki.jenkins-ci.org/display/J
 * Create Multibranch Pipeline job.
 * Add a Ubuntu Linux slave node.
 * Add a Windows slave node.
+  * With docker-ce (default) or docker-ee (you need to uncomment it from the `Vagrantfile`).
   * With enabled long path support on the OS and chocolatey.
   * With [MSYS2](https://github.com/msys2/msys2/wiki/MSYS2-introduction) to be able to use the `Execute shell` build step.
     * See the [example-execute-shell-windows](https://jenkins.example.com/job/example-execute-shell-windows) job.
@@ -42,6 +43,7 @@ Add the following entry to your `/etc/hosts` file:
 
 ```
 10.10.10.100 jenkins.example.com
+10.10.10.102 windows.jenkins.example.com
 ```
 
 If you want to use LDAP for user authentication, you have to:
@@ -57,7 +59,7 @@ one of the example accounts, e.g. `alice.doe` and password `password`).
 
 Run `vagrant up ubuntu` to launch the Ubuntu slave.
 
-Run `vagrant up windows` to launch the Windows slave.
+Run `vagrant up windows` to launch the Windows slave. [Portainer](https://portainer.io/) is available at http://windows.jenkins.example.com:9000/.
 
 Run `vagrant up macos` to launch the macOS slave. **NB** you first need to download [Xcode_8.1.xip](https://developer.apple.com/download/more/).
 After provisioning you can delete it, as `Xcode_8.1.cpio.xz` will take its place as a more efficient way to install Xcode.

@@ -16,6 +16,10 @@ trap {
     Exit 1
 }
 
+function Write-Title($title) {
+    Write-Output "#`n# $title`n#"
+}
+
 # wrap the choco command (to make sure this script aborts when it fails).
 function Start-Choco([string[]]$Arguments, [int[]]$SuccessExitCodes=@(0)) {
     $command, $commandArguments = $Arguments
@@ -38,6 +42,13 @@ function Start-Choco([string[]]$Arguments, [int[]]$SuccessExitCodes=@(0)) {
 }
 function choco {
     Start-Choco $Args
+}
+
+function docker {
+    docker.exe @Args | Out-String -Stream -Width ([int]::MaxValue)
+    if ($LASTEXITCODE) {
+        throw "$(@('docker')+$Args | ConvertTo-Json -Compress) failed with exit code $LASTEXITCODE"
+    }
 }
 
 function Get-DotNetVersion {

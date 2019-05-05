@@ -651,7 +651,7 @@ node = new DumbSlave(
     "c:/j",
     new JNLPLauncher(true))
 node.numExecutors = 3
-node.labelString = "windows 2019 vs2019 unity amd64"
+node.labelString = "windows 2019 vs2019 docker unity amd64"
 Jenkins.instance.nodesObject.addNode(node)
 Jenkins.instance.nodesObject.save()
 EOF

@@ -168,6 +168,56 @@ EOF
 
 jgroovy = <<'EOF'
 import jenkins.model.Jenkins
+import org.jenkinsci.plugins.workflow.job.WorkflowJob
+import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition
+
+folder = Jenkins.instance.getItem('dump-environment')
+
+project = new WorkflowJob(folder, 'windows-docker-dump-environment')
+project.definition = new CpsFlowDefinition("""\
+pipeline {
+    // NB the jenkins docker plugin does not currently work on windows.
+    //    as a workaround we have to manually run docker run.
+    //agent {
+    //    docker {
+    //        label 'windows && docker'
+    //        image 'mcr.microsoft.com/windows/nanoserver:1809'
+    //    }
+    //}
+    agent {
+        label 'windows && docker'
+    }
+    stages {
+        stage('Build') {
+            steps {
+                powershell '''
+Set-Content -Encoding Ascii -Path build.bat -Value @'
+ver
+whoami /all
+set
+'@
+
+docker run `
+    --rm `
+    -v "\${env:WORKSPACE}:\${env:WORKSPACE}" `
+    -w \$env:WORKSPACE `
+    -e "WORKSPACE=\$env:WORKSPACE" `
+    -e "BUILD_NUMBER=\$env:BUILD_NUMBER" `
+    mcr.microsoft.com/windows/servercore:1809 `
+    build.bat
+'''
+            }
+        }
+    }
+}
+""",
+true)
+
+folder.add(project, project.name)
+EOF
+
+jgroovy = <<'EOF'
+import jenkins.model.Jenkins
 import hudson.model.FreeStyleProject
 import hudson.model.labels.LabelAtom
 import hudson.tasks.Shell

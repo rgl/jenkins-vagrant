@@ -73,8 +73,13 @@ Vagrant.configure('2') do |config|
     config.vm.provision :shell, inline: "echo '#{config_gitlab_ip} #{config_gitlab_fqdn}' | Out-File -Encoding ASCII -Append c:/Windows/System32/drivers/etc/hosts"
     config.vm.provision :shell, inline: "$env:chocolateyVersion='0.10.13'; iwr https://chocolatey.org/install.ps1 -UseBasicParsing | iex", name: "Install Chocolatey"
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-dotnet.ps1'
+    config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-containers-feature.ps1'
     config.vm.provision :shell, inline: "echo 'Rebooting...'", reboot: true
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-base.ps1'
+    config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-docker-ce.ps1'
+    # config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-docker-ee.ps1'
+    config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-docker-reg.ps1'
+    config.vm.provision :shell, path: 'windows/ps.ps1', args: 'portainer/provision.ps1'
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-vs-build-tools.ps1'
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-dotnetcore-sdk.ps1'
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-msys2.ps1'
