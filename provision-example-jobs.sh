@@ -100,6 +100,7 @@ project = new FreeStyleProject(folder, 'windows')
 project.assignedLabel = new LabelAtom('windows')
 project.buildersList.add(new BatchFile(
 '''\
+ver
 set
 whoami /all
 '''))
@@ -139,6 +140,7 @@ pipeline {
         stage('Build') {
             steps {
                 bat '''
+ver
 set
 whoami /all
 '''
