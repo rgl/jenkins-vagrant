@@ -633,6 +633,7 @@ node = new DumbSlave(
     new CommandLauncher("ssh ubuntu.jenkins.example.com /var/jenkins/bin/jenkins-slave"))
 node.numExecutors = 3
 node.labelString = "ubuntu 18.04 linux amd64"
+node.mode = 'EXCLUSIVE'
 Jenkins.instance.nodesObject.addNode(node)
 Jenkins.instance.nodesObject.save()
 EOF
@@ -652,6 +653,7 @@ node = new DumbSlave(
     new JNLPLauncher(true))
 node.numExecutors = 3
 node.labelString = "windows 2019 vs2019 docker unity amd64"
+node.mode = 'EXCLUSIVE'
 Jenkins.instance.nodesObject.addNode(node)
 Jenkins.instance.nodesObject.save()
 EOF
@@ -671,6 +673,7 @@ node = new DumbSlave(
     new CommandLauncher("ssh macos.jenkins.example.com /var/jenkins/bin/jenkins-slave"))
 node.numExecutors = 3
 node.labelString = "macos 10.12 amd64"
+node.mode = 'EXCLUSIVE'
 Jenkins.instance.nodesObject.addNode(node)
 Jenkins.instance.nodesObject.save()
 EOF
