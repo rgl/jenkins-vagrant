@@ -31,3 +31,6 @@ dotnet tool install --global sourcelink
 # install the xUnit to JUnit report converter.
 # see https://github.com/gabrielweyer/xunit-to-junit
 dotnet tool install --global dotnet-xunit-to-junit
+
+# install vagrant plugins.
+. .\provision-vagrant-plugins.ps1

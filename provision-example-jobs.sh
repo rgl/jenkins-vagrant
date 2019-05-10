@@ -283,7 +283,7 @@ gcc --version
 cat >hello-world.c <<"EOC"
 #include <stdio.h>
 void main() {
-	puts("Hello World!");
+    puts("Hello World!");
 }
 EOC
 gcc -O2 -ohello-world.exe hello-world.c
@@ -610,6 +610,195 @@ exec {dotnet run -v n -c Release --no-build} -successExitCodes -532462766
 # force a success exit code because dotnet run is expected to fail due
 # to an expected unhandled exception being raised by the application.
 Exit 0
+'''))
+
+Jenkins.instance.add(project, project.name)
+EOF
+
+jgroovy = <<'EOF'
+import hudson.model.FreeStyleProject
+import hudson.model.labels.LabelAtom
+import hudson.model.labels.LabelExpression.And
+import hudson.plugins.powershell.PowerShell
+import hudson.plugins.ws_cleanup.Pattern
+import hudson.plugins.ws_cleanup.Pattern.PatternType
+import hudson.plugins.ws_cleanup.PreBuildCleanup
+import jenkins.model.Jenkins
+import org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper
+import org.jenkinsci.plugins.credentialsbinding.impl.UsernamePasswordMultiBinding
+
+project = new FreeStyleProject(Jenkins.instance, 'windows-vagrant-vsphere-example')
+project.assignedLabel = new And(new LabelAtom('windows'), new LabelAtom('vagrant'))
+project.buildWrappersList.add(new PreBuildCleanup(
+    [
+        new Pattern('.vagrant/**', PatternType.EXCLUDE)
+    ],          // patterns
+    false,      // deleteDirs
+    null,       // cleanupParameter
+    null,       // externalDelete
+    false       // disableDeferredWipeout
+))
+project.buildWrappersList.add(new SecretBuildWrapper([
+    new UsernamePasswordMultiBinding(
+        'VAGRANT_VSPHERE_USERNAME',
+        'VAGRANT_VSPHERE_PASSWORD',
+        'vagrant-vsphere'),
+]))
+project.buildersList.add(new PowerShell(
+'''\
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+$ProgressPreference = 'SilentlyContinue'
+trap {
+    Write-Output "ERROR: $_"
+    Write-Output (($_.ScriptStackTrace -split '\\r?\\n') -replace '^(.*)$','ERROR: $1')
+    Write-Output (($_.Exception.ToString() -split '\\r?\\n') -replace '^(.*)$','ERROR EXCEPTION: $1')
+    Exit 1
+}
+
+function vagrant {
+    vagrant.exe @Args | Out-String -Stream -Width ([int]::MaxValue)
+    if ($LASTEXITCODE) {
+        throw "$(@('vagrant')+$Args | ConvertTo-Json -Compress) failed with exit code $LASTEXITCODE"
+    }
+}
+
+Set-Content -Encoding Ascii -Path Get-MachineSID.ps1 -Value @'
+# see https://gist.github.com/IISResetMe/36ef331484a770e23a81
+function Get-MachineSID {
+    param(
+        [switch]$DomainSID
+    )
+
+    # Retrieve the Win32_ComputerSystem class and determine if machine is a Domain Controller  
+    $WmiComputerSystem = Get-WmiObject -Class Win32_ComputerSystem
+    $IsDomainController = $WmiComputerSystem.DomainRole -ge 4
+
+    if ($IsDomainController -or $DomainSID) {
+        # We grab the Domain SID from the DomainDNS object (root object in the default NC)
+        $Domain    = $WmiComputerSystem.Domain
+        $SIDBytes = ([ADSI]"LDAP://$Domain").objectSid | %{$_}
+        New-Object System.Security.Principal.SecurityIdentifier -ArgumentList ([Byte[]]$SIDBytes),0
+    } else {
+        # Going for the local SID by finding a local account and removing its Relative ID (RID)
+        $LocalAccountSID = Get-WmiObject -Query "SELECT SID FROM Win32_UserAccount WHERE LocalAccount = 'True'" | Select-Object -First 1 -ExpandProperty SID
+        $MachineSID      = ($p = $LocalAccountSID -split "-")[0..($p.Length-2)]-join"-"
+        New-Object System.Security.Principal.SecurityIdentifier -ArgumentList $MachineSID
+    }
+}
+echo "This Computer SID is $(Get-MachineSID)"
+'@
+
+# required environment variables.
+# NB VAGRANT_VSPHERE_USERNAME and VAGRANT_VSPHERE_PASSWORD come from the vagrant-vsphere jenkins credential.
+$env:VAGRANT_VSPHERE_HOST = 'vsphere.example.com'
+$env:VAGRANT_VSPHERE_DATA_CENTER_NAME = 'Datacenter'
+$env:VAGRANT_VSPHERE_DATA_STORE_NAME = 'Datastore'
+$env:VAGRANT_VSPHERE_COMPUTE_RESOURCE_NAME = 'Cluster'
+$env:VAGRANT_VSPHERE_TEMPLATE_NAME = 'vagrant-templates/windows-2019-amd64'
+$env:VAGRANT_VSPHERE_VM_BASE_PATH = '/vagrant-examples'
+$env:VAGRANT_VSPHERE_VM_NAME = $env:JOB_NAME -replace '[^A-Za-z0-9]','-'
+$env:VAGRANT_VSPHERE_VLAN = 'vagrant'
+$env:VAGRANT_USERNAME = 'vagrant'
+$env:VAGRANT_PASSWORD = 'vagrant'
+
+# make sure to always start from a fresh environment.
+# NB for this to work you must retain the .vagrant directory between job executions.
+# NB we cannot use `vagrant destroy -f` when the job does a git clean before checkout;
+#    to make this example work in all cases, we manually delete the vm with govc.
+Write-Host 'Destroying previous NG VM...'
+$env:GOVC_INSECURE = '1'
+$env:GOVC_URL = "https://$env:VAGRANT_VSPHERE_HOST/sdk"
+$env:GOVC_USERNAME = $env:VAGRANT_VSPHERE_USERNAME
+$env:GOVC_PASSWORD = $env:VAGRANT_VSPHERE_PASSWORD
+$vmIpath = "/$env:VAGRANT_VSPHERE_DATA_CENTER_NAME/vm$env:VAGRANT_VSPHERE_VM_BASE_PATH/$env:VAGRANT_VSPHERE_VM_NAME"
+govc vm.destroy --vm.ipath $vmIpath
+
+Set-Content -Encoding Ascii -Path Vagrantfile -Value @'
+Vagrant.configure(2) do |config|
+    config.vm.box = 'windows-2019-amd64'
+    config.vm.provider "vsphere" do |vsphere, override|
+        vsphere.name = ENV['VAGRANT_VSPHERE_VM_NAME']
+        vsphere.notes = "Created from the #{ENV['BUILD_URL']} job running at the #{ENV['NODE_NAME']} jenkins node"
+        # TODO custom_attribute can only set values on existing attributes... see how to create them.
+        #      see https://github.com/nsidc/vagrant-vsphere/issues/260
+        # vsphere.custom_attribute('JENKINS_NODE_NAME', ENV['NODE_NAME'])
+        # vsphere.custom_attribute('JENKINS_JOB_NAME', ENV['JOB_NAME'])
+        # vsphere.custom_attribute('JENKINS_BUILD_URL', ENV['BUILD_URL'])
+        # vsphere.custom_attribute('timestamp', Time.now.to_s)
+        vsphere.cpu_count = 2
+        vsphere.memory_mb = 4*1024
+        vsphere.ip_address_timeout = 720
+        vsphere.insecure = true # TODO fix this.
+        # use the windows customization spec. the spec should be configured as:
+        #       Name:                   windows
+        #       OS type:                Windows
+        #       OS options:             Generate new security ID
+        #       Registration info:      Owner name: vagrant Organization: vagrant
+        #       Computer name:          Use Virtual Machine name
+        #       Product key:            No product key specified
+        #       Administrator log in:   Do not log in automatically as Administrator
+        #       Time zone:              (GMT+00:00) Dublin, Edinburgh, Lisbon, London
+        #       Network type:           Standard
+        #       Workgroup/Domain:       Workgroup: WORKGROUP
+        #   see Create a Customization Specification for Windows at https://docs.vmware.com/en/VMware-vSphere/6.7/com.vmware.vsphere.vm_admin.doc/GUID-CAEB6A70-D1CF-446E-BC64-EC42CDB47117.html
+        vsphere.customization_spec_name = 'windows'
+        #vsphere.wait_for_sysprep = true
+        vsphere.host = ENV['VAGRANT_VSPHERE_HOST']
+        vsphere.data_center_name = ENV['VAGRANT_VSPHERE_DATA_CENTER_NAME']
+        vsphere.data_store_name = ENV['VAGRANT_VSPHERE_DATA_STORE_NAME']
+        vsphere.compute_resource_name = ENV['VAGRANT_VSPHERE_COMPUTE_RESOURCE_NAME']
+        vsphere.user = ENV['VAGRANT_VSPHERE_USERNAME']
+        vsphere.password = ENV['VAGRANT_VSPHERE_PASSWORD']
+        vsphere.template_name = ENV['VAGRANT_VSPHERE_TEMPLATE_NAME']
+        vsphere.vm_base_path = ENV['VAGRANT_VSPHERE_VM_BASE_PATH']
+        vsphere.vlan = ENV['VAGRANT_VSPHERE_VLAN']
+        override.vm.guest = :windows
+        override.vm.communicator = "winrm"
+        override.vm.boot_timeout = 720
+        override.winrm.username = ENV['VAGRANT_USERNAME']
+        override.winrm.password = ENV['VAGRANT_PASSWORD']
+        override.winrm.timeout = 720 # default 60
+        override.winrm.retry_limit = 72 # default 3
+        override.winrm.retry_delay = 10 # default 10
+        # disable the default vagrant share because we cannot share an SMB folder on windows without
+        # administrator privileges... instead we'll use the vagrant scp command.
+        # NB under the hood vagrant uses the following command to create an smb share, e.g.:
+        #       net share vgt-a5fe3e6833fe42a62caff803690ba6fa-6ad5fdbcbf2eaa93bd62f92333a2e6e5=C:/example /unlimited /GRANT:Everyone,Full /REMARK:vgt-a5fe3e6833fe42a62caff803690ba6fa-6ad5fdbcbf2eaa93bd62f92333a2e6e5
+        #    see https://github.com/hashicorp/vagrant/blob/v2.2.4/plugins/hosts/windows/cap/smb.rb#L96
+        #    see https://github.com/hashicorp/vagrant/blob/v2.2.4/plugins/hosts/windows/scripts/set_share.ps1
+        override.vm.synced_folder '.', '/vagrant', disabled: true
+    end
+    config.vm.provision "shell", path: "Get-MachineSID.ps1"
+    config.vm.provision "shell", inline: "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))"
+end
+'@
+
+# make sure to always start from a fresh environment.
+# NB for this to work you must retain the .vagrant directory between job executions.
+vagrant destroy -f
+
+# start the environment.
+vagrant up --provider=vsphere
+try {
+    # get the vm ip address into a variable.
+    $vmIpAddress = vagrant ssh-config | ForEach-Object {if ($_ -match 'HostName (.+)') {$matches[1]}} | Select-Object -First 1
+    Write-Host "VM IP Address: $vmIpAddress"
+
+    # execute some commands.
+    vagrant execute -c 'whoami /all'
+    vagrant execute --sudo -c 'whoami /all'
+
+    # copy a host file to a guest directory.
+    vagrant scp Vagrantfile :c:/tmp 
+
+    # copy a guest file to a host directory.
+    mkdir -Force tmp | Out-Null
+    vagrant scp :c:/tmp/Vagrantfile tmp
+} finally {
+    # finally destroy it.
+    vagrant destroy -f
+}
 '''))
 
 Jenkins.instance.add(project, project.name)

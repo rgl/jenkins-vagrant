@@ -605,6 +605,30 @@ fi
 
 
 #
+# create credential to be used to create vagrant environments in vsphere.
+
+jgroovy = <<'EOF'
+import com.cloudbees.plugins.credentials.CredentialsScope
+import com.cloudbees.plugins.credentials.domains.Domain
+import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl
+import com.cloudbees.plugins.credentials.SystemCredentialsProvider
+
+c = new UsernamePasswordCredentialsImpl(
+    CredentialsScope.GLOBAL,
+    "vagrant-vsphere",          // id
+    "vsphere.example.com",      // description
+    "jenkins",                  // username
+    "HeyH0Password")            // password
+
+SystemCredentialsProvider.instance.store.addCredentials(
+    Domain.global(),
+    c)
+
+null // return nothing.
+EOF
+
+
+#
 # create artifacts that need to be shared with the other nodes.
 
 mkdir -p /vagrant/tmp
@@ -652,7 +676,7 @@ node = new DumbSlave(
     "c:/j",
     new JNLPLauncher(true))
 node.numExecutors = 3
-node.labelString = "windows 2019 vs2019 docker unity amd64"
+node.labelString = "windows 2019 vs2019 vagrant docker unity amd64"
 node.mode = 'EXCLUSIVE'
 Jenkins.instance.nodesObject.addNode(node)
 Jenkins.instance.nodesObject.save()
