@@ -368,6 +368,7 @@ def install(id) {
     'xunit',
     'conditional-buildstep',
     'workflow-aggregator', // aka Pipeline; see https://plugins.jenkins.io/workflow-aggregator
+    'ws-cleanup', // aka Workspace Cleanup; see https://plugins.jenkins.io/ws-cleanup
 ].each {
   install(it)
 }
