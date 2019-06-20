@@ -1,7 +1,7 @@
 # escape=`
 FROM mcr.microsoft.com/windows/nanoserver:1809 as builder
 WORKDIR C:/Users/ContainerUser
-ADD https://github.com/portainer/portainer/releases/download/1.20.2/portainer-1.20.2-windows-amd64.tar.gz portainer.tgz
+ADD https://github.com/portainer/portainer/releases/download/1.21.0/portainer-1.21.0-windows-amd64.tar.gz portainer.tgz
 RUN tar xf portainer.tgz
 
 FROM mcr.microsoft.com/windows/nanoserver:1809
