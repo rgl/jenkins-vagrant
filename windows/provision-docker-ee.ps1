@@ -6,7 +6,7 @@
 # see https://github.com/OneGet/MicrosoftDockerProvider
 # see dockerURL variable at https://github.com/OneGet/MicrosoftDockerProvider/blob/developer/DockerMsftProvider.psm1#L21
 # NB docker-ee is free to use in Windows Server (its included in the Windows license).
-$dockerVersion = '18.09'
+$dockerVersion = '19.03'
 Write-Host "Installing docker $dockerVersion..."
 Get-PackageProvider -Name NuGet -Force | Out-Null # NB the Get-* cmdlet really installs the NuGet package provider...
 Install-Module -Name DockerMsftProvider -Repository PSGallery -Force
@@ -78,7 +78,7 @@ docker version
 Write-Title 'docker info'
 docker info
 
-# see https://docs.docker.com/engine/api/v1.32/
+# see https://docs.docker.com/engine/api/v1.40/
 # see https://github.com/moby/moby/tree/master/api
 Write-Title 'docker info (obtained from http://localhost:2375/info)'
 $infoResponse = Invoke-WebRequest 'http://localhost:2375/info' -UseBasicParsing
