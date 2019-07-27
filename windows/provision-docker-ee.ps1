@@ -28,6 +28,7 @@ $config = @{
     'experimental' = $false
     'debug' = $false
     'labels' = @('os=windows')
+    'exec-opts' = @('isolation=process')
     'hosts' = @(
         'tcp://0.0.0.0:2375',
         'npipe:////./pipe/docker_engine'

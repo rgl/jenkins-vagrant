@@ -1,12 +1,12 @@
 # see https://docs.microsoft.com/en-us/virtualization/windowscontainers/manage-docker/configure-docker-daemon
 # see https://docs.docker.com/engine/installation/linux/docker-ce/binaries/#install-server-and-client-binaries-on-windows
-# see https://github.com/docker/docker-ce/releases/tag/v19.03.0
+# see https://github.com/docker/docker-ce/releases/tag/v19.03.1
 
 # download install the docker binaries.
-$archiveVersion = '19.03.0'
+$archiveVersion = '19.03.1'
 $archiveName = "docker-$archiveVersion.zip"
 $archiveUrl = "https://github.com/rgl/docker-ce-windows-binaries-vagrant/releases/download/v$archiveVersion/$archiveName"
-$archiveHash = '3f8572df42bca0e63804cd9e93ad8903ad03fb473ed97fec0e1011cda8d28560'
+$archiveHash = '1097a9e7765b0b6ba6d8a02f7ce0a76571f23b4c5e9b4223c74c7c1f15cb934b'
 $archivePath = "$env:TEMP\$archiveName"
 Write-Host "Installing docker $archiveVersion..."
 (New-Object System.Net.WebClient).DownloadFile($archiveUrl, $archivePath)
@@ -40,6 +40,7 @@ $config = @{
     'experimental' = $false
     'debug' = $false
     'labels' = @('os=windows')
+    'exec-opts' = @('isolation=process')
     # allow users in the following groups to use the docker engine named pipe.
     # see https://github.com/moby/moby/commit/0906195fbbd6f379c163b80f23e4c5a60bcfc5f0
     # see https://github.com/moby/moby/blob/8e610b2b55bfd1bfa9436ab110d311f5e8a74dcb/daemon/listeners/listeners_windows.go#L25
