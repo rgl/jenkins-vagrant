@@ -46,15 +46,15 @@ Install-ModifiedChocolateyPackage netfx-4.7.1-devpack 4.7.2558.0 e293769f03da7a4
 # add support for building applications that target the .net 4.5.2 framework.
 choco install -y netfx-4.5.2-devpack
 
-# install the Visual Studio Build Tools 2019 16.1.6.
+# install the Visual Studio Build Tools 2019 16.2.0.
 # see https://www.visualstudio.com/downloads/
 # see https://docs.microsoft.com/en-us/visualstudio/releases/2019/release-notes
 # see https://docs.microsoft.com/en-us/visualstudio/install/use-command-line-parameters-to-install-visual-studio?view=vs-2019
 # see https://docs.microsoft.com/en-us/visualstudio/install/command-line-parameter-examples?view=vs-2019
 # see https://docs.microsoft.com/en-us/visualstudio/install/workload-and-component-ids?view=vs-2019
 # see https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-build-tools?view=vs-2019
-$archiveUrl = 'https://download.visualstudio.microsoft.com/download/pr/c3f86bc6-1398-4fbc-8bd9-b2c242108344/327c0bd70716b92dc7f968aadaf9a502/vs_buildtools.exe'
-$archiveHash = '65c61b25408253a8009ee9100878d0eb99bfa7f483fef9ee708db1deb6419347'
+$archiveUrl = 'https://download.visualstudio.microsoft.com/download/pr/af181144-6075-4ca1-8543-9dbdeffb1b79/9d09c436e510d44ae798146b36153624/vs_buildtools.exe'
+$archiveHash = 'b356dde1e719dba8ab56c866a124015438c9a3987286d2fbb6fcfe360080ce22'
 $archiveName = Split-Path $archiveUrl -Leaf
 $archivePath = "$env:TEMP\$archiveName"
 Write-Host 'Downloading the Visual Studio Build Tools Setup Bootstrapper...'
