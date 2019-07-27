@@ -199,6 +199,8 @@ whoami /all
 set
 '@
 
+docker version
+
 docker run `
     --rm `
     -v "\${env:WORKSPACE}:\${env:WORKSPACE}" `
