@@ -146,6 +146,7 @@ Start-Process -WindowStyle Hidden -Credential $jenkinsAccountCredential -Working
 
 # configure the jenkins home.
 choco install -y pstools
+Copy-Item C:\vagrant\windows\provision-vagrant-plugins.ps1 C:\tmp
 Copy-Item C:\vagrant\windows\configure-jenkins-home.ps1 C:\tmp
 psexec `
     -accepteula `
@@ -153,8 +154,10 @@ psexec `
     -u $jenkinsAccountName `
     -p $jenkinsAccountPassword `
     -h `
-    PowerShell -File C:\tmp\configure-jenkins-home.ps1
+    -w C:\tmp `
+    PowerShell -File configure-jenkins-home.ps1
 Remove-Item C:\tmp\configure-jenkins-home.ps1
+Remove-Item C:\tmp\provision-vagrant-plugins.ps1
 
 # create the storage directory hierarchy.
 # grant the SYSTEM, Administrators and $jenkinsAccountName accounts
