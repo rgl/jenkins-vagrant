@@ -1,1 +1,1 @@
-Start-Choco install,-y,dotnet4.7.2 @(0,3010)
+Start-Choco install,-y,dotnetfx,--version=4.8.0.0 @(0,3010)
