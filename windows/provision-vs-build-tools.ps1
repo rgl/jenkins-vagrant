@@ -46,6 +46,9 @@ Install-ModifiedChocolateyPackage netfx-4.7.1-devpack 4.7.2558.0 e293769f03da7a4
 # add support for building applications that target the .net 4.5.2 framework.
 choco install -y netfx-4.5.2-devpack
 
+# add support for building applications that target the .net 4.8 framework.
+choco install -y netfx-4.8-devpack
+
 # install the Visual Studio Build Tools 2019 16.2.3.
 # see https://www.visualstudio.com/downloads/
 # see https://docs.microsoft.com/en-us/visualstudio/releases/2019/release-notes
