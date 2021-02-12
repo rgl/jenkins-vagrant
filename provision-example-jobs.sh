@@ -19,7 +19,8 @@ source /vagrant/jenkins-cli.sh
 # see https://github.com/jenkinsci/powershell-plugin/blob/master/src/main/java/hudson/plugins/powershell/PowerShell.java
 # see https://github.com/jenkinsci/git-plugin/blob/master/src/main/java/hudson/plugins/git/GitSCM.java
 # see https://github.com/jenkinsci/git-plugin/blob/master/src/main/java/hudson/plugins/git/extensions/impl/CleanBeforeCheckout.java
-# see https://github.com/jenkinsci/xunit-plugin/blob/master/src/main/java/org/jenkinsci/plugins/xunit/XUnitBuilder.java
+# see https://github.com/jenkinsci/xunit-plugin/blob/master/src/main/java/org/jenkinsci/plugins/xunit/XUnitPublisher.java
+# see https://github.com/jenkinsci/xunit-plugin/blob/master/src/main/java/org/jenkinsci/plugins/xunit/types/XUnitDotNetTestType.java
 
 # create the dump-environment folder to contain all of our dump jobs.
 jgroovy = <<'EOF'
@@ -341,7 +342,7 @@ import hudson.plugins.powershell.PowerShell
 import hudson.tasks.ArtifactArchiver
 import hudson.tasks.BatchFile
 import hudson.tasks.Mailer
-import org.jenkinsci.plugins.xunit.XUnitBuilder
+import org.jenkinsci.plugins.xunit.XUnitPublisher
 import org.jenkinsci.lib.dtkit.type.TestType
 import org.jenkins_ci.plugins.run_condition.core.StatusCondition
 import org.jenkins_ci.plugins.run_condition.BuildStepRunner
@@ -420,15 +421,14 @@ dir -Recurse */bin/*.Tests.dll | ForEach-Object {
     Pop-Location
 }
 '''))
-project.buildersList.add(new XUnitBuilder(
+xUnitDotNetTestType = new XUnitDotNetTestType('**/xunit-report.xml')
+xUnitDotNetTestType.skipNoTestFiles = false
+xUnitDotNetTestType.failIfNotNew = true
+xUnitDotNetTestType.deleteOutputFiles = true
+xUnitDotNetTestType.stopProcessingIfError = true
+project.buildersList.add(new XUnitPublisher(
     [
-        new XUnitDotNetTestType(
-            '**/xunit-report.xml', // pattern
-            false,  // skipNoTestFiles
-            true,   // failIfNotNew
-            true,   // deleteOutputFiles
-            true    // stopProcessingIfError
-        )
+        xUnitDotNetTestType
     ] as TestType[], // types
     [
         new FailedThreshold(
@@ -672,7 +672,7 @@ function Get-MachineSID {
         [switch]$DomainSID
     )
 
-    # Retrieve the Win32_ComputerSystem class and determine if machine is a Domain Controller  
+    # Retrieve the Win32_ComputerSystem class and determine if machine is a Domain Controller
     $WmiComputerSystem = Get-WmiObject -Class Win32_ComputerSystem
     $IsDomainController = $WmiComputerSystem.DomainRole -ge 4
 
@@ -792,7 +792,7 @@ try {
     vagrant execute --sudo -c 'whoami /all'
 
     # copy a host file to a guest directory.
-    vagrant scp Vagrantfile :c:/tmp 
+    vagrant scp Vagrantfile :c:/tmp
 
     # copy a guest file to a host directory.
     mkdir -Force tmp | Out-Null
