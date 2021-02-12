@@ -16,7 +16,7 @@ config_gitlab_fqdn  = 'gitlab.example.com'
 config_gitlab_ip    = '10.10.9.99'
 
 Vagrant.configure('2') do |config|
-  config.vm.box = 'ubuntu-18.04-amd64'
+  config.vm.box = 'ubuntu-20.04-amd64'
 
   config.vm.provider :libvirt do |lv, config|
     lv.memory = 2048
