@@ -1,5 +1,5 @@
 
-JCLI="java -jar /var/cache/jenkins/war/WEB-INF/jenkins-cli.jar -s http://localhost:8080"
+JCLI="java -jar /var/cache/jenkins/war/WEB-INF/lib/cli-*.jar -s http://localhost:8080"
 
 # wait for the cli endpoint to be available.
 function jcliwait {

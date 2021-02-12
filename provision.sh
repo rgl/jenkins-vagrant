@@ -2,6 +2,7 @@
 set -eux
 
 domain=$(hostname --fqdn)
+jenkins_version='2.263.4'
 
 # use the local Jenkins user database.
 config_authentication='jenkins'
@@ -237,7 +238,7 @@ sed -i -E 's,^(\s*assistive_technologies\s*=.*),#\1,' /etc/java-8-openjdk/access
 wget -qO- https://pkg.jenkins.io/debian-stable/jenkins.io.key | apt-key add -
 echo 'deb http://pkg.jenkins.io/debian-stable binary/' >/etc/apt/sources.list.d/jenkins.list
 apt-get update
-apt-get install -y --no-install-recommends jenkins
+apt-get install -y --no-install-recommends "jenkins=$jenkins_version"
 pushd /var/lib/jenkins
 # wait for initialization to finish.
 bash -c 'while [ "$(xmlstarlet sel -t -v /hudson/installStateName config.xml 2>/dev/null)" != "NEW" ]; do sleep 1; done'
@@ -280,7 +281,7 @@ systemctl start jenkins
 # import the cli and redefine jcli for not using any authentication while we configure jenkins.
 source /vagrant/jenkins-cli.sh
 function jcli {
-    $JCLI -noKeyAuth "$@"
+    $JCLI "$@"
 }
 
 # wait for the cli endpoint to be available.
