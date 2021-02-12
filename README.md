@@ -35,7 +35,7 @@ These are the machines and how they are connected with each other:
 
 Build and install the [Ubuntu 20.04 Base Box](https://github.com/rgl/ubuntu-vagrant).
 
-Build and install the [Windows 2019 Base Box](https://github.com/rgl/windows-2016-vagrant).
+Build and install the [Windows 2019 Base Box](https://github.com/rgl/windows-vagrant).
 
 Build and install the [macOS Base Box](https://github.com/rgl/macos-vagrant).
 
