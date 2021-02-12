@@ -119,7 +119,7 @@ Write-Title '[Environment]::OSVersion'
 
 Write-Title '$PSVersionTable'
 $PSVersionTable | Format-Table -AutoSize
-'''))
+''', true, true))
 
 folder.add(project, project.name)
 EOF
@@ -420,7 +420,7 @@ dir -Recurse */bin/*.Tests.dll | ForEach-Object {
         -DestinationPath coverage-report.zip
     Pop-Location
 }
-'''))
+''', true, true))
 xUnitDotNetTestType = new XUnitDotNetTestType('**/xunit-report.xml')
 xUnitDotNetTestType.skipNoTestFiles = false
 xUnitDotNetTestType.failIfNotNew = true
@@ -612,7 +612,7 @@ exec {dotnet run -v n -c Release --no-build} -successExitCodes -532462766
 # force a success exit code because dotnet run is expected to fail due
 # to an expected unhandled exception being raised by the application.
 Exit 0
-'''))
+''', true, true))
 
 Jenkins.instance.add(project, project.name)
 EOF
@@ -801,7 +801,7 @@ try {
     # finally destroy it.
     vagrant destroy -f
 }
-'''))
+''', true, true))
 
 Jenkins.instance.add(project, project.name)
 EOF
