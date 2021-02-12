@@ -658,7 +658,7 @@ node = new DumbSlave(
     "/var/jenkins",
     new CommandLauncher("ssh ubuntu.jenkins.example.com /var/jenkins/bin/jenkins-slave"))
 node.numExecutors = 3
-node.labelString = "ubuntu 18.04 linux amd64"
+node.labelString = "ubuntu 20.04 linux amd64"
 node.mode = 'EXCLUSIVE'
 Jenkins.instance.nodesObject.addNode(node)
 Jenkins.instance.nodesObject.save()
