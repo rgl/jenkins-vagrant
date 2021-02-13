@@ -69,12 +69,10 @@ choco install -y adoptopenjdk8jre
 Update-SessionEnvironment
 
 # add our jenkins master self-signed certificate to the default java trust store.
-@(
-    'C:\Program Files\Java\jre*\lib\security\cacerts'
-    'C:\Program Files\Java\jdk*\jre\lib\security\cacerts'
-    'C:\Program Files\AdoptOpenJDK\*jre\lib\security\cacerts'
-    'C:\Program Files\AdoptOpenJDK\*jdk\jre\lib\security\cacerts'
-) | ForEach-Object {Get-ChildItem $_ -ErrorAction SilentlyContinue} | ForEach-Object {
+Get-ChildItem -Recurse -Include cacerts -ErrorAction SilentlyContinue @(
+    'C:\Program Files\Java'
+    'C:\Program Files\AdoptOpenJDK'
+) | ForEach-Object {
     $keyStore = $_
     $alias = $config_jenkins_master_fqdn
     $keytool = Resolve-Path "$keyStore\..\..\..\bin\keytool.exe"
@@ -112,6 +110,8 @@ Update-SessionEnvironment
     } elseif ($LASTEXITCODE) {
         Write-Host $keytoolOutput
         throw "failed to list keystore with exit code $LASTEXITCODE"
+    } else {
+        Write-Host "Skipping updating the already existent alias $alias in the java $keyStore keystore"
     }
 }
 
