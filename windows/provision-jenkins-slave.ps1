@@ -64,6 +64,9 @@ if (Test-Path C:/vagrant/tmp/gitlab.example.com-crt.der) {
         -CertStoreLocation Cert:/LocalMachine/Root
 }
 
+# install the nssm to manage the jenkins service.
+choco install -y nssm
+
 # install the JRE.
 choco install -y adoptopenjdk8jre
 Update-SessionEnvironment
@@ -151,19 +154,47 @@ Start-Process `
     -ArgumentList '/c'
 
 # configure the jenkins home.
-choco install -y pstools
-Copy-Item C:\vagrant\windows\provision-vagrant-plugins.ps1 C:\tmp
-Copy-Item C:\vagrant\windows\configure-jenkins-home.ps1 C:\tmp
-psexec `
-    -accepteula `
-    -nobanner `
-    -u $jenkinsAccountName `
-    -p $jenkinsAccountPassword `
-    -h `
-    -w C:\tmp `
-    PowerShell -File configure-jenkins-home.ps1
-Remove-Item C:\tmp\configure-jenkins-home.ps1
-Remove-Item C:\tmp\provision-vagrant-plugins.ps1
+# NB we have to manually create the service to run as jenkins because psexec 2.32 is fubar.
+$configureJenkinsServiceName = 'configure-jenkins-home'
+$configureJenkinsServiceHome = "C:\tmp\$configureJenkinsServiceName"
+$configureJenkinsServiceLogPath = "$configureJenkinsServiceHome\service.log"
+mkdir $configureJenkinsServiceHome | Out-Null
+$acl = Get-Acl $configureJenkinsServiceHome
+$acl.AddAccessRule((
+    New-Object `
+        Security.AccessControl.FileSystemAccessRule(
+            $jenkinsAccountName,
+            'FullControl',
+            'ContainerInherit,ObjectInherit',
+            'None',
+            'Allow')))
+Set-Acl $configureJenkinsServiceHome $acl
+Copy-Item C:\vagrant\windows\provision-vagrant-plugins.ps1 $configureJenkinsServiceHome
+Copy-Item C:\vagrant\windows\configure-jenkins-home.ps1 $configureJenkinsServiceHome
+nssm install $configureJenkinsServiceName PowerShell.exe
+nssm set $configureJenkinsServiceName AppParameters `
+    '-NoLogo' `
+    '-NoProfile' `
+    '-ExecutionPolicy Bypass' `
+    '-File configure-jenkins-home.ps1'
+nssm set $configureJenkinsServiceName ObjectName ".\$jenkinsAccountName" $jenkinsAccountPassword
+nssm set $configureJenkinsServiceName AppStdout $configureJenkinsServiceLogPath
+nssm set $configureJenkinsServiceName AppStderr $configureJenkinsServiceLogPath
+nssm set $configureJenkinsServiceName AppDirectory $configureJenkinsServiceHome
+nssm set $configureJenkinsServiceName AppExit Default Exit
+Start-Service $configureJenkinsServiceName
+$line = 0
+do {
+    Start-Sleep -Seconds 5
+    if (Test-Path $configureJenkinsServiceLogPath) {
+        Get-Content $configureJenkinsServiceLogPath | Select-Object -Skip $line | ForEach-Object {
+            ++$line
+            Write-Output $_
+        }
+    }
+} while ((Get-Service $configureJenkinsServiceName).Status -ne 'Stopped')
+nssm remove $configureJenkinsServiceName confirm
+Remove-Item -Recurse $configureJenkinsServiceHome
 
 # create the storage directory hierarchy.
 # grant the SYSTEM, Administrators and $jenkinsAccountName accounts
@@ -234,7 +265,6 @@ Invoke-WebRequest "https://$config_jenkins_master_fqdn/jnlpJars/agent.jar" -OutF
 # NB this is needed to run integration tests that use WCF named pipes (WCF creates a Memory Section in the Global namespace with CreateFileMapping).
 #    see https://support.microsoft.com/en-us/help/821546/overview-of-the-impersonate-a-client-after-authentication-and-the-crea
 # NB this is needed to build unity projects (it needs WMI permissions to get the machine manifest for its activation mechanism).
-choco install -y nssm
 $serviceUsername = $jenkinsAccountName
 $servicePassword = $jenkinsAccountPassword
 $serviceName = $jenkinsAccountName
