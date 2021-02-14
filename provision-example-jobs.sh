@@ -320,12 +320,19 @@ project.buildersList.add(new Shell(
 #!bash
 MSYS2_PATH_TYPE=inherit; source shell mingw64; set -eux
 
+# show details about the current windows user account.
 /c/Windows/System32/whoami.exe -all
 
+# build the solution.
 MSBuild.exe -m -p:Configuration=Debug -t:restore -t:build
 
-#./GreeterService/bin/Debug/GreeterService.exe --wait-for-debugger
-./GreeterService/bin/Debug/GreeterService.exe --endpoints pipe
+# start the service in background.
+#./GreeterService/bin/Debug/GreeterService.exe --wait-for-debugger &
+./GreeterService/bin/Debug/GreeterService.exe --endpoints pipe &
+sleep 2
+
+# execute the client against the service.
+./GreeterPipeClient/bin/Debug/GreetPipeClient.exe
 '''))
 
 Jenkins.instance.add(project, project.name)
