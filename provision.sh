@@ -220,7 +220,7 @@ systemctl restart nginx
 #
 # install dependencies.
 
-apt-get install -y openjdk-8-jre-headless
+apt-get install -y openjdk-11-jre-headless
 apt-get install -y gnupg
 apt-get install -y xmlstarlet
 
@@ -229,7 +229,7 @@ apt-get install -y xmlstarlet
 # fix "java.lang.NoClassDefFoundError: Could not initialize class org.jfree.chart.JFreeChart"
 # error while rendering the xUnit Test Result Trend chart on the job page.
 
-sed -i -E 's,^(\s*assistive_technologies\s*=.*),#\1,' /etc/java-8-openjdk/accessibility.properties 
+sed -i -E 's,^(\s*assistive_technologies\s*=.*),#\1,' /etc/java-11-openjdk/accessibility.properties 
 
 
 #

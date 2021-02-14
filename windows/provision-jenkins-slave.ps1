@@ -68,7 +68,7 @@ if (Test-Path C:/vagrant/tmp/gitlab.example.com-crt.der) {
 choco install -y nssm
 
 # install the JRE.
-choco install -y adoptopenjdk8jre
+choco install -y adoptopenjdk11jre
 Update-SessionEnvironment
 
 # add our jenkins master self-signed certificate to the default java trust store.
