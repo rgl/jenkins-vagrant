@@ -612,9 +612,9 @@ exec {dotnet pack -v n -c Release --no-build -p:PackageVersion=0.0.2 --output .}
 
 cd ../ExampleApplication
 exec {dotnet build -v n -c Release}
-exec {sourcelink print-urls bin/Release/netcoreapp2.1/ExampleApplication.dll}
-exec {sourcelink print-json bin/Release/netcoreapp2.1/ExampleApplication.dll | ConvertFrom-Json | ConvertTo-Json -Depth 100}
-exec {sourcelink print-documents bin/Release/netcoreapp2.1/ExampleApplication.dll}
+exec {sourcelink print-urls bin/Release/netcoreapp3.1/ExampleApplication.dll}
+exec {sourcelink print-json bin/Release/netcoreapp3.1/ExampleApplication.dll | ConvertFrom-Json | ConvertTo-Json -Depth 100}
+exec {sourcelink print-documents bin/Release/netcoreapp3.1/ExampleApplication.dll}
 exec {dotnet run -v n -c Release --no-build} -successExitCodes -532462766
 # force a success exit code because dotnet run is expected to fail due
 # to an expected unhandled exception being raised by the application.
