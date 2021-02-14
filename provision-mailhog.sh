@@ -2,8 +2,8 @@
 set -eux
 
 # download and install.
-artifact_url=https://github.com/mailhog/MailHog/releases/download/v1.0.0/MailHog_linux_amd64
-artifact_sha=ba921e04438e176c474d533447ae64707ffcdd1230f0153f86cb188d348f25c0
+artifact_url=https://github.com/mailhog/MailHog/releases/download/v1.0.1/MailHog_linux_amd64
+artifact_sha=e2ed634ded49929f089b20045581955ed217672078fd86082dd7a6c67c5d09c7
 artifact_bin=/opt/mailhog/bin/MailHog
 wget -qO /tmp/MailHog $artifact_url
 if [ "$(sha256sum /tmp/MailHog | awk '{print $1}')" != "$artifact_sha" ]; then
