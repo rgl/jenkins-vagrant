@@ -1,8 +1,11 @@
-Write-Output 'building the portainer image...'
-$tag = 'portainer:1.22.0'
-docker build -t $tag .
-docker image ls $tag
-docker history $tag
+# Copy files from the vagrant shared directory to the local disk.
+# NB this is needed due to docker build failing with:
+#       unable to prepare context: unable to evaluate symlinks in context path: CreateFile
+#       \\192.168.1.69\vgt-0aab8fa734c4edb0eb1969bf3a4502ba-6ad5fdbcbf2eaa93bd62f92333a2e6e5windows:
+#       The network name cannot be found.
+mkdir -Force "$env:TEMP\portainer" | Out-Null
+copy * "$env:TEMP\portainer"
+cd "$env:TEMP\portainer"
 
 Write-Output 'starting portainer...'
 $hostIp = (Get-NetAdapter -Name 'Ethernet*' | Sort-Object -Property Name | Select-Object -Last 1 | Get-NetIPAddress -AddressFamily IPv4).IPAddress
@@ -14,7 +17,7 @@ docker `
     -d `
     -v //./pipe/docker_engine://./pipe/docker_engine `
     -p 9000:9000 `
-    portainer:1.22.0 `
+    portainer/portainer-ce:2.1.1 `
         -H npipe:////./pipe/docker_engine
 
 $url = 'http://localhost:9000'
