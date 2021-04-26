@@ -1,13 +1,13 @@
 # see https://docs.microsoft.com/en-us/virtualization/windowscontainers/manage-docker/configure-docker-daemon
 # see https://docs.docker.com/engine/installation/linux/docker-ce/binaries/#install-server-and-client-binaries-on-windows
-# see https://github.com/moby/moby/releases/tag/v20.10.3
-# see https://github.com/rgl/docker-ce-windows-binaries-vagrant/releases/tag/v20.10.3
+# see https://github.com/moby/moby/releases/tag/v20.10.6
+# see https://github.com/rgl/docker-ce-windows-binaries-vagrant/releases/tag/v20.10.6
 
 # download install the docker binaries.
-$archiveVersion = '20.10.3'
+$archiveVersion = '20.10.6'
 $archiveName = "docker-$archiveVersion.zip"
 $archiveUrl = "https://github.com/rgl/docker-ce-windows-binaries-vagrant/releases/download/v$archiveVersion/$archiveName"
-$archiveHash = 'aeb6fbf3165f8cc0eda6e214d4aeaf8c03ea1cb48afa377b370409ab43d1cd88'
+$archiveHash = 'c9ef955399e0633c6c7b5f26024722f4c00b732b58c47b9d09b19feb990ffb39'
 $archivePath = "$env:TEMP\$archiveName"
 Write-Host "Installing docker $archiveVersion..."
 (New-Object System.Net.WebClient).DownloadFile($archiveUrl, $archivePath)
@@ -62,13 +62,9 @@ Start-Service docker
 # see https://hub.docker.com/_/microsoft-windows-servercore
 # see https://hub.docker.com/_/microsoft-windowsfamily-windows
 # see https://docs.microsoft.com/en-us/windows/release-information/
-$windowsVersionTag = Get-WindowsVersionTag
-Write-Host "Pulling base image ($windowsVersionTag)..."
-docker pull mcr.microsoft.com/windows/nanoserver:$windowsVersionTag
-#docker pull mcr.microsoft.com/windows/servercore:$windowsVersionTag
-#docker pull mcr.microsoft.com/windows:$windowsVersionTag
-#docker pull microsoft/dotnet:3.1-sdk-nanoserver-$windowsVersionTag
-#docker pull microsoft/dotnet:3.1-aspnetcore-runtime-nanoserver-$windowsVersionTag
+$windowsContainers = Get-WindowsContainers
+Write-Host "Pulling base image $($windowsContainers.nanoserver)..."
+docker pull $windowsContainers.nanoserver
 
 Write-Host 'Creating the firewall rule to allow inbound TCP/IP access to the Docker Engine port 2375...'
 New-NetFirewallRule `

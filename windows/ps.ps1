@@ -20,7 +20,21 @@ function Write-Title($title) {
     Write-Output "#`n# $title`n#"
 }
 
-function Get-WindowsVersionTag {
+# see https://blogs.technet.microsoft.com/virtualization/2018/10/01/incoming-tag-changes-for-containers-in-windows-server-2019/
+# see https://hub.docker.com/_/microsoft-windows-nanoserver
+# see https://hub.docker.com/_/microsoft-windows-servercore
+# see https://hub.docker.com/_/microsoft-windows
+# see https://mcr.microsoft.com/v2/windows/nanoserver/tags/list
+# see https://mcr.microsoft.com/v2/windows/servercore/tags/list
+# see https://mcr.microsoft.com/v2/windows/tags/list
+# see https://hub.docker.com/_/microsoft-windows-nanoserver-insider
+# see https://hub.docker.com/_/microsoft-windows-servercore-insider
+# see https://hub.docker.com/_/microsoft-windows-insider
+# see https://mcr.microsoft.com/v2/windows/nanoserver/insider/tags/list
+# see https://mcr.microsoft.com/v2/windows/servercore/insider/tags/list
+# see https://mcr.microsoft.com/v2/windows/insider/tags/list
+# see https://docs.microsoft.com/en-us/windows/release-information/
+function Get-WindowsContainers {
     $currentVersionKey = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion'
     $windowsBuildNumber = $currentVersionKey.CurrentBuildNumber
     $windowsVersionTag = @{
@@ -28,9 +42,19 @@ function Get-WindowsVersionTag {
         '17763' = '1809'
     }[$windowsBuildNumber]
     if (!$windowsVersionTag) {
-        throw "Unknown Windows Build Number $windowsBuildNumber"
+        $windowsVersionTag = "$($currentVersionKey.CurrentMajorVersionNumber).$($currentVersionKey.CurrentMinorVersionNumber).$($currentVersionKey.CurrentBuildNumber).$($currentVersionKey.UBR)"
     }
-    $windowsVersionTag
+    $suffix = if ($currentVersionKey.BuildBranch -eq 'fe_release') {
+        '/insider'
+    } else {
+        ''
+    }
+    @{
+        tag = $windowsVersionTag
+        nanoserver = "mcr.microsoft.com/windows/nanoserver$suffix`:$windowsVersionTag"
+        servercore = "mcr.microsoft.com/windows/servercore$suffix`:$windowsVersionTag"
+        windows = "mcr.microsoft.com/windows$suffix`:$windowsVersionTag"
+    }
 }
 
 # wrap the choco command (to make sure this script aborts when it fails).
