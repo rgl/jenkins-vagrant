@@ -2,7 +2,7 @@
 set -eux
 
 domain=$(hostname --fqdn)
-jenkins_version='2.263.4'
+jenkins_version='2.277.3'
 
 # use the local Jenkins user database.
 config_authentication='jenkins'
@@ -93,7 +93,7 @@ alias l='ls -lF --color'
 alias ll='l -a'
 alias h='history 25'
 alias j='jobs -l'
-alias jcli="java -jar /var/cache/jenkins/war/WEB-INF/jenkins-cli.jar -s http://localhost:8080 -http -auth @$HOME/.jenkins-cli"
+alias jcli="java -jar /var/cache/jenkins/war/WEB-INF/lib/cli-*.jar -s http://localhost:8080 -http -auth @$HOME/.jenkins-cli"
 alias jgroovy='jcli groovy'
 EOF
 
@@ -241,7 +241,7 @@ apt-get update
 apt-get install -y --no-install-recommends "jenkins=$jenkins_version"
 pushd /var/lib/jenkins
 # wait for initialization to finish.
-bash -c 'while [ "$(xmlstarlet sel -t -v /hudson/installStateName config.xml 2>/dev/null)" != "NEW" ]; do sleep 1; done'
+bash -c 'while [ ! -f "/var/lib/jenkins/secrets/initialAdminPassword" ]; do sleep 1; done'
 systemctl stop jenkins
 chmod 751 /var/cache/jenkins
 mv config.xml{,.orig}
@@ -253,7 +253,7 @@ xmlstarlet edit --inplace -u '/hudson/useSecurity' -v 'false' config.xml
 xmlstarlet edit --inplace -d '/hudson/authorizationStrategy' config.xml
 xmlstarlet edit --inplace -d '/hudson/securityRealm' config.xml
 # disable the install wizard.
-xmlstarlet edit --inplace -u '/hudson/installStateName' -v 'RUNNING' config.xml
+sed -i -E 's,^(JAVA_ARGS="-.+),\1\nJAVA_ARGS="$JAVA_ARGS -Djenkins.install.runSetupWizard=false",' /etc/default/jenkins
 # modify the slave workspace directory name to be just "w" as a way to minimize
 # path-too-long errors on windows slaves.
 # NB unfortunately this setting applies to all slaves.
