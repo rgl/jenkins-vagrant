@@ -68,13 +68,14 @@ if (Test-Path C:/vagrant/tmp/gitlab.example.com-crt.der) {
 choco install -y nssm
 
 # install the JRE.
-choco install -y adoptopenjdk11jre
+choco install -y temurin11jre
 Update-SessionEnvironment
 
 # add our jenkins master self-signed certificate to the default java trust store.
+# NB alternatively we could use java.exe -Djavax.net.ssl.trustStoreType=Windows-ROOT
+#    to use the Windows Trust Root store.
 Get-ChildItem -Recurse -Include cacerts -ErrorAction SilentlyContinue @(
-    'C:\Program Files\Java'
-    'C:\Program Files\AdoptOpenJDK'
+    'C:\Program Files\*\*\lib\security\cacerts'
 ) | ForEach-Object {
     $keyStore = $_
     $alias = $config_jenkins_master_fqdn
@@ -83,7 +84,7 @@ Get-ChildItem -Recurse -Include cacerts -ErrorAction SilentlyContinue @(
         -noprompt `
         -list `
         -storepass changeit `
-        -keystore "$keyStore" `
+        -cacerts `
         -alias "$alias"
     if ($keytoolOutput -match 'keytool error: java.lang.Exception: Alias .+ does not exist') {
         Write-Host "Adding $alias to the java $keyStore keystore..."
@@ -98,7 +99,7 @@ Get-ChildItem -Recurse -Include cacerts -ErrorAction SilentlyContinue @(
                 '-import',
                 '-trustcacerts',
                 '-storepass changeit',
-                "-keystore `"$keyStore`"",
+                '-cacerts',
                 "-alias `"$alias`"",
                 "-file c:\vagrant\tmp\$config_jenkins_master_fqdn-crt.der" `
             -RedirectStandardOutput "$env:TEMP\keytool-stdout.txt" `
