@@ -1,13 +1,13 @@
 # see https://docs.microsoft.com/en-us/virtualization/windowscontainers/manage-docker/configure-docker-daemon
 # see https://docs.docker.com/engine/installation/linux/docker-ce/binaries/#install-server-and-client-binaries-on-windows
-# see https://github.com/moby/moby/releases/tag/v20.10.6
-# see https://github.com/rgl/docker-ce-windows-binaries-vagrant/releases/tag/v20.10.6
+# see https://github.com/moby/moby/releases/tag/v20.10.12
+# see https://github.com/rgl/docker-ce-windows-binaries-vagrant/releases/tag/v20.10.12
 
 # download install the docker binaries.
-$archiveVersion = '20.10.6'
+$archiveVersion = '20.10.12'
 $archiveName = "docker-$archiveVersion.zip"
 $archiveUrl = "https://github.com/rgl/docker-ce-windows-binaries-vagrant/releases/download/v$archiveVersion/$archiveName"
-$archiveHash = 'c9ef955399e0633c6c7b5f26024722f4c00b732b58c47b9d09b19feb990ffb39'
+$archiveHash = '5076667d6f0edf0d5c4b483cdde91d21e97c93f1ded40ce42c2f8f4a8ff42326'
 $archivePath = "$env:TEMP\$archiveName"
 Write-Host "Installing docker $archiveVersion..."
 (New-Object System.Net.WebClient).DownloadFile($archiveUrl, $archivePath)
@@ -56,15 +56,6 @@ Set-Content -Encoding ascii "$env:ProgramData\docker\config\daemon.json" ($confi
 
 Write-Host 'Starting docker...'
 Start-Service docker
-
-# see https://blogs.technet.microsoft.com/virtualization/2018/10/01/incoming-tag-changes-for-containers-in-windows-server-2019/
-# see https://hub.docker.com/_/microsoft-windows-nanoserver
-# see https://hub.docker.com/_/microsoft-windows-servercore
-# see https://hub.docker.com/_/microsoft-windowsfamily-windows
-# see https://docs.microsoft.com/en-us/windows/release-information/
-$windowsContainers = Get-WindowsContainers
-Write-Host "Pulling base image $($windowsContainers.nanoserver)..."
-docker pull $windowsContainers.nanoserver
 
 Write-Host 'Creating the firewall rule to allow inbound TCP/IP access to the Docker Engine port 2375...'
 New-NetFirewallRule `
