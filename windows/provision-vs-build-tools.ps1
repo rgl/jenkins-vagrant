@@ -1,12 +1,3 @@
-# add support for building applications that target the .net 4.7.2 framework.
-choco install -y netfx-4.7.2-devpack
-
-# add support for building applications that target the .net 4.7.1 framework.
-choco install -y netfx-4.7.1-devpack
-
-# add support for building applications that target the .net 4.5.2 framework.
-choco install -y netfx-4.5.2-devpack
-
 # add support for building applications that target the .net 4.8 framework.
 choco install -y netfx-4.8-devpack
 
