@@ -280,6 +280,7 @@ nssm set $serviceName AppParameters `
     -workDir $serviceHome
 nssm set $serviceName AppDirectory $serviceHome
 nssm set $serviceName Start SERVICE_AUTO_START
+nssm set $serviceName AppRestartDelay 15000 # [ms]
 nssm set $serviceName AppRotateFiles 1
 nssm set $serviceName AppRotateOnline 1
 nssm set $serviceName AppRotateSeconds 86400
