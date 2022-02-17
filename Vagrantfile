@@ -82,7 +82,7 @@ Vagrant.configure('2') do |config|
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-docker-reg.ps1'
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'portainer/provision.ps1'
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-vs-build-tools.ps1'
-    config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-dotnetcore-sdk.ps1'
+    config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-dotnet-sdk.ps1'
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-msys2.ps1'
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-vagrant.ps1'
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-unity.ps1'

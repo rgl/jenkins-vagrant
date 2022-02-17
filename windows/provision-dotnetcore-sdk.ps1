@@ -1,13 +1,13 @@
-# see https://dotnet.microsoft.com/download/dotnet-core/3.1
-# see https://github.com/dotnet/core/blob/main/release-notes/3.1/3.1.14/3.1.408-download.md
+# see https://dotnet.microsoft.com/download/dotnet/6.0
+# see https://github.com/dotnet/core/blob/main/release-notes/6.0/6.0.2/6.0.2.md
 
 # opt-out from dotnet telemetry.
 [Environment]::SetEnvironmentVariable('DOTNET_CLI_TELEMETRY_OPTOUT', '1', 'Machine')
 $env:DOTNET_CLI_TELEMETRY_OPTOUT = '1'
 
 # install the dotnet sdk.
-$archiveUrl = 'https://download.visualstudio.microsoft.com/download/pr/fa20039c-5871-4597-8a7b-f0553a12edcc/4fb1cce6214049fe639dd230a9265133/dotnet-sdk-3.1.408-win-x64.exe'
-$archiveHash = 'c8d3000f07735ee7cdf3bab402323bf96413d7afd7dadc5f1e92f02c184b67ca00f188e083f1d6bd8ae21b88a24f87d443088ecee28c33cd186f8ca9606fc816'
+$archiveUrl = 'https://download.visualstudio.microsoft.com/download/pr/fb14ba65-a9c9-49ce-9106-d0388b35ae1b/7bbfe92fb68e0c9330c9106b5c55869d/dotnet-sdk-6.0.102-win-x64.exe'
+$archiveHash = '5c999a3871473d1a5bb767f381d8fb216571955f59d93e9e579a3ef415906c2fc731857eb8faee4fbf47570c4eaaa8dc2de39553492f4e8d000ec3d12686b0fe'
 $archiveName = Split-Path -Leaf $archiveUrl
 $archivePath = "$env:TEMP\$archiveName"
 Write-Host "Downloading $archiveName..."
@@ -19,7 +19,7 @@ if ($archiveHash -ne $archiveActualHash) {
 Write-Host "Installing $archiveName..."
 &$archivePath /install /quiet /norestart | Out-String -Stream
 if ($LASTEXITCODE) {
-    throw "Failed to install dotnetcore-sdk with Exit Code $LASTEXITCODE"
+    throw "Failed to install dotnet-sdk with Exit Code $LASTEXITCODE"
 }
 Remove-Item $archivePath
 
@@ -28,11 +28,6 @@ $env:PATH = "$([Environment]::GetEnvironmentVariable('PATH', 'Machine'));$([Envi
 
 # show information about dotnet.
 dotnet --info
-
-# add the nuget.org source.
-# see https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-nuget-add-source
-dotnet nuget add source --name nuget.org https://api.nuget.org/v3/index.json
-dotnet nuget list source
 
 # install the sourcelink dotnet global tool.
 dotnet tool install --global sourcelink
