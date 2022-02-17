@@ -66,7 +66,7 @@ Vagrant.configure('2') do |config|
     config.vm.provider :virtualbox do |vb|
       vb.memory = 4096
     end
-    config.vm.box = 'windows-2019-amd64'
+    config.vm.box = 'windows-2022-amd64'
     config.vm.hostname = 'windows'
     config.vm.network :private_network, ip: config_windows_ip, libvirt__forward_mode: 'route', libvirt__dhcp_enabled: false
     config.vm.provision :shell, inline: "echo '#{config_jenkins_ip} #{config_jenkins_fqdn}' | Out-File -Encoding ASCII -Append c:/Windows/System32/drivers/etc/hosts"

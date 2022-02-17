@@ -46,7 +46,7 @@ Write-Host 'Pulling base image...'
 docker pull mcr.microsoft.com/windows/nanoserver:1809
 #docker pull mcr.microsoft.com/windows/servercore:1809
 #docker pull mcr.microsoft.com/windows/windows:1809
-#docker pull mcr.microsoft.com/windows/servercore:ltsc2019
+#docker pull mcr.microsoft.com/windows/servercore:ltsc2022
 #docker pull microsoft/dotnet:2.1-sdk-nanoserver-1809
 #docker pull microsoft/dotnet:2.1-aspnetcore-runtime-nanoserver-1809
 
