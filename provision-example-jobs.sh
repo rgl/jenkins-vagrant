@@ -386,6 +386,12 @@ function exec([ScriptBlock]$externalCommand, [string]$stderrPrefix='', [int[]]$s
         if ($LASTEXITCODE -notin $successExitCodes) {
             throw "$externalCommand failed with exit code $LASTEXITCODE"
         }
+        if ($LASTEXITCODE -ne 0) {
+            # force $LASTEXITCODE to 0 and $? to $true. these are normally checked
+            # by the CI system to known whether the command was successful or not.
+            $global:LASTEXITCODE = 0
+            $? | Out-Null
+        }
     } finally {
         $ErrorActionPreference = $eap
     }
@@ -527,24 +533,19 @@ function exec([ScriptBlock]$externalCommand, [string]$stderrPrefix='', [int[]]$s
         if ($LASTEXITCODE -notin $successExitCodes) {
             throw "$externalCommand failed with exit code $LASTEXITCODE"
         }
+        if ($LASTEXITCODE -ne 0) {
+            # force $LASTEXITCODE to 0 and $? to $true. these are normally checked
+            # by the CI system to known whether the command was successful or not.
+            $global:LASTEXITCODE = 0
+            $? | Out-Null
+        }
     } finally {
         $ErrorActionPreference = $eap
     }
 }
 
-cd ExampleLibrary
-exec {dotnet build -v n -c Release}
-exec {dotnet pack -v n -c Release --no-build -p:PackageVersion=0.0.2 --output .}
-
-cd ../ExampleApplication
-exec {dotnet build -v n -c Release}
-exec {sourcelink print-urls bin/Release/netcoreapp3.1/ExampleApplication.dll}
-exec {sourcelink print-json bin/Release/netcoreapp3.1/ExampleApplication.dll | ConvertFrom-Json | ConvertTo-Json -Depth 100}
-exec {sourcelink print-documents bin/Release/netcoreapp3.1/ExampleApplication.dll}
-exec {dotnet run -v n -c Release --no-build} -successExitCodes -532462766
-# force a success exit code because dotnet run is expected to fail due
-# to an expected unhandled exception being raised by the application.
-Exit 0
+exec { ./build.ps1 build }
+exec { ./build.ps1 test }
 ''', true, true, null))
 
 Jenkins.instance.add(project, project.name)
