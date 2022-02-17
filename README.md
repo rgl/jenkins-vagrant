@@ -51,17 +51,17 @@ If you want to use LDAP for user authentication, you have to:
 1. have [rgl/windows-domain-controller-vagrant](https://github.com/rgl/windows-domain-controller-vagrant) up and running at `../windows-domain-controller-vagrant`.
 1. uncomment the `config_authentication='ldap'` line inside [provision.sh](provision.sh). 
 
-Run `vagrant up jenkins` to launch the master. See its output to known how to login at the
+Run `vagrant up --no-destroy-on-error jenkins` to launch the master. See its output to known how to login at the
 [local Jenkins home page](https://jenkins.example.com) as `admin` (you can also login with
 one of the example accounts, e.g. `alice.doe` and password `password`).
 
 **NB** nginx is setup with a self-signed certificate that you have to trust before being able to access the local Jenkins home page.
 
-Run `vagrant up ubuntu` to launch the Ubuntu slave.
+Run `vagrant up --no-destroy-on-error ubuntu` to launch the Ubuntu slave.
 
-Run `vagrant up windows` to launch the Windows slave. [Portainer](https://portainer.io/) is available at http://windows.jenkins.example.com:9000/.
+Run `vagrant up --no-destroy-on-error windows` to launch the Windows slave. [Portainer](https://portainer.io/) is available at http://windows.jenkins.example.com:9000/.
 
-Run `vagrant up macos` to launch the macOS slave. **NB** you first need to download [Xcode_8.1.xip](https://developer.apple.com/download/more/).
+Run `vagrant up --no-destroy-on-error macos` to launch the macOS slave. **NB** you first need to download [Xcode_8.1.xip](https://developer.apple.com/download/more/).
 After provisioning you can delete it, as `Xcode_8.1.cpio.xz` will take its place as a more efficient way to install Xcode.
 
 Email notifications are sent to a local [MailHog](https://github.com/mailhog/MailHog) SMTP server running at localhost:1025 and you can browse them at [http://jenkins.example.com:8025](http://jenkins.example.com:8025).

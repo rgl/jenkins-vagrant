@@ -2,7 +2,9 @@
 set -eux
 
 domain=$(hostname --fqdn)
-jenkins_version='2.277.3'
+
+# see https://www.jenkins.io/download/
+jenkins_version='2.319.3'
 
 # use the local Jenkins user database.
 config_authentication='jenkins'
@@ -234,6 +236,7 @@ sed -i -E 's,^(\s*assistive_technologies\s*=.*),#\1,' /etc/java-11-openjdk/acces
 
 #
 # install Jenkins.
+# see https://pkg.jenkins.io/debian/
 
 wget -qO- https://pkg.jenkins.io/debian-stable/jenkins.io.key | apt-key add -
 echo 'deb http://pkg.jenkins.io/debian-stable binary/' >/etc/apt/sources.list.d/jenkins.list
@@ -261,7 +264,7 @@ sed -i -E 's,^(JAVA_ARGS="-.+),\1\nJAVA_ARGS="$JAVA_ARGS -Djenkins.install.runSe
 # see windows/provision-jenkins-slaves.ps1.
 # see https://issues.jenkins-ci.org/browse/JENKINS-12667
 # see https://wiki.jenkins.io/display/JENKINS/Features+controlled+by+system+properties
-# see https://github.com/jenkinsci/jenkins/blob/jenkins-2.138.2/core/src/main/java/hudson/model/Slave.java#L722
+# see https://github.com/jenkinsci/jenkins/blob/jenkins-2.319.3/core/src/main/java/hudson/model/Slave.java#L737-L740
 sed -i -E 's,^(JAVA_ARGS="-.+),\1\nJAVA_ARGS="$JAVA_ARGS -Dhudson.model.Slave.workspaceRoot=w",' /etc/default/jenkins
 # bind to localhost.
 sed -i -E 's,^(JENKINS_ARGS="-.+),\1\nJENKINS_ARGS="$JENKINS_ARGS --httpListenAddress=127.0.0.1",' /etc/default/jenkins
