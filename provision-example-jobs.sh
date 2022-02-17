@@ -19,8 +19,6 @@ source /vagrant/jenkins-cli.sh
 # see https://github.com/jenkinsci/powershell-plugin/blob/master/src/main/java/hudson/plugins/powershell/PowerShell.java
 # see https://github.com/jenkinsci/git-plugin/blob/master/src/main/java/hudson/plugins/git/GitSCM.java
 # see https://github.com/jenkinsci/git-plugin/blob/master/src/main/java/hudson/plugins/git/extensions/impl/CleanBeforeCheckout.java
-# see https://github.com/jenkinsci/xunit-plugin/blob/master/src/main/java/org/jenkinsci/plugins/xunit/XUnitPublisher.java
-# see https://github.com/jenkinsci/xunit-plugin/blob/master/src/main/java/org/jenkinsci/plugins/xunit/types/XUnitDotNetTestType.java
 
 # create the dump-environment folder to contain all of our dump jobs.
 jgroovy = <<'EOF'
@@ -349,15 +347,6 @@ import hudson.plugins.powershell.PowerShell
 import hudson.tasks.ArtifactArchiver
 import hudson.tasks.BatchFile
 import hudson.tasks.Mailer
-import org.jenkinsci.plugins.xunit.XUnitPublisher
-import org.jenkinsci.lib.dtkit.type.TestType
-import org.jenkins_ci.plugins.run_condition.core.StatusCondition
-import org.jenkins_ci.plugins.run_condition.BuildStepRunner
-import org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder
-import org.jenkinsci.plugins.xunit.types.XUnitDotNetTestType
-import org.jenkinsci.plugins.xunit.threshold.XUnitThreshold
-import org.jenkinsci.plugins.xunit.threshold.FailedThreshold
-import org.jenkinsci.plugins.xunit.threshold.SkippedThreshold
 
 project = new FreeStyleProject(Jenkins.instance, 'MailBounceDetector')
 project.assignedLabel = new LabelAtom('vs2022')
@@ -402,72 +391,9 @@ function exec([ScriptBlock]$externalCommand, [string]$stderrPrefix='', [int[]]$s
     }
 }
 
-exec {MSBuild -m -p:Configuration=Release -t:restore -t:build}
-
-dir -Recurse */bin/*.Tests.dll | ForEach-Object {
-    Push-Location $_.Directory
-    Write-Host "Running the unit tests in $($_.Name)..."
-    exec {
-        # NB maybe you should also use -skipautoprops
-        OpenCover.Console.exe `
-            -output:opencover-report.xml `
-            -register:path64 `
-            '-filter:+[*]* -[*.Tests*]* -[*]*.*Config -[xunit.*]*' `
-            '-target:xunit.console.exe' `
-            "-targetargs:$($_.Name) -nologo -noshadow -xml xunit-report.xml"
-    }
-    exec {
-        ReportGenerator.exe `
-            -reports:opencover-report.xml `
-            -targetdir:coverage-report
-    }
-    Compress-Archive `
-        -CompressionLevel Optimal `
-        -Path coverage-report/* `
-        -DestinationPath coverage-report.zip
-    Pop-Location
-}
+exec { ./build.ps1 build }
+exec { ./build.ps1 test }
 ''', true, true, null))
-xUnitDotNetTestType = new XUnitDotNetTestType('**/xunit-report.xml')
-xUnitDotNetTestType.skipNoTestFiles = false
-xUnitDotNetTestType.failIfNotNew = true
-xUnitDotNetTestType.deleteOutputFiles = true
-xUnitDotNetTestType.stopProcessingIfError = true
-project.buildersList.add(new XUnitPublisher(
-    [
-        xUnitDotNetTestType
-    ] as TestType[], // types
-    [
-        new FailedThreshold(
-            unstableThreshold: '',
-            unstableNewThreshold: '',
-            failureThreshold: '0',
-            failureNewThreshold: '',
-        ),
-        new SkippedThreshold(
-            unstableThreshold: '',
-            unstableNewThreshold: '',
-            failureThreshold: '0',
-            failureNewThreshold: '',
-        )
-    ] as XUnitThreshold[], // thresholds
-    1,      // thresholdMode
-    '3000'  // testTimeMargin
-))
-project.buildersList.add(new SingleConditionalBuilder(
-    new BatchFile(                  // buildStep
-'''\
-:: when there are tests failures, the previous xUnit build-step only
-:: marks the build as failed, it does not aborts it. this step will
-:: really abort it.
-:: see https://github.com/jenkinsci/xunit-plugin/pull/62
-@echo Aborting the build due to test failures...
-@exit 1
-'''),
-    new StatusCondition(            // condition
-        'FAILURE',  // worstResult
-        'FAILURE'), // bestResult
-    new BuildStepRunner.Fail()))    // runner
 
 //
 // add post-build steps.
