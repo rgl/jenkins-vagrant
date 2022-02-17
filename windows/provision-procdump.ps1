@@ -73,5 +73,5 @@ Set-ItemProperty `
 # NB to print basic information about a mini dump use:
 #       &"C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\cdb.exe" -nosqm -z C:\dumps\raise-illegal-instruction-c.exe_190801_184222.dmp -c '!peb;q'
 #    see https://docs.microsoft.com/en-us/windows-hardware/drivers/debugger/extracting-information-from-a-dump-file
-# NB this should correspond to Microsoft.VisualStudio.Component.Windows10SDK.17763 as installed by vs build tools in provision-vs-build-tools.ps1.
-choco install -y windows-sdk-10-version-1809-windbg
+# NB this should correspond to Microsoft.VisualStudio.Component.Windows10SDK.19041 as installed by vs build tools in provision-vs-build-tools.ps1.
+choco install -y windows-sdk-10-version-2004-windbg

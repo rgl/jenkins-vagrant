@@ -360,7 +360,7 @@ import org.jenkinsci.plugins.xunit.threshold.FailedThreshold
 import org.jenkinsci.plugins.xunit.threshold.SkippedThreshold
 
 project = new FreeStyleProject(Jenkins.instance, 'MailBounceDetector')
-project.assignedLabel = new LabelAtom('vs2019')
+project.assignedLabel = new LabelAtom('vs2022')
 
 //
 // add the git repository.
@@ -572,7 +572,7 @@ import hudson.plugins.git.extensions.impl.CleanBeforeCheckout
 import hudson.plugins.powershell.PowerShell
 
 project = new FreeStyleProject(Jenkins.instance, 'example-dotnet-source-link')
-project.assignedLabel = new LabelAtom('vs2019')
+project.assignedLabel = new LabelAtom('vs2022')
 project.scm = new GitSCM('https://github.com/rgl/example-dotnet-source-link.git')
 project.scm.branches = [new BranchSpec('*/master')]
 project.scm.extensions.add(new CleanBeforeCheckout())
