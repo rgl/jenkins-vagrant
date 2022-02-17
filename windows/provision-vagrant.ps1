@@ -1,5 +1,5 @@
-# install packer and plugins.
-choco install -y packer packer-provisioner-windows-update
+# install packer.
+choco install -y packer
 
 # install vagrant plugins.
 # NB plugins are installed at the current user profile, as such, we install them
