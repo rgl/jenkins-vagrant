@@ -15,7 +15,7 @@ This configures Jenkins through [CLI/JNLP](https://wiki.jenkins-ci.org/display/J
 * Create Multibranch Pipeline job.
 * Add a Ubuntu Linux slave node.
 * Add a Windows slave node.
-  * With docker-ce (default) or docker-ee (you need to uncomment it from the `Vagrantfile`).
+  * With docker.
   * With enabled long path support on the OS and chocolatey.
   * With [MSYS2](https://github.com/msys2/msys2/wiki/MSYS2-introduction) to be able to use the `Execute shell` build step.
     * See the [example-execute-shell-windows](https://jenkins.example.com/job/example-execute-shell-windows) job.

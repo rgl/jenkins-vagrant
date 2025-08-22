@@ -68,7 +68,6 @@ Vagrant.configure('2') do |config|
     config.vm.provision :shell, inline: "echo 'Rebooting...'", reboot: true
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-base.ps1'
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-docker-ce.ps1'
-    # config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-docker-ee.ps1'
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-docker-reg.ps1'
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'portainer/provision.ps1'
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-vs-build-tools.ps1'
