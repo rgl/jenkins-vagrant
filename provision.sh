@@ -764,7 +764,30 @@ EOF
 
 
 #
-# create an example oidc id-token credential (generator).
+# configure the oidc provider id-token claims.
+# see /var/lib/jenkins/io.jenkins.plugins.oidc_provider.config.IdTokenConfiguration.xml
+# see https://github.com/jenkinsci/oidc-provider-plugin/blob/master/src/main/java/io/jenkins/plugins/oidc_provider/config/IdTokenConfiguration.java
+# NB GIT_URL, GIT_BRANCH and GIT_COMMIT are not available as build claims.
+
+jgroovy = <<'EOF'
+import io.jenkins.plugins.oidc_provider.config.ClaimTemplate
+import io.jenkins.plugins.oidc_provider.config.IdTokenConfiguration
+import io.jenkins.plugins.oidc_provider.config.IntegerClaimType
+import io.jenkins.plugins.oidc_provider.config.StringClaimType
+import io.jsonwebtoken.Claims
+
+IdTokenConfiguration.get().buildClaimTemplates = [
+    new ClaimTemplate(Claims.SUBJECT, "\${JOB_URL}", new StringClaimType()),
+    new ClaimTemplate("build_number", "\${BUILD_NUMBER}", new IntegerClaimType()),
+    new ClaimTemplate("node_name", "\${NODE_NAME}", new StringClaimType()),
+]
+
+null // return nothing.
+EOF
+
+
+#
+# create an example oidc provider id-token credential.
 # see https://plugins.jenkins.io/oidc-provider
 # see https://javadoc.jenkins.io/plugin/oidc-provider/io/jenkins/plugins/oidc_provider/IdTokenCredentials.html
 # NB the jwks endpoint is at https://jenkins.example.com/oidc/jwks
