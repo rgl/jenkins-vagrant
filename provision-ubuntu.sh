@@ -59,7 +59,7 @@ EOF
 #
 # install dependencies.
 
-apt-get install -y openjdk-11-jre-headless
+apt-get install -y openjdk-21-jre-headless
 
 
 #
@@ -99,7 +99,7 @@ popd
 #
 # install and configure git.
 
-apt-get install -y git-core
+apt-get install -y git
 su jenkins -c bash <<'EOF'
 set -eux
 git config --global user.email 'jenkins@example.com'

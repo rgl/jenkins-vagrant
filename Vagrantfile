@@ -16,7 +16,7 @@ config_gitlab_fqdn  = 'gitlab.example.com'
 config_gitlab_ip    = '10.10.9.99'
 
 Vagrant.configure('2') do |config|
-  config.vm.box = 'ubuntu-20.04-amd64'
+  config.vm.box = 'ubuntu-22.04-uefi-amd64'
 
   config.vm.provider :libvirt do |lv, config|
     lv.memory = 2048
@@ -25,16 +25,20 @@ Vagrant.configure('2') do |config|
     # lv.nested = true
     lv.keymap = 'pt'
     lv.random :model => 'random'
-    config.vm.synced_folder '.', '/vagrant', type: 'nfs'
+    config.vm.synced_folder '.', '/vagrant', type: 'nfs', nfs_version: '4.2', nfs_udp: false
   end
 
   config.vm.define :jenkins do |config|
+    config.vm.provider :libvirt do |lv, config|
+      lv.machine_virtual_size = 32 # GB
+    end
     config.vm.hostname = config_jenkins_fqdn
     config.vm.network :private_network, ip: config_jenkins_ip, libvirt__forward_mode: 'route', libvirt__dhcp_enabled: false
     config.vm.provision :shell, inline: "echo '#{config_ubuntu_ip} #{config_ubuntu_fqdn}' >>/etc/hosts"
     config.vm.provision :shell, inline: "echo '#{config_windows_ip} #{config_windows_fqdn}' >>/etc/hosts"
     config.vm.provision :shell, inline: "echo '#{config_macos_ip} #{config_macos_fqdn}' >>/etc/hosts"
     config.vm.provision :shell, inline: "echo '#{config_gitlab_ip} #{config_gitlab_fqdn}' >>/etc/hosts"
+    config.vm.provision :shell, path: 'provision-resize-disk.sh'
     config.vm.provision :shell, path: 'provision-mailhog.sh'
     config.vm.provision :shell, path: 'provision.sh'
     config.vm.provision :shell, path: 'provision-example-jobs.sh'
@@ -44,10 +48,14 @@ Vagrant.configure('2') do |config|
   end
 
   config.vm.define :ubuntu do |config|
+    config.vm.provider :libvirt do |lv, config|
+      lv.machine_virtual_size = 64 # GB
+    end
     config.vm.hostname = config_ubuntu_fqdn
     config.vm.network :private_network, ip: config_ubuntu_ip, libvirt__forward_mode: 'route', libvirt__dhcp_enabled: false
     config.vm.provision :shell, inline: "echo '#{config_jenkins_ip} #{config_jenkins_fqdn}' >>/etc/hosts"
     config.vm.provision :shell, inline: "echo '#{config_gitlab_ip} #{config_gitlab_fqdn}' >>/etc/hosts"
+    config.vm.provision :shell, path: 'provision-resize-disk.sh'
     config.vm.provision :shell, path: 'provision-ubuntu.sh'
   end
 
@@ -56,14 +64,12 @@ Vagrant.configure('2') do |config|
       lv.memory = 4096
       config.vm.synced_folder '.', '/vagrant', type: 'smb', smb_username: ENV['USER'], smb_password: ENV['VAGRANT_SMB_PASSWORD']
     end
-    config.vm.box = 'windows-2022-amd64'
+    config.vm.box = 'windows-2022-uefi-amd64'
     config.vm.hostname = 'windows'
     config.vm.network :private_network, ip: config_windows_ip, libvirt__forward_mode: 'route', libvirt__dhcp_enabled: false
     config.vm.provision :shell, inline: "echo '#{config_jenkins_ip} #{config_jenkins_fqdn}' | Out-File -Encoding ASCII -Append c:/Windows/System32/drivers/etc/hosts"
     config.vm.provision :shell, inline: "echo '#{config_gitlab_ip} #{config_gitlab_fqdn}' | Out-File -Encoding ASCII -Append c:/Windows/System32/drivers/etc/hosts"
-    config.vm.provision :shell, inline: "$env:chocolateyVersion='0.12.1'; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))", name: "Install Chocolatey"
-    config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-procdump.ps1'
-    config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-dotnet.ps1'
+    config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-chocolatey.ps1'
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-containers-feature.ps1'
     config.vm.provision :shell, inline: "echo 'Rebooting...'", reboot: true
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-base.ps1'
@@ -74,6 +80,7 @@ Vagrant.configure('2') do |config|
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-msys2.ps1'
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-vagrant.ps1'
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-enable-long-paths.ps1'
+    config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-procdump.ps1'
     config.vm.provision :shell, path: 'windows/ps.ps1', args: ['provision-jenkins-slave.ps1', config_jenkins_fqdn, config_windows_fqdn]
   end
 

@@ -1,13 +1,13 @@
-# see https://dotnet.microsoft.com/download/dotnet/6.0
-# see https://github.com/dotnet/core/blob/main/release-notes/6.0/6.0.2/6.0.2.md
+# see https://dotnet.microsoft.com/en-us/download/dotnet/8.0
+# see https://github.com/dotnet/core/blob/main/release-notes/8.0/8.0.18/8.0.18.md
 
 # opt-out from dotnet telemetry.
 [Environment]::SetEnvironmentVariable('DOTNET_CLI_TELEMETRY_OPTOUT', '1', 'Machine')
 $env:DOTNET_CLI_TELEMETRY_OPTOUT = '1'
 
 # install the dotnet sdk.
-$archiveUrl = 'https://download.visualstudio.microsoft.com/download/pr/fb14ba65-a9c9-49ce-9106-d0388b35ae1b/7bbfe92fb68e0c9330c9106b5c55869d/dotnet-sdk-6.0.102-win-x64.exe'
-$archiveHash = '5c999a3871473d1a5bb767f381d8fb216571955f59d93e9e579a3ef415906c2fc731857eb8faee4fbf47570c4eaaa8dc2de39553492f4e8d000ec3d12686b0fe'
+$archiveUrl = 'https://builds.dotnet.microsoft.com/dotnet/Sdk/8.0.412/dotnet-sdk-8.0.412-win-x64.exe'
+$archiveHash = '6218d166dba2217e80d8a9cce727a730d1dc4b82d3944ad59b2780ea885204317bde7dbcb1453267df5a19ef2477fadadfb7061e90bfc5a9c8c8c92133ea5151'
 $archiveName = Split-Path -Leaf $archiveUrl
 $archivePath = "$env:TEMP\$archiveName"
 Write-Host "Downloading $archiveName..."
@@ -28,6 +28,3 @@ $env:PATH = "$([Environment]::GetEnvironmentVariable('PATH', 'Machine'));$([Envi
 
 # show information about dotnet.
 dotnet --info
-
-# install the sourcelink dotnet global tool.
-dotnet tool install --global sourcelink

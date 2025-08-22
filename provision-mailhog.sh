@@ -46,7 +46,7 @@ systemctl enable mailhog
 systemctl start mailhog
 
 # configure the system to use mailhog as a smarthost.
-# these anwsers were obtained (after installing nullmailer) with:
+# these answers were obtained (after installing nullmailer) with:
 #   #sudo debconf-show nullmailer
 #   sudo apt-get install debconf-utils
 #   # this way you can see the comments:

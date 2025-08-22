@@ -1,20 +1,16 @@
-# see https://docs.microsoft.com/en-us/virtualization/windowscontainers/manage-docker/configure-docker-daemon
+# see https://learn.microsoft.com/en-us/virtualization/windowscontainers/manage-docker/configure-docker-daemon
 # see https://docs.docker.com/engine/installation/linux/docker-ce/binaries/#install-server-and-client-binaries-on-windows
-# see https://github.com/moby/moby/releases/tag/v20.10.12
-# see https://github.com/rgl/docker-ce-windows-binaries-vagrant/releases/tag/v20.10.12
+# see https://github.com/moby/moby/releases/tag/v28.3.3
+# see https://github.com/rgl/docker-ce-windows-binaries-vagrant/releases/tag/v28.3.3
 
 # download install the docker binaries.
-$archiveVersion = '20.10.12'
+# renovate: datasource=github-releases depName=rgl/docker-ce-windows-binaries-vagrant
+$archiveVersion = '28.3.3'
 $archiveName = "docker-$archiveVersion.zip"
 $archiveUrl = "https://github.com/rgl/docker-ce-windows-binaries-vagrant/releases/download/v$archiveVersion/$archiveName"
-$archiveHash = '5076667d6f0edf0d5c4b483cdde91d21e97c93f1ded40ce42c2f8f4a8ff42326'
 $archivePath = "$env:TEMP\$archiveName"
 Write-Host "Installing docker $archiveVersion..."
 (New-Object System.Net.WebClient).DownloadFile($archiveUrl, $archivePath)
-$archiveActualHash = (Get-FileHash $archivePath -Algorithm SHA256).Hash
-if ($archiveActualHash -ne $archiveHash) {
-    throw "the $archiveUrl file hash $archiveActualHash does not match the expected $archiveHash"
-}
 Expand-Archive $archivePath -DestinationPath $env:ProgramFiles
 Remove-Item $archivePath
 

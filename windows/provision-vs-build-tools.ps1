@@ -1,15 +1,16 @@
 # add support for building applications that target the .net 4.8 framework.
 choco install -y netfx-4.8-devpack
 
-# install the Visual Studio Build Tools 2022 17.0.6.
-# see https://docs.microsoft.com/en-us/visualstudio/releases/2022/release-history#fixed-version-bootstrappers
-# see https://docs.microsoft.com/en-us/visualstudio/releases/2022/release-notes
-# see https://docs.microsoft.com/en-us/visualstudio/install/use-command-line-parameters-to-install-visual-studio?view=vs-2022
-# see https://docs.microsoft.com/en-us/visualstudio/install/command-line-parameter-examples?view=vs-2022
-# see https://docs.microsoft.com/en-us/visualstudio/install/workload-and-component-ids?view=vs-2022
-# see https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-build-tools?view=vs-2022
-$archiveUrl = 'https://download.visualstudio.microsoft.com/download/pr/928b2d78-4b74-4601-9c82-334cdbb1b3b4/66b16f06a5567dd98207000c4e04fd6afb28f54e7711641d834e9462decc2358/vs_BuildTools.exe'
-$archiveHash = '66b16f06a5567dd98207000c4e04fd6afb28f54e7711641d834e9462decc2358'
+# install the Visual Studio Build Tools 2022 17.12.10.
+# see https://learn.microsoft.com/en-us/visualstudio/releases/2022/release-history#fixed-version-bootstrappers
+# see https://learn.microsoft.com/en-us/visualstudio/releases/2022/release-notes
+# see https://learn.microsoft.com/en-us/visualstudio/install/use-command-line-parameters-to-install-visual-studio?view=vs-2022
+# see https://learn.microsoft.com/en-us/visualstudio/install/command-line-parameter-examples?view=vs-2022
+# see https://learn.microsoft.com/en-us/visualstudio/install/workload-and-component-ids?view=vs-2022
+# see https://learn.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-build-tools?view=vs-2022
+# NB update the windbg version in provision-procdump-as-postmortem-debugger.ps1 to match the installed Windows10SDK.19041.
+$archiveUrl = 'https://download.visualstudio.microsoft.com/download/pr/87b94407-0aa3-45fc-b53f-d224027a42b3/00e8cad9ef34839c57f9be8bc4f93c517804777bdef770e8dbdc8ba0e06bc348/vs_BuildTools.exe'
+$archiveHash = '00e8cad9ef34839c57f9be8bc4f93c517804777bdef770e8dbdc8ba0e06bc348'
 $archiveName = Split-Path $archiveUrl -Leaf
 $archivePath = "$env:TEMP\$archiveName"
 Write-Host 'Downloading the Visual Studio Build Tools Setup Bootstrapper...'

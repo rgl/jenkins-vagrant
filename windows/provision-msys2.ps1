@@ -111,8 +111,9 @@ EOF
 Bash @'
 pacman --noconfirm -Sy mingw-w64-x86_64-gcc
 pacman --noconfirm -Sy mingw-w64-x86_64-jq
-pacman --noconfirm -Sy mingw-w64-x86_64-python3 mingw-w64-x86_64-python3-pip
-pacman --noconfirm -Sy mingw-w64-x86_64-python3-pygments
+pacman --noconfirm -Sy mingw-w64-x86_64-python3
+pacman --noconfirm -Sy mingw-w64-x86_64-python-pip
+pacman --noconfirm -Sy mingw-w64-x86_64-python-pygments
 # NB this is commented because httpie is currently failing to build/install in msys2.
 #python3 -m pip install httpie
 '@

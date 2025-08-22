@@ -68,7 +68,7 @@ if (Test-Path C:/vagrant/tmp/gitlab.example.com-crt.der) {
 choco install -y nssm
 
 # install the JRE.
-choco install -y temurin11jre
+choco install -y temurin21jre
 Update-SessionEnvironment
 
 # add our jenkins master self-signed certificate to the default java trust store.
@@ -315,4 +315,4 @@ Write-Host (Get-DotNetVersion)
 Write-Title 'Installed MSBuild version'
 MSBuild -version
 Write-Title 'Installed chocolatey packages'
-choco list -l
+choco list

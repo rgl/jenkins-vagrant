@@ -4,7 +4,7 @@ set -eux
 domain=$(hostname --fqdn)
 
 # see https://www.jenkins.io/download/
-jenkins_version='2.319.3'
+jenkins_version='2.516.2'
 
 # use the local Jenkins user database.
 config_authentication='jenkins'
@@ -222,7 +222,7 @@ systemctl restart nginx
 #
 # install dependencies.
 
-apt-get install -y openjdk-11-jre-headless
+apt-get install -y openjdk-21-jre-headless
 apt-get install -y gnupg
 apt-get install -y xmlstarlet
 
@@ -231,15 +231,15 @@ apt-get install -y xmlstarlet
 # fix "java.lang.NoClassDefFoundError: Could not initialize class org.jfree.chart.JFreeChart"
 # error while rendering the xUnit Test Result Trend chart on the job page.
 
-sed -i -E 's,^(\s*assistive_technologies\s*=.*),#\1,' /etc/java-11-openjdk/accessibility.properties 
+sed -i -E 's,^(\s*assistive_technologies\s*=.*),#\1,' /etc/java-21-openjdk/accessibility.properties
 
 
 #
 # install Jenkins.
-# see https://pkg.jenkins.io/debian/
+# see https://pkg.jenkins.io/debian-stable/
 
-wget -qO- https://pkg.jenkins.io/debian-stable/jenkins.io.key | apt-key add -
-echo 'deb http://pkg.jenkins.io/debian-stable binary/' >/etc/apt/sources.list.d/jenkins.list
+wget -qO /etc/apt/keyrings/jenkins-keyring.asc https://pkg.jenkins.io/debian/jenkins.io-2023.key
+echo 'deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/' >/etc/apt/sources.list.d/jenkins.list
 apt-get update
 apt-get install -y --no-install-recommends "jenkins=$jenkins_version"
 pushd /var/lib/jenkins
@@ -251,30 +251,36 @@ mv config.xml{,.orig}
 # remove the xml 1.1 declaration because xmlstarlet does not support it... and xml 1.1 is not really needed.
 tail -n +2 config.xml.orig >config.xml
 # disable security.
-# see https://wiki.jenkins-ci.org/display/JENKINS/Disable+security
+# see https://www.jenkins.io/doc/book/security/access-control/disable/
 xmlstarlet edit --inplace -u '/hudson/useSecurity' -v 'false' config.xml
 xmlstarlet edit --inplace -d '/hudson/authorizationStrategy' config.xml
 xmlstarlet edit --inplace -d '/hudson/securityRealm' config.xml
+# see https://www.jenkins.io/doc/book/system-administration/systemd-services/
+install -d /etc/systemd/system/jenkins.service.d
+install /dev/null /etc/systemd/system/jenkins.service.d/override.conf
+cat >>/etc/systemd/system/jenkins.service.d/override.conf <<'EOF'
+[Service]
+Environment="JAVA_OPTS=-Djava.awt.headless=true"
+EOF
 # disable the install wizard.
-sed -i -E 's,^(JAVA_ARGS="-.+),\1\nJAVA_ARGS="$JAVA_ARGS -Djenkins.install.runSetupWizard=false",' /etc/default/jenkins
+sed -i -E 's,^(Environment="JAVA_OPTS=-.+)",\1 -Djenkins.install.runSetupWizard=false",' /etc/systemd/system/jenkins.service.d/override.conf
 # modify the slave workspace directory name to be just "w" as a way to minimize
 # path-too-long errors on windows slaves.
 # NB unfortunately this setting applies to all slaves.
 # NB in a pipeline job you can also use the customWorkspace option.
 # see windows/provision-jenkins-slaves.ps1.
-# see https://issues.jenkins-ci.org/browse/JENKINS-12667
-# see https://wiki.jenkins.io/display/JENKINS/Features+controlled+by+system+properties
-# see https://github.com/jenkinsci/jenkins/blob/jenkins-2.319.3/core/src/main/java/hudson/model/Slave.java#L737-L740
-sed -i -E 's,^(JAVA_ARGS="-.+),\1\nJAVA_ARGS="$JAVA_ARGS -Dhudson.model.Slave.workspaceRoot=w",' /etc/default/jenkins
+# see https://issues.jenkins.io/browse/JENKINS-12667
+# see https://www.jenkins.io/doc/book/managing/system-properties/
+# see https://github.com/jenkinsci/jenkins/blob/jenkins-2.516.2/core/src/main/java/hudson/model/Slave.java#L796-L799
+sed -i -E 's,^(Environment="JAVA_OPTS=-.+)",\1 -Dhudson.model.Slave.workspaceRoot=w",' /etc/systemd/system/jenkins.service.d/override.conf
 # bind to localhost.
-sed -i -E 's,^(JENKINS_ARGS="-.+),\1\nJENKINS_ARGS="$JENKINS_ARGS --httpListenAddress=127.0.0.1",' /etc/default/jenkins
-# configure access log.
-# NB this is useful for testing whether static files are really being handled by nginx.
-sed -i -E 's,^(JENKINS_ARGS="-.+),\1\nJENKINS_ARGS="$JENKINS_ARGS --accessLoggerClassName=winstone.accesslog.SimpleAccessLogger --simpleAccessLogger.format=combined --simpleAccessLogger.file=/var/log/jenkins/access.log",' /etc/default/jenkins
-sed -i -E 's,^(/var/log/jenkins/)jenkins.log,\1*.log,' /etc/logrotate.d/jenkins
+cat >>/etc/systemd/system/jenkins.service.d/override.conf <<'EOF'
+Environment="JENKINS_LISTEN_ADDRESS=127.0.0.1"
+EOF
 # show the configuration changes.
 diff -u config.xml{.orig,} || true
 popd
+systemctl daemon-reload
 systemctl start jenkins
 
 
@@ -291,7 +297,7 @@ function jcli {
 jcliwait
 
 # customize.
-# see http://javadoc.jenkins-ci.org/jenkins/model/Jenkins.html
+# see https://javadoc.jenkins.io/jenkins/model/Jenkins.html
 jgroovy = <<'EOF'
 import hudson.model.Node.Mode
 import jenkins.model.Jenkins
@@ -307,7 +313,7 @@ Jenkins.instance.save()
 EOF
 
 # set the jenkins url and administrator email.
-# see http://javadoc.jenkins-ci.org/jenkins/model/JenkinsLocationConfiguration.html
+# see https://javadoc.jenkins.io/jenkins/model/JenkinsLocationConfiguration.html
 jgroovy = <<EOF
 import jenkins.model.JenkinsLocationConfiguration
 
@@ -318,7 +324,7 @@ c.save()
 EOF
 
 # install and configure git.
-apt-get install -y git-core
+apt-get install -y git
 su jenkins -c bash <<'EOF'
 set -eux
 git config --global user.email 'jenkins@example.com'
@@ -331,10 +337,10 @@ EOF
 # NB installing plugins is quite flaky, mainly because Jenkins (as-of 2.19.2)
 #    does not retry their downloads. this will workaround it by (re)installing
 #    until it works.
-# see http://javadoc.jenkins-ci.org/jenkins/model/Jenkins.html
-# see http://javadoc.jenkins-ci.org/hudson/PluginManager.html
-# see http://javadoc.jenkins.io/hudson/model/UpdateCenter.html
-# see http://javadoc.jenkins.io/hudson/model/UpdateSite.Plugin.html
+# see https://javadoc.jenkins.io/jenkins/model/Jenkins.html
+# see https://javadoc.jenkins.io/hudson/PluginManager.html
+# see https://javadoc.jenkins.io/hudson/model/UpdateCenter.html
+# see https://javadoc.jenkins.io/hudson/model/UpdateSite.Plugin.html
 jgroovy = <<'EOF'
 import jenkins.model.Jenkins
 Jenkins.instance.updateCenter.updateAllSites()
@@ -363,16 +369,18 @@ def install(id) {
 }
 
 [
-    'cloudbees-folder',
-    'email-ext',
-    'gitlab-plugin',
-    'git',
-    'powershell',
-    'xcode-plugin',
-    'xunit',
-    'conditional-buildstep',
-    'workflow-aggregator', // aka Pipeline; see https://plugins.jenkins.io/workflow-aggregator
-    'ws-cleanup', // aka Workspace Cleanup; see https://plugins.jenkins.io/ws-cleanup
+    'ldap',                     // aka LDAP;                        see https://plugins.jenkins.io/ldap
+    'command-launcher',         // aka Command Agent Launcher;      see https://plugins.jenkins.io/command-launcher
+    'cloudbees-folder',         // aka Folders;                     see https://plugins.jenkins.io/cloudbees-folder
+    'email-ext',                // aka Email Extension;             see https://plugins.jenkins.io/email-ext
+    'gitlab-plugin',            // aka GitLab;                      see https://plugins.jenkins.io/gitlab-plugin
+    'git',                      // aka Git;                         see https://plugins.jenkins.io/git
+    'powershell',               // aka Jenkins PowerShell Plugin;   see https://plugins.jenkins.io/powershell
+    'xcode-plugin',             // aka Xcode plugin;                see https://plugins.jenkins.io/xcode-plugin
+    'xunit',                    // aka xUnit;                       see https://plugins.jenkins.io/xunit
+    'conditional-buildstep',    // aka Conditional BuildStep;       see https://plugins.jenkins.io/conditional-buildstep
+    'workflow-aggregator',      // aka Pipeline;                    see https://plugins.jenkins.io/workflow-aggregator
+    'ws-cleanup',               // aka Workspace Cleanup;           see https://plugins.jenkins.io/ws-cleanup
 ].each {
   install(it)
 }
@@ -414,7 +422,7 @@ su jenkins -c 'ssh-keygen -q -t rsa -N "" -f ~/.ssh/id_rsa'
 
 # set the allowed agent protocols.
 # NB JNLP4-connect will be used by windows nodes.
-# see http://javadoc.jenkins-ci.org/jenkins/model/Jenkins.html
+# see https://javadoc.jenkins.io/jenkins/model/Jenkins.html
 jgroovy = <<'EOF'
 import jenkins.model.Jenkins
 
@@ -425,8 +433,8 @@ EOF
 
 # enable simple security.
 # also create the vagrant user account. jcli will use this account from now on.
-# see http://javadoc.jenkins-ci.org/hudson/security/HudsonPrivateSecurityRealm.html
-# see http://javadoc.jenkins-ci.org/hudson/model/User.html
+# see https://javadoc.jenkins.io/hudson/security/HudsonPrivateSecurityRealm.html
+# see https://javadoc.jenkins.io/hudson/model/User.html
 jgroovy = <<'EOF'
 import jenkins.model.Jenkins
 import hudson.security.HudsonPrivateSecurityRealm
@@ -447,8 +455,8 @@ Jenkins.instance.save()
 EOF
 
 # create the vagrant user api token.
-# see http://javadoc.jenkins-ci.org/hudson/model/User.html
-# see http://javadoc.jenkins-ci.org/jenkins/security/ApiTokenProperty.html
+# see https://javadoc.jenkins.io/hudson/model/User.html
+# see https://javadoc.jenkins.io/jenkins/security/ApiTokenProperty.html
 # see https://jenkins.io/doc/book/managing/cli/
 function jcli {
     $JCLI -http -auth vagrant:vagrant "$@"
@@ -469,7 +477,7 @@ chmod 400 ~/.jenkins-cli
 source /vagrant/jenkins-cli.sh
 
 # show which user is actually being used in jcli. this should show "vagrant".
-# see http://javadoc.jenkins-ci.org/hudson/model/User.html
+# see https://javadoc.jenkins.io/hudson/model/User.html
 jcli who-am-i
 jgroovy = <<'EOF'
 import hudson.model.User
@@ -482,7 +490,7 @@ EOF
 
 # use LDAP for user authentication (when enabled).
 # NB this assumes you are running the Active Directory from https://github.com/rgl/windows-domain-controller-vagrant.
-# see https://wiki.jenkins-ci.org/display/JENKINS/LDAP+Plugin
+# see https://plugins.jenkins.io/ldap/
 # see https://github.com/jenkinsci/ldap-plugin/blob/b0b86221a898ecbd95c005ceda57a67533833314/src/main/java/hudson/security/LDAPSecurityRealm.java#L480
 if [ "$config_authentication" = 'ldap' ]; then
 echo '192.168.56.2 dc.example.com' >>/etc/hosts
@@ -564,8 +572,8 @@ Jenkins.instance.securityRealm = new LDAPSecurityRealm(
 Jenkins.instance.save()
 EOF
 # verify that we can resolve an LDAP user and group.
-# see http://javadoc.jenkins-ci.org/hudson/security/SecurityRealm.html
-# see http://javadoc.jenkins-ci.org/hudson/security/GroupDetails.html
+# see https://javadoc.jenkins.io/hudson/security/SecurityRealm.html
+# see https://javadoc.jenkins.io/hudson/security/GroupDetails.html
 jgroovy = <<'EOF'
 import jenkins.model.Jenkins
 
@@ -582,8 +590,8 @@ EOF
 fi
 
 # create example accounts (when using jenkins authentication).
-# see http://javadoc.jenkins-ci.org/hudson/model/User.html
-# see http://javadoc.jenkins-ci.org/hudson/security/HudsonPrivateSecurityRealm.html
+# see https://javadoc.jenkins.io/hudson/model/User.html
+# see https://javadoc.jenkins.io/hudson/security/HudsonPrivateSecurityRealm.html
 # see https://github.com/jenkinsci/mailer-plugin/blob/master/src/main/java/hudson/tasks/Mailer.java
 if [ "$config_authentication" = 'jenkins' ]; then
 jgroovy = <<'EOF'
@@ -646,10 +654,11 @@ popd
 
 #
 # add the ubuntu slave node.
-# see http://javadoc.jenkins-ci.org/jenkins/model/Jenkins.html
-# see http://javadoc.jenkins-ci.org/jenkins/model/Nodes.html
-# see http://javadoc.jenkins-ci.org/hudson/slaves/DumbSlave.html
-# see http://javadoc.jenkins-ci.org/hudson/model/Computer.html
+# see https://javadoc.jenkins.io/jenkins/model/Jenkins.html
+# see https://javadoc.jenkins.io/jenkins/model/Nodes.html
+# see https://javadoc.jenkins.io/hudson/slaves/DumbSlave.html
+# see https://javadoc.jenkins.io/hudson/slaves/ComputerLauncher.html
+# see https://javadoc.jenkins.io/hudson/model/Computer.html
 
 jgroovy = <<'EOF'
 import jenkins.model.Jenkins
@@ -661,7 +670,7 @@ node = new DumbSlave(
     "/var/jenkins",
     new CommandLauncher("ssh ubuntu.jenkins.example.com /var/jenkins/bin/jenkins-slave"))
 node.numExecutors = 3
-node.labelString = "ubuntu 20.04 linux amd64"
+node.labelString = "ubuntu 22.04 linux amd64"
 node.mode = 'EXCLUSIVE'
 Jenkins.instance.nodesObject.addNode(node)
 Jenkins.instance.nodesObject.save()
@@ -721,3 +730,33 @@ Jenkins.instance.computers
         .each { println("${it.name}\t${it.jnlpMac}") }
 EOF
 ) | awk '/.+\t.+/ { printf "%s",$2 > "/vagrant/tmp/slave-jnlp-secret-" $1 ".txt" }'
+
+
+#
+# approve all the pending scripts.
+# see https://javadoc.jenkins.io/plugin/script-security/org/jenkinsci/plugins/scriptsecurity/scripts/ScriptApproval.html
+# see https://jenkins.example.com/manage/scriptApproval/
+# NB the pending and approved scripts are in /var/lib/jenkins/scriptApproval.xml
+#    for example:
+#       <approvedScriptHashes>
+#         <string>SHA512:ee4138444442c3b814fa7f236f936f630adf2c65e11089eddc55d75d7c092dc7e37ff9aa2047a3ae76ded9cfa1ca42a0276a81ad71b1a648903d2315bedac780</string>
+#       </approvedScriptHashes>
+#       <pendingScripts>
+#         <pendingScript>
+#           <context>
+#             <user>vagrant</user>
+#           </context>
+#           <script>ssh ubuntu.jenkins.example.com /var/jenkins/bin/jenkins-slave</script>
+#           <language>system-command</language>
+#         </pendingScript>
+#       </pendingScripts>
+# TODO find a better way, and just approve the ssh slave commands.
+
+jgroovy = <<'EOF'
+import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval
+
+ScriptApproval scriptApproval = ScriptApproval.get()
+scriptApproval.pendingScripts.toList().each {
+    scriptApproval.approveScript(it.hash)
+}
+EOF

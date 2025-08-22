@@ -1,6 +1,6 @@
 This is a [Vagrant](https://www.vagrantup.com/) Environment for a Continuous Integration server using the [Jenkins](https://jenkins.io) daemon.
 
-This configures Jenkins through [CLI/JNLP](https://wiki.jenkins-ci.org/display/JENKINS/Jenkins+CLI) and [Groovy](http://www.groovy-lang.org/) scripts to:
+This configures Jenkins through [CLI/JNLP](https://www.jenkins.io/doc/book/managing/cli/) and [Groovy](http://www.groovy-lang.org/) scripts to:
 
 * Enable the simple `Logged-in users can do anything` Authorization security policy.
 * Add a SSH public key to `vagrant` user account and use it to access the CLI.
@@ -30,7 +30,7 @@ These are the machines and how they are connected with each other:
 
 # Usage
 
-Build and install the [Ubuntu 20.04 Base Box](https://github.com/rgl/ubuntu-vagrant).
+Build and install the [Ubuntu 22.04 Base Box](https://github.com/rgl/ubuntu-vagrant).
 
 Build and install the [Windows 2022 Base Box](https://github.com/rgl/windows-vagrant).
 
@@ -91,8 +91,8 @@ getObjectProperties(project)
 
 ```groovy
 // create an user api token.
-// see http://javadoc.jenkins-ci.org/hudson/model/User.html
-// see http://javadoc.jenkins-ci.org/jenkins/security/ApiTokenProperty.html
+// see https://javadoc.jenkins.io/hudson/model/User.html
+// see https://javadoc.jenkins.io/jenkins/security/ApiTokenProperty.html
 // see https://jenkins.io/doc/book/managing/cli/
 import hudson.model.User
 import jenkins.security.ApiTokenProperty

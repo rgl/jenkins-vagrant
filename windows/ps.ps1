@@ -10,14 +10,14 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 trap {
-    Write-Output "ERROR: $_"
-    Write-Output (($_.ScriptStackTrace -split '\r?\n') -replace '^(.*)$','ERROR: $1')
-    Write-Output (($_.Exception.ToString() -split '\r?\n') -replace '^(.*)$','ERROR EXCEPTION: $1')
+    Write-Host "ERROR: $_"
+    ($_.ScriptStackTrace -split '\r?\n') -replace '^(.*)$','ERROR: $1' | Write-Host
+    ($_.Exception.ToString() -split '\r?\n') -replace '^(.*)$','ERROR EXCEPTION: $1' | Write-Host
     Exit 1
 }
 
 function Write-Title($title) {
-    Write-Output "#`n# $title`n#"
+    Write-Host "#`n# $title`n#"
 }
 
 # see https://github.com/microsoft/Windows-Containers
@@ -27,6 +27,7 @@ function Write-Title($title) {
 # see https://hub.docker.com/_/microsoft-windows-servercore
 # see https://hub.docker.com/_/microsoft-windows-server
 # see https://hub.docker.com/_/microsoft-windows
+# see https://hub.docker.com/_/microsoft-powershell
 # see https://mcr.microsoft.com/v2/windows/nanoserver/tags/list
 # see https://mcr.microsoft.com/v2/windows/servercore/tags/list
 # see https://mcr.microsoft.com/v2/windows/server/tags/list
@@ -34,9 +35,8 @@ function Write-Title($title) {
 # see https://mcr.microsoft.com/v2/powershell/tags/list
 # see https://mcr.microsoft.com/v2/dotnet/sdk/tags/list
 # see https://mcr.microsoft.com/v2/dotnet/runtime/tags/list
-# see https://hub.docker.com/_/golang/
-# see https://docs.microsoft.com/en-us/windows/release-information/
-# see https://docs.microsoft.com/en-us/windows/release-health/windows-server-release-info
+# see https://learn.microsoft.com/en-us/windows/release-health/
+# see https://learn.microsoft.com/en-us/windows/release-health/windows-server-release-info
 # see Get-WindowsVersion at https://github.com/rgl/windows-vagrant/blob/master/example/summary.ps1
 function Get-WindowsContainers {
     $currentVersionKey = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion'
@@ -47,13 +47,14 @@ function Get-WindowsContainers {
     }[$windowsBuildNumber]
     @{
         tag = $windowsVersionTag
-        nanoserver = "mcr.microsoft.com/windows/nanoserver`:$windowsVersionTag"
-        servercore = "mcr.microsoft.com/windows/servercore`:$windowsVersionTag"
+        nanoserver = "mcr.microsoft.com/windows/nanoserver:$windowsVersionTag"
+        servercore = "mcr.microsoft.com/windows/servercore:$windowsVersionTag"
         server = if ($windowsBuildNumber -ge 20348) {
-            "mcr.microsoft.com/windows/server`:$windowsVersionTag"
+            "mcr.microsoft.com/windows/server:$windowsVersionTag"
         } else {
-            "mcr.microsoft.com/windows`:$windowsVersionTag"
+            "mcr.microsoft.com/windows:$windowsVersionTag"
         }
+        pwsh = "mcr.microsoft.com/powershell:7.4-windowsservercore-$windowsVersionTag"
     }
 }
 
@@ -81,6 +82,7 @@ function choco {
     Start-Choco $Args
 }
 
+# wrap the docker command (to make sure this script aborts when it fails).
 function docker {
     docker.exe @Args | Out-String -Stream -Width ([int]::MaxValue)
     if ($LASTEXITCODE) {
@@ -91,8 +93,11 @@ function docker {
 function Get-DotNetVersion {
     # see https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed#net_d
     $release = [int](Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full' -Name Release).Release
+    if ($release -ge 533320) {
+        return '4.8.1 or later'
+    }
     if ($release -ge 528040) {
-        return '4.8 or later'
+        return '4.8'
     }
     if ($release -ge 461808) {
         return '4.7.2'

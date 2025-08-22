@@ -7,15 +7,15 @@ source /vagrant/jenkins-cli.sh
 #
 # create example jobs.
 # see https://jenkins.io/doc/pipeline/steps/
-# see http://javadoc.jenkins-ci.org/jenkins/model/Jenkins.html
-# see http://javadoc.jenkins.io/plugin/workflow-job/org/jenkinsci/plugins/workflow/job/WorkflowJob.html
-# see http://javadoc.jenkins.io/plugin/workflow-cps/org/jenkinsci/plugins/workflow/cps/CpsFlowDefinition.html
-# see http://javadoc.jenkins-ci.org/hudson/model/FreeStyleProject.html
-# see http://javadoc.jenkins-ci.org/hudson/model/Label.html
-# see http://javadoc.jenkins-ci.org/hudson/tasks/Shell.html
-# see http://javadoc.jenkins-ci.org/hudson/tasks/ArtifactArchiver.html
-# see http://javadoc.jenkins-ci.org/hudson/tasks/BatchFile.html
-# see http://javadoc.jenkins.io/plugin/mailer/hudson/tasks/Mailer.html
+# see https://javadoc.jenkins.io/jenkins/model/Jenkins.html
+# see https://javadoc.jenkins.io/plugin/workflow-job/org/jenkinsci/plugins/workflow/job/WorkflowJob.html
+# see https://javadoc.jenkins.io/plugin/workflow-cps/org/jenkinsci/plugins/workflow/cps/CpsFlowDefinition.html
+# see https://javadoc.jenkins.io/hudson/model/FreeStyleProject.html
+# see https://javadoc.jenkins.io/hudson/model/Label.html
+# see https://javadoc.jenkins.io/hudson/tasks/Shell.html
+# see https://javadoc.jenkins.io/hudson/tasks/ArtifactArchiver.html
+# see https://javadoc.jenkins.io/hudson/tasks/BatchFile.html
+# see https://javadoc.jenkins.io/plugin/mailer/hudson/tasks/Mailer.html
 # see https://github.com/jenkinsci/powershell-plugin/blob/master/src/main/java/hudson/plugins/powershell/PowerShell.java
 # see https://github.com/jenkinsci/git-plugin/blob/master/src/main/java/hudson/plugins/git/GitSCM.java
 # see https://github.com/jenkinsci/git-plugin/blob/master/src/main/java/hudson/plugins/git/extensions/impl/CleanBeforeCheckout.java
@@ -397,6 +397,7 @@ function exec([ScriptBlock]$externalCommand, [string]$stderrPrefix='', [int[]]$s
     }
 }
 
+exec { ./build.ps1 dependencies }
 exec { ./build.ps1 build }
 exec { ./build.ps1 test }
 ''', true, true, null))

@@ -15,6 +15,11 @@ import jenkins.model.Jenkins
 import jenkins.security.ApiTokenProperty
 import hudson.tasks.Mailer
 
+if (Jenkins.instance.securityRealm.getClass().name.toLowerCase().contains('ldap')) {
+    println 'disabled-when-using-ldap-auth-in-jenkins'
+    return
+}
+
 [
     [id: "gitlab",   fullName: "GitLab"],
 ].each {
