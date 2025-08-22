@@ -56,7 +56,7 @@ one of the example accounts, e.g. `alice.doe` and password `password`).
 
 Run `vagrant up --no-destroy-on-error ubuntu` to launch the Ubuntu slave.
 
-Run `vagrant up --no-destroy-on-error windows` to launch the Windows slave. [Portainer](https://portainer.io/) is available at http://windows.jenkins.example.com:9000/.
+Run `vagrant up --no-destroy-on-error windows` to launch the Windows slave.
 
 Run `vagrant up --no-destroy-on-error macos` to launch the macOS slave. **NB** you first need to download [Xcode_8.1.xip](https://developer.apple.com/download/more/).
 After provisioning you can delete it, as `Xcode_8.1.cpio.xz` will take its place as a more efficient way to install Xcode.

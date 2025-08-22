@@ -304,12 +304,6 @@ Start-Service $serviceName
 [InternetShortcut]
 URL=https://{0}
 "@)
-[IO.File]::WriteAllText(
-    "$env:USERPROFILE\Desktop\Portainer.url",
-    @"
-[InternetShortcut]
-URL=http://localhost:9000
-"@)
 '@ -f $config_jenkins_master_fqdn)
 
 # show installation summary.
