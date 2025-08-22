@@ -57,6 +57,7 @@ Vagrant.configure('2') do |config|
     config.vm.provision :shell, inline: "echo '#{config_gitlab_ip} #{config_gitlab_fqdn}' >>/etc/hosts"
     config.vm.provision :shell, path: 'provision-resize-disk.sh'
     config.vm.provision :shell, path: 'provision-ubuntu.sh'
+    config.vm.provision :shell, path: 'provision-docker.sh'
   end
 
   config.vm.define :windows do |config|
