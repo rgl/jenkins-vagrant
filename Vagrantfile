@@ -28,13 +28,6 @@ Vagrant.configure('2') do |config|
     config.vm.synced_folder '.', '/vagrant', type: 'nfs'
   end
 
-  config.vm.provider :virtualbox do |vb|
-    vb.linked_clone = true
-    vb.memory = 2048
-    vb.cpus = 2
-    vb.customize ['modifyvm', :id, '--cableconnected1', 'on']
-  end
-
   config.vm.define :jenkins do |config|
     config.vm.hostname = config_jenkins_fqdn
     config.vm.network :private_network, ip: config_jenkins_ip, libvirt__forward_mode: 'route', libvirt__dhcp_enabled: false
@@ -63,9 +56,6 @@ Vagrant.configure('2') do |config|
       lv.memory = 4096
       config.vm.synced_folder '.', '/vagrant', type: 'smb', smb_username: ENV['USER'], smb_password: ENV['VAGRANT_SMB_PASSWORD']
     end
-    config.vm.provider :virtualbox do |vb|
-      vb.memory = 4096
-    end
     config.vm.box = 'windows-2022-amd64'
     config.vm.hostname = 'windows'
     config.vm.network :private_network, ip: config_windows_ip, libvirt__forward_mode: 'route', libvirt__dhcp_enabled: false
@@ -91,9 +81,6 @@ Vagrant.configure('2') do |config|
   end
 
   config.vm.define :macos do |config|
-    config.vm.provider :virtualbox do |vb|
-      vb.memory = 4096
-    end
     config.vm.box = 'macOS'
     config.vm.hostname = config_macos_fqdn
     config.vm.network :private_network, ip: config_macos_ip, libvirt__forward_mode: 'route', libvirt__dhcp_enabled: false
