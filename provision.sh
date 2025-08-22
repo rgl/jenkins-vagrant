@@ -369,6 +369,7 @@ def install(id) {
 }
 
 [
+    'oidc-provider',            // aka OpenID Connect Provider;     see https://plugins.jenkins.io/oidc-provider
     'ldap',                     // aka LDAP;                        see https://plugins.jenkins.io/ldap
     'command-launcher',         // aka Command Agent Launcher;      see https://plugins.jenkins.io/command-launcher
     'cloudbees-folder',         // aka Folders;                     see https://plugins.jenkins.io/cloudbees-folder
@@ -759,4 +760,30 @@ ScriptApproval scriptApproval = ScriptApproval.get()
 scriptApproval.pendingScripts.toList().each {
     scriptApproval.approveScript(it.hash)
 }
+EOF
+
+
+#
+# create an example oidc id-token credential (generator).
+# see https://plugins.jenkins.io/oidc-provider
+# see https://javadoc.jenkins.io/plugin/oidc-provider/io/jenkins/plugins/oidc_provider/IdTokenCredentials.html
+# NB the jwks endpoint is at https://jenkins.example.com/oidc/jwks
+
+jgroovy = <<'EOF'
+import com.cloudbees.plugins.credentials.CredentialsScope
+import com.cloudbees.plugins.credentials.domains.Domain
+import com.cloudbees.plugins.credentials.SystemCredentialsProvider
+import io.jenkins.plugins.oidc_provider.IdTokenStringCredentials
+
+c = new IdTokenStringCredentials(
+    CredentialsScope.GLOBAL,
+    "oidc-id-token-example",
+    "For https://example.com")
+c.audience = "https://example.com"
+
+SystemCredentialsProvider.instance.store.addCredentials(
+    Domain.global(),
+    c)
+
+null // return nothing.
 EOF

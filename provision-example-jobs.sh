@@ -763,3 +763,21 @@ project.publishersList.add(
 
 Jenkins.instance.add(project, project.name)
 EOF
+
+jgroovy = <<'EOF'
+import hudson.plugins.git.BranchSpec
+import hudson.plugins.git.extensions.impl.CleanBeforeCheckout
+import hudson.plugins.git.GitSCM
+import jenkins.model.Jenkins
+import org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition
+import org.jenkinsci.plugins.workflow.job.WorkflowJob
+
+scm = new GitSCM('https://github.com/rgl/jenkins-validate-jwt.git')
+scm.branches = [new BranchSpec('*/main')]
+scm.extensions.add(new CleanBeforeCheckout())
+
+project = new WorkflowJob(Jenkins.instance, 'jenkins-validate-jwt')
+project.definition = new CpsScmFlowDefinition(scm, 'Jenkinsfile')
+
+Jenkins.instance.add(project, project.name)
+EOF
