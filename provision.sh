@@ -681,7 +681,7 @@ node = new DumbSlave(
     "c:/j",
     new JNLPLauncher(true))
 node.numExecutors = 3
-node.labelString = "windows 2022 vs2022 vagrant docker unity amd64"
+node.labelString = "windows 2022 vs2022 vagrant docker amd64"
 node.mode = 'EXCLUSIVE'
 Jenkins.instance.nodesObject.addNode(node)
 Jenkins.instance.nodesObject.save()

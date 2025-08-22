@@ -4,7 +4,7 @@ This configures Jenkins through [CLI/JNLP](https://wiki.jenkins-ci.org/display/J
 
 * Enable the simple `Logged-in users can do anything` Authorization security policy.
 * Add a SSH public key to `vagrant` user account and use it to access the CLI.
-  * Except on Windows; there it uses JNLP4/HTTPS to connect to the Jenkins Master from a Windows Service. Only a Windows Service has the needed permissions to run integration tests that use the WCF net.pipe transport and to build unity projects.
+  * Except on Windows; there it uses JNLP4/HTTPS to connect to the Jenkins Master from a Windows Service. Only a Windows Service has the needed permissions to run integration tests that use the WCF net.pipe transport.
 * Optionally use LDAP user authentication.
 * Add and list users.
 * Install and configure plugins.
@@ -19,9 +19,6 @@ This configures Jenkins through [CLI/JNLP](https://wiki.jenkins-ci.org/display/J
   * With enabled long path support on the OS and chocolatey.
   * With [MSYS2](https://github.com/msys2/msys2/wiki/MSYS2-introduction) to be able to use the `Execute shell` build step.
     * See the [example-execute-shell-windows](https://jenkins.example.com/job/example-execute-shell-windows) job.
-  * With Unity Editor.
-    * You still need to [activate](https://docs.unity3d.com/Manual/LicensesAndActivation.html) it by
-running Unity Hub.
 * Add a macOS slave node.
 
 **NB** If you are new to Groovy, be sure to check the [Groovy Learn X in Y minutes page](https://learnxinyminutes.com/docs/groovy/).

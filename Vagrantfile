@@ -75,7 +75,6 @@ Vagrant.configure('2') do |config|
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-dotnet-sdk.ps1'
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-msys2.ps1'
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-vagrant.ps1'
-    config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-unity.ps1'
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-enable-long-paths.ps1'
     config.vm.provision :shell, path: 'windows/ps.ps1', args: ['provision-jenkins-slave.ps1', config_jenkins_fqdn, config_windows_fqdn]
   end
