@@ -146,19 +146,7 @@ New-Item -Path HKCU:Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetSt
     | New-ItemProperty -Name FullPath -Value 1 -PropertyType DWORD `
     | Out-Null
 
-# install Google Chrome.
-# see https://www.chromium.org/administrators/configuring-other-preferences
-choco install -y --ignore-checksums googlechrome
-$chromeLocation = 'C:\Program Files\Google\Chrome\Application'
-cp -Force GoogleChrome-external_extensions.json (Resolve-Path "$chromeLocation\*\default_apps\external_extensions.json")
-cp -Force GoogleChrome-master_preferences.json "$chromeLocation\master_preferences"
-cp -Force GoogleChrome-master_bookmarks.html "$chromeLocation\master_bookmarks.html"
-
 # install useful applications.
 choco install -y 7zip
 choco install -y notepad3
 choco install -y vscode
-
-# set default applications.
-choco install -y SetDefaultBrowser
-SetDefaultBrowser HKLM "Google Chrome"
