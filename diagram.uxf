@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<diagram program="umlet" version="14.3.0">
+<diagram program="umlet" version="15.1">
   <zoom_level>10</zoom_level>
   <element>
     <id>UMLDeployment</id>
@@ -58,11 +58,11 @@ windows.jenkins.example.com
       <x>380</x>
       <y>90</y>
       <w>100</w>
-      <h>40</h>
+      <h>50</h>
     </coordinates>
     <panel_attributes>lt=()-
 r1=ssh
-</panel_attributes>
+m1=:22</panel_attributes>
     <additional_attributes>10.0;20.0;80.0;20.0</additional_attributes>
   </element>
   <element>
@@ -84,10 +84,11 @@ r1=ssh
       <x>280</x>
       <y>180</y>
       <w>110</w>
-      <h>40</h>
+      <h>50</h>
     </coordinates>
     <panel_attributes>lt=-()
-r2=jnlp4</panel_attributes>
+r2=jnlp4
+m2=:50000</panel_attributes>
     <additional_attributes>10.0;20.0;90.0;20.0</additional_attributes>
   </element>
   <element>
@@ -96,11 +97,11 @@ r2=jnlp4</panel_attributes>
       <x>20</x>
       <y>220</y>
       <w>100</w>
-      <h>40</h>
+      <h>50</h>
     </coordinates>
     <panel_attributes>lt=()-
 r1=https
-</panel_attributes>
+m1=:443</panel_attributes>
     <additional_attributes>10.0;20.0;80.0;20.0</additional_attributes>
   </element>
   <element>
@@ -122,11 +123,11 @@ dc.example.com
       <x>380</x>
       <y>390</y>
       <w>100</w>
-      <h>40</h>
+      <h>50</h>
     </coordinates>
     <panel_attributes>lt=()-
 r1=ldaps
-</panel_attributes>
+m1=:636</panel_attributes>
     <additional_attributes>10.0;20.0;80.0;20.0</additional_attributes>
   </element>
   <element>
@@ -174,11 +175,11 @@ macos.jenkins.example.com
       <x>380</x>
       <y>270</y>
       <w>100</w>
-      <h>40</h>
+      <h>50</h>
     </coordinates>
     <panel_attributes>lt=()-
 r1=ssh
-</panel_attributes>
+m1=:22</panel_attributes>
     <additional_attributes>10.0;20.0;80.0;20.0</additional_attributes>
   </element>
   <element>
