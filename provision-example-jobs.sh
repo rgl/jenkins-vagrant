@@ -177,38 +177,53 @@ folder = Jenkins.instance.getItem('dump-environment')
 project = new WorkflowJob(folder, 'windows-docker-dump-environment')
 project.definition = new CpsFlowDefinition("""\
 pipeline {
-    // NB the jenkins docker plugin does not currently work on windows.
-    //    as a workaround we have to manually run docker run.
-    //agent {
-    //    docker {
-    //        label 'windows && docker'
-    //        image 'mcr.microsoft.com/windows/nanoserver:ltsc2022'
-    //    }
-    //}
     agent {
-        label 'windows && docker'
+        docker {
+            label 'windows && docker'
+            image 'mcr.microsoft.com/windows/nanoserver:ltsc2022'
+        }
     }
     stages {
         stage('Build') {
             steps {
-                powershell '''
-Set-Content -Encoding Ascii -Path build.bat -Value @'
-ver
-whoami /all
-set
-'@
+                bat '''
+                    ver
+                    set | sort
+                    '''.stripIndent()
+            }
+        }
+    }
+}
+""",
+true)
 
-docker version
+folder.add(project, project.name)
+EOF
 
-docker run `
-    --rm `
-    -v "\${env:WORKSPACE}:\${env:WORKSPACE}" `
-    -w \$env:WORKSPACE `
-    -e "WORKSPACE=\$env:WORKSPACE" `
-    -e "BUILD_NUMBER=\$env:BUILD_NUMBER" `
-    mcr.microsoft.com/windows/servercore:ltsc2022 `
-    build.bat
-'''
+jgroovy = <<'EOF'
+import jenkins.model.Jenkins
+import org.jenkinsci.plugins.workflow.job.WorkflowJob
+import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition
+
+folder = Jenkins.instance.getItem('dump-environment')
+
+project = new WorkflowJob(folder, 'linux-docker-dump-environment')
+project.definition = new CpsFlowDefinition("""\
+pipeline {
+    agent {
+        docker {
+            label 'linux && docker'
+            image 'debian:trixie-slim'
+        }
+    }
+    stages {
+        stage('Build') {
+            steps {
+                sh '''
+                    cat /etc/os-release
+                    uname -a
+                    env | sort
+                    '''.stripIndent()
             }
         }
     }

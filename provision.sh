@@ -356,6 +356,7 @@ def install(id) {
     'conditional-buildstep',    // aka Conditional BuildStep;       see https://plugins.jenkins.io/conditional-buildstep
     'workflow-aggregator',      // aka Pipeline;                    see https://plugins.jenkins.io/workflow-aggregator
     'ws-cleanup',               // aka Workspace Cleanup;           see https://plugins.jenkins.io/ws-cleanup
+    'docker-workflow',          // aka Docker Pipeline;             see https://plugins.jenkins.io/docker-workflow
 ].each {
   install(it)
 }
@@ -643,7 +644,7 @@ node = new DumbSlave(
     "/var/jenkins",
     new CommandLauncher("ssh ubuntu.jenkins.example.com /var/jenkins/bin/jenkins-agent"))
 node.numExecutors = 3
-node.labelString = "ubuntu 22.04 linux amd64"
+node.labelString = "ubuntu 22.04 linux docker amd64"
 node.mode = 'EXCLUSIVE'
 Jenkins.instance.nodesObject.addNode(node)
 Jenkins.instance.nodesObject.save()
