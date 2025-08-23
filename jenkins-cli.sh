@@ -3,6 +3,7 @@ JCLI="java -jar /var/cache/jenkins/war/WEB-INF/lib/cli-*.jar -s http://localhost
 
 # wait for the cli endpoint to be available.
 function jcliwait {
+    bash -c 'while ! wget -q --spider http://localhost:8080/health/; do sleep 1; done;'
     bash -c 'while ! wget -q --spider http://localhost:8080/cli; do sleep 1; done;'
 }
 

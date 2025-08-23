@@ -244,6 +244,7 @@ apt-get update
 apt-get install -y --no-install-recommends "jenkins=$jenkins_version"
 pushd /var/lib/jenkins
 # wait for initialization to finish.
+bash -c 'while ! wget -q --spider http://localhost:8080/health/; do sleep 1; done;'
 bash -c 'while [ ! -f "/var/lib/jenkins/secrets/initialAdminPassword" ]; do sleep 1; done'
 systemctl stop jenkins
 chmod 751 /var/cache/jenkins
