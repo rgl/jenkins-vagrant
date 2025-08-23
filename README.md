@@ -4,7 +4,7 @@ This configures Jenkins through [CLI/JNLP](https://www.jenkins.io/doc/book/manag
 
 * Enable the simple `Logged-in users can do anything` Authorization security policy.
 * Add a SSH public key to `vagrant` user account and use it to access the CLI.
-  * Except on Windows; there it uses JNLP4/HTTPS to connect to the Jenkins Master from a Windows Service. Only a Windows Service has the needed permissions to run integration tests that use the WCF net.pipe transport.
+  * Except on Windows; there it uses JNLP4/HTTPS to connect to the Jenkins Controller from a Windows Service. Only a Windows Service has the needed permissions to run integration tests that use the WCF net.pipe transport.
 * Optionally use LDAP user authentication.
 * Add and list users.
 * Install and configure plugins.
@@ -49,7 +49,7 @@ If you want to use LDAP for user authentication, you have to:
 1. have [rgl/windows-domain-controller-vagrant](https://github.com/rgl/windows-domain-controller-vagrant) up and running at `../windows-domain-controller-vagrant`.
 1. uncomment the `config_authentication='ldap'` line inside [provision.sh](provision.sh). 
 
-Run `vagrant up --no-destroy-on-error jenkins` to launch the master. See its output to known how to login at the
+Run `vagrant up --no-destroy-on-error jenkins` to launch the controller. See its output to known how to login at the
 [local Jenkins home page](https://jenkins.example.com) as `admin` (you can also login with
 one of the example accounts, e.g. `alice.doe` and password `password`).
 

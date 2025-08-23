@@ -2,7 +2,7 @@
 set -eux
 
 config_fqdn=$(hostname)
-config_jenkins_master_fqdn=$(hostname | sed -E 's,^[a-z]+\.,,')
+config_jenkins_controller_fqdn=$(hostname | sed -E 's,^[a-z]+\.,,')
 
 
 #
@@ -130,14 +130,14 @@ set -eux
 pushd /var/jenkins
 install -d -o jenkins -g jenkins -m 750 {bin,lib,.ssh}
 install -o jenkins -g jenkins -m 640 /dev/null .ssh/authorized_keys
-cat /vagrant/tmp/$config_jenkins_master_fqdn-ssh-rsa.pub >>.ssh/authorized_keys
-security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain /vagrant/tmp/$config_jenkins_master_fqdn-crt.pem
+cat /vagrant/tmp/$config_jenkins_controller_fqdn-ssh-rsa.pub >>.ssh/authorized_keys
+security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain /vagrant/tmp/$config_jenkins_controller_fqdn-crt.pem
 cat >bin/jenkins-agent <<EOF
 #!/bin/sh
 exec java -jar \$PWD/lib/agent.jar
 EOF
 chmod +x bin/jenkins-agent
-curl -sf https://$config_jenkins_master_fqdn/jnlpJars/agent.jar -o lib/agent.jar
+curl -sf https://$config_jenkins_controller_fqdn/jnlpJars/agent.jar -o lib/agent.jar
 popd
 SUDO_EOF
 

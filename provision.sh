@@ -306,7 +306,7 @@ import jenkins.model.Jenkins
 // disable usage statistics.
 Jenkins.instance.noUsageStatistics = true
 
-// do not run jobs on the master.
+// do not run jobs on the controller.
 Jenkins.instance.numExecutors = 0
 Jenkins.instance.mode = Mode.EXCLUSIVE
 
@@ -419,7 +419,7 @@ EOF
 #
 # configure security.
 
-# generate the SSH key-pair that jenkins master uses to communicates with the agents.
+# generate the SSH key-pair that jenkins controller uses to communicates with the agents.
 su jenkins -c 'ssh-keygen -q -t rsa -N "" -f ~/.ssh/id_rsa'
 
 # set the allowed agent protocols.

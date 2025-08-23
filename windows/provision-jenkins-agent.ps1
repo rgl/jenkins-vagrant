@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory=$true)]
-    [string]$config_jenkins_master_fqdn = 'jenkins.example.com',
+    [string]$config_jenkins_controller_fqdn = 'jenkins.example.com',
 
     [Parameter(Mandatory=$true)]
     [string]$config_fqdn = 'windows.jenkins.example.com'
@@ -52,9 +52,9 @@ Install-ChocolateyShortcut `
     -ShortcutFilePath 'C:\Users\All Users\Microsoft\Windows\Start Menu\Programs\Process Monitor.lnk' `
     -TargetPath 'C:\ProgramData\chocolatey\lib\procmon\tools\procmon.exe'
 
-# import the Jenkins master site https certificate into the local machine trust store.
+# import the Jenkins controller site https certificate into the local machine trust store.
 Import-Certificate `
-    -FilePath C:/vagrant/tmp/$config_jenkins_master_fqdn-crt.der `
+    -FilePath C:/vagrant/tmp/$config_jenkins_controller_fqdn-crt.der `
     -CertStoreLocation Cert:/LocalMachine/Root
 
 # import the gitlab-vagrant environment site https certificate into the local machine trust store.
@@ -71,14 +71,14 @@ choco install -y nssm
 choco install -y temurin21jre
 Update-SessionEnvironment
 
-# add our jenkins master self-signed certificate to the default java trust store.
+# add our jenkins controller self-signed certificate to the default java trust store.
 # NB alternatively we could use java.exe -Djavax.net.ssl.trustStoreType=Windows-ROOT
 #    to use the Windows Trust Root store.
 Get-ChildItem -Recurse -Include cacerts -ErrorAction SilentlyContinue @(
     'C:\Program Files\*\*\lib\security\cacerts'
 ) | ForEach-Object {
     $keyStore = $_
-    $alias = $config_jenkins_master_fqdn
+    $alias = $config_jenkins_controller_fqdn
     $keytool = Resolve-Path "$keyStore\..\..\..\bin\keytool.exe"
     $keytoolOutput = &$keytool `
         -noprompt `
@@ -101,7 +101,7 @@ Get-ChildItem -Recurse -Include cacerts -ErrorAction SilentlyContinue @(
                 '-storepass changeit',
                 '-cacerts',
                 "-alias `"$alias`"",
-                "-file c:\vagrant\tmp\$config_jenkins_master_fqdn-crt.der" `
+                "-file c:\vagrant\tmp\$config_jenkins_controller_fqdn-crt.der" `
             -RedirectStandardOutput "$env:TEMP\keytool-stdout.txt" `
             -RedirectStandardError "$env:TEMP\keytool-stderr.txt" `
             -NoNewWindow `
@@ -259,7 +259,7 @@ $jenkinsWorkspaceDirectory.SetAccessControl($acl)
 
 # download the jnlp jar and install it.
 mkdir $jenkinsDirectory\lib | Out-Null
-Invoke-WebRequest "https://$config_jenkins_master_fqdn/jnlpJars/agent.jar" -OutFile $jenkinsDirectory\lib\agent.jar
+Invoke-WebRequest "https://$config_jenkins_controller_fqdn/jnlpJars/agent.jar" -OutFile $jenkinsDirectory\lib\agent.jar
 
 # install jenkins as a service.
 # NB jenkins cannot run from a OpenSSH session because it will end up without required groups and rights.
@@ -275,7 +275,7 @@ mkdir -Force "$serviceHome\logs" | Out-Null
 nssm install $serviceName (Get-Command java.exe).Path
 nssm set $serviceName AppParameters `
     -jar lib/agent.jar `
-    -jnlpUrl "https://$config_jenkins_master_fqdn/computer/windows/slave-agent.jnlp" `
+    -jnlpUrl "https://$config_jenkins_controller_fqdn/computer/windows/slave-agent.jnlp" `
     -secret (Get-Content -Raw c:\vagrant\tmp\agent-jnlp-secret-windows.txt) `
     -workDir $serviceHome
 nssm set $serviceName AppDirectory $serviceHome
@@ -299,12 +299,12 @@ Start-Service $serviceName
     "$env:USERPROFILE\ConfigureDesktop-Jenkins.ps1",
 @'
 [IO.File]::WriteAllText(
-    "$env:USERPROFILE\Desktop\Jenkins Master.url",
+    "$env:USERPROFILE\Desktop\Jenkins Controller.url",
     @"
 [InternetShortcut]
 URL=https://{0}
 "@)
-'@ -f $config_jenkins_master_fqdn)
+'@ -f $config_jenkins_controller_fqdn)
 
 # show installation summary.
 function Write-Title($title) {

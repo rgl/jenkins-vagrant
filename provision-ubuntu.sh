@@ -2,7 +2,7 @@
 set -eux
 
 config_fqdn=$(hostname --fqdn)
-config_jenkins_master_fqdn=$(hostname --domain)
+config_jenkins_controller_fqdn=$(hostname --domain)
 
 echo 'Defaults env_keep += "DEBIAN_FRONTEND"' >/etc/sudoers.d/env_keep_apt
 chmod 440 /etc/sudoers.d/env_keep_apt
@@ -84,15 +84,15 @@ install -d -o jenkins -g jenkins -m 750 /var/jenkins
 pushd /var/jenkins
 install -d -o jenkins -g jenkins -m 750 {bin,lib,.ssh}
 install -o jenkins -g jenkins -m 640 /dev/null .ssh/authorized_keys
-cat /vagrant/tmp/$config_jenkins_master_fqdn-ssh-rsa.pub >>.ssh/authorized_keys
-cp /vagrant/tmp/$config_jenkins_master_fqdn-crt.pem /usr/local/share/ca-certificates/$config_jenkins_master_fqdn.crt
+cat /vagrant/tmp/$config_jenkins_controller_fqdn-ssh-rsa.pub >>.ssh/authorized_keys
+cp /vagrant/tmp/$config_jenkins_controller_fqdn-crt.pem /usr/local/share/ca-certificates/$config_jenkins_controller_fqdn.crt
 update-ca-certificates # NB this also updates the default java key store at /etc/ssl/certs/java/cacerts.
 cat >bin/jenkins-agent <<EOF
 #!/bin/sh
 exec java -jar $PWD/lib/agent.jar
 EOF
 chmod +x bin/jenkins-agent
-wget -q https://$config_jenkins_master_fqdn/jnlpJars/agent.jar -O lib/agent.jar
+wget -q https://$config_jenkins_controller_fqdn/jnlpJars/agent.jar -O lib/agent.jar
 popd
 
 

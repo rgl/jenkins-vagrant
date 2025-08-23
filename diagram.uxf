@@ -9,7 +9,7 @@
       <w>190</w>
       <h>410</h>
     </coordinates>
-    <panel_attributes>&lt;&lt;jenkins master&gt;&gt;
+    <panel_attributes>&lt;&lt;jenkins controller&gt;&gt;
 jenkins.example.com
 (10.10.10.100)</panel_attributes>
     <additional_attributes/>
