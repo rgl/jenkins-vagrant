@@ -131,7 +131,7 @@ $jenkinsAccountCredential = New-Object `
         $jenkinsAccountPasswordSecureString
 New-LocalUser `
     -Name $jenkinsAccountName `
-    -FullName 'Jenkins Slave' `
+    -FullName 'Jenkins Agent' `
     -Password $jenkinsAccountPasswordSecureString `
     -PasswordNeverExpires
 # allow the jenkins user to logon into the Desktop (e.g. to start the Remote Debugger).
@@ -276,7 +276,7 @@ nssm install $serviceName (Get-Command java.exe).Path
 nssm set $serviceName AppParameters `
     -jar lib/agent.jar `
     -jnlpUrl "https://$config_jenkins_master_fqdn/computer/windows/slave-agent.jnlp" `
-    -secret (Get-Content -Raw c:\vagrant\tmp\slave-jnlp-secret-windows.txt) `
+    -secret (Get-Content -Raw c:\vagrant\tmp\agent-jnlp-secret-windows.txt) `
     -workDir $serviceHome
 nssm set $serviceName AppDirectory $serviceHome
 nssm set $serviceName Start SERVICE_AUTO_START

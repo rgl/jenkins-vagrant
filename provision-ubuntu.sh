@@ -78,7 +78,7 @@ adduser \
 
 
 #
-# install the slave.
+# install the agent.
 
 install -d -o jenkins -g jenkins -m 750 /var/jenkins
 pushd /var/jenkins
@@ -87,12 +87,12 @@ install -o jenkins -g jenkins -m 640 /dev/null .ssh/authorized_keys
 cat /vagrant/tmp/$config_jenkins_master_fqdn-ssh-rsa.pub >>.ssh/authorized_keys
 cp /vagrant/tmp/$config_jenkins_master_fqdn-crt.pem /usr/local/share/ca-certificates/$config_jenkins_master_fqdn.crt
 update-ca-certificates # NB this also updates the default java key store at /etc/ssl/certs/java/cacerts.
-cat >bin/jenkins-slave <<EOF
+cat >bin/jenkins-agent <<EOF
 #!/bin/sh
-exec java -jar $PWD/lib/slave.jar
+exec java -jar $PWD/lib/agent.jar
 EOF
-chmod +x bin/jenkins-slave
-wget -q https://$config_jenkins_master_fqdn/jnlpJars/slave.jar -O lib/slave.jar
+chmod +x bin/jenkins-agent
+wget -q https://$config_jenkins_master_fqdn/jnlpJars/agent.jar -O lib/agent.jar
 popd
 
 

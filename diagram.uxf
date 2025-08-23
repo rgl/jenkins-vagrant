@@ -22,7 +22,7 @@ jenkins.example.com
       <w>260</w>
       <h>80</h>
     </coordinates>
-    <panel_attributes>&lt;&lt;jenkins slave&gt;&gt;
+    <panel_attributes>&lt;&lt;jenkins agent&gt;&gt;
 ubuntu.jenkins.example.com
 (10.10.10.101)</panel_attributes>
     <additional_attributes/>
@@ -35,7 +35,7 @@ ubuntu.jenkins.example.com
       <w>260</w>
       <h>80</h>
     </coordinates>
-    <panel_attributes>&lt;&lt;jenkins slave&gt;&gt;
+    <panel_attributes>&lt;&lt;jenkins agent&gt;&gt;
 windows.jenkins.example.com
 (10.10.10.102)</panel_attributes>
     <additional_attributes/>
@@ -163,7 +163,7 @@ layer=-1</panel_attributes>
       <w>260</w>
       <h>80</h>
     </coordinates>
-    <panel_attributes>&lt;&lt;jenkins slave&gt;&gt;
+    <panel_attributes>&lt;&lt;jenkins agent&gt;&gt;
 macos.jenkins.example.com
 (10.10.10.103)</panel_attributes>
     <additional_attributes/>

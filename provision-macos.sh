@@ -97,7 +97,7 @@ brew cask install java
 sudo bash <<'SUDO_EOF'
 set -eux
 USER_NAME=jenkins
-USER_REAL_NAME='Jenkins Slave'
+USER_REAL_NAME='Jenkins Agent'
 USER_GID=$(($(dscl . -list /Groups PrimaryGroupID | awk '{print $2}' | sort -ug | tail -1)+1))
 USER_UID=$(($(dscl . -list /Users  UniqueID       | awk '{print $2}' | sort -ug | tail -1)+1))
 dscl . -create /Groups/_$USER_NAME
@@ -123,7 +123,7 @@ SUDO_EOF
 
 
 #
-# install the slave.
+# install the agent.
 
 sudo bash <<SUDO_EOF
 set -eux
@@ -132,12 +132,12 @@ install -d -o jenkins -g jenkins -m 750 {bin,lib,.ssh}
 install -o jenkins -g jenkins -m 640 /dev/null .ssh/authorized_keys
 cat /vagrant/tmp/$config_jenkins_master_fqdn-ssh-rsa.pub >>.ssh/authorized_keys
 security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain /vagrant/tmp/$config_jenkins_master_fqdn-crt.pem
-cat >bin/jenkins-slave <<EOF
+cat >bin/jenkins-agent <<EOF
 #!/bin/sh
-exec java -jar \$PWD/lib/slave.jar
+exec java -jar \$PWD/lib/agent.jar
 EOF
-chmod +x bin/jenkins-slave
-curl -sf https://$config_jenkins_master_fqdn/jnlpJars/slave.jar -o lib/slave.jar
+chmod +x bin/jenkins-agent
+curl -sf https://$config_jenkins_master_fqdn/jnlpJars/agent.jar -o lib/agent.jar
 popd
 SUDO_EOF
 

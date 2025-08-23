@@ -13,13 +13,14 @@ This configures Jenkins through [CLI/JNLP](https://www.jenkins.io/doc/book/manag
 * Create Freestyle project job.
 * Create Pipeline job.
 * Create Multibranch Pipeline job.
-* Add a Ubuntu Linux slave node.
-* Add a Windows slave node.
+* Add a Ubuntu Linux agent node.
+  * With docker.
+* Add a Windows agent node.
   * With docker.
   * With enabled long path support on the OS and chocolatey.
   * With [MSYS2](https://github.com/msys2/msys2/wiki/MSYS2-introduction) to be able to use the `Execute shell` build step.
     * See the [example-execute-shell-windows](https://jenkins.example.com/job/example-execute-shell-windows) job.
-* Add a macOS slave node.
+* Add a macOS agent node.
 
 **NB** If you are new to Groovy, be sure to check the [Groovy Learn X in Y minutes page](https://learnxinyminutes.com/docs/groovy/).
 
@@ -54,11 +55,11 @@ one of the example accounts, e.g. `alice.doe` and password `password`).
 
 **NB** nginx is setup with a self-signed certificate that you have to trust before being able to access the local Jenkins home page.
 
-Run `vagrant up --no-destroy-on-error ubuntu` to launch the Ubuntu slave.
+Run `vagrant up --no-destroy-on-error ubuntu` to launch the Ubuntu agent.
 
-Run `vagrant up --no-destroy-on-error windows` to launch the Windows slave.
+Run `vagrant up --no-destroy-on-error windows` to launch the Windows agent.
 
-Run `vagrant up --no-destroy-on-error macos` to launch the macOS slave. **NB** you first need to download [Xcode_8.1.xip](https://developer.apple.com/download/more/).
+Run `vagrant up --no-destroy-on-error macos` to launch the macOS agent. **NB** you first need to download [Xcode_8.1.xip](https://developer.apple.com/download/more/).
 After provisioning you can delete it, as `Xcode_8.1.cpio.xz` will take its place as a more efficient way to install Xcode.
 
 Email notifications are sent to a local [MailHog](https://github.com/mailhog/MailHog) SMTP server running at localhost:1025 and you can browse them at [http://jenkins.example.com:8025](http://jenkins.example.com:8025).

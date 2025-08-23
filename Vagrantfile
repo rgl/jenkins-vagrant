@@ -82,7 +82,7 @@ Vagrant.configure('2') do |config|
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-vagrant.ps1'
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-enable-long-paths.ps1'
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-procdump.ps1'
-    config.vm.provision :shell, path: 'windows/ps.ps1', args: ['provision-jenkins-slave.ps1', config_jenkins_fqdn, config_windows_fqdn]
+    config.vm.provision :shell, path: 'windows/ps.ps1', args: ['provision-jenkins-agent.ps1', config_jenkins_fqdn, config_windows_fqdn]
   end
 
   config.vm.define :macos do |config|

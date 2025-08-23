@@ -265,11 +265,11 @@ Environment="JAVA_OPTS=-Djava.awt.headless=true"
 EOF
 # disable the install wizard.
 sed -i -E 's,^(Environment="JAVA_OPTS=-.+)",\1 -Djenkins.install.runSetupWizard=false",' /etc/systemd/system/jenkins.service.d/override.conf
-# modify the slave workspace directory name to be just "w" as a way to minimize
-# path-too-long errors on windows slaves.
-# NB unfortunately this setting applies to all slaves.
+# modify the agent workspace directory name to be just "w" as a way to minimize
+# path-too-long errors on windows agents.
+# NB unfortunately this setting applies to all agents.
 # NB in a pipeline job you can also use the customWorkspace option.
-# see windows/provision-jenkins-slaves.ps1.
+# see windows/provision-jenkins-agent.ps1.
 # see https://issues.jenkins.io/browse/JENKINS-12667
 # see https://www.jenkins.io/doc/book/managing/system-properties/
 # see https://github.com/jenkinsci/jenkins/blob/jenkins-2.516.2/core/src/main/java/hudson/model/Slave.java#L796-L799
@@ -419,7 +419,7 @@ EOF
 #
 # configure security.
 
-# generate the SSH key-pair that jenkins master uses to communicates with the slaves.
+# generate the SSH key-pair that jenkins master uses to communicates with the agents.
 su jenkins -c 'ssh-keygen -q -t rsa -N "" -f ~/.ssh/id_rsa'
 
 # set the allowed agent protocols.
@@ -655,7 +655,7 @@ popd
 
 
 #
-# add the ubuntu slave node.
+# add the ubuntu agent node.
 # see https://javadoc.jenkins.io/jenkins/model/Jenkins.html
 # see https://javadoc.jenkins.io/jenkins/model/Nodes.html
 # see https://javadoc.jenkins.io/hudson/slaves/DumbSlave.html
@@ -670,7 +670,7 @@ import hudson.slaves.CommandLauncher
 node = new DumbSlave(
     "ubuntu",
     "/var/jenkins",
-    new CommandLauncher("ssh ubuntu.jenkins.example.com /var/jenkins/bin/jenkins-slave"))
+    new CommandLauncher("ssh ubuntu.jenkins.example.com /var/jenkins/bin/jenkins-agent"))
 node.numExecutors = 3
 node.labelString = "ubuntu 22.04 linux amd64"
 node.mode = 'EXCLUSIVE'
@@ -680,7 +680,7 @@ EOF
 
 
 #
-# add the windows slave node.
+# add the windows agent node.
 
 jgroovy = <<'EOF'
 import jenkins.model.Jenkins
@@ -700,7 +700,7 @@ EOF
 
 
 #
-# add the macos slave node.
+# add the macos agent node.
 
 jgroovy = <<'EOF'
 import jenkins.model.Jenkins
@@ -710,7 +710,7 @@ import hudson.slaves.CommandLauncher
 node = new DumbSlave(
     "macos",
     "/var/jenkins",
-    new CommandLauncher("ssh macos.jenkins.example.com /var/jenkins/bin/jenkins-slave"))
+    new CommandLauncher("ssh macos.jenkins.example.com /var/jenkins/bin/jenkins-agent"))
 node.numExecutors = 3
 node.labelString = "macos 10.12 amd64"
 node.mode = 'EXCLUSIVE'
@@ -720,7 +720,7 @@ EOF
 
 
 #
-# share the slave jnlp secrets with the other nodes.
+# share the agent jnlp secrets with the other nodes.
 
 (
 jgroovy = <<'EOF'
@@ -731,7 +731,7 @@ Jenkins.instance.computers
         .findAll { it instanceof SlaveComputer }
         .each { println("${it.name}\t${it.jnlpMac}") }
 EOF
-) | awk '/.+\t.+/ { printf "%s",$2 > "/vagrant/tmp/slave-jnlp-secret-" $1 ".txt" }'
+) | awk '/.+\t.+/ { printf "%s",$2 > "/vagrant/tmp/agent-jnlp-secret-" $1 ".txt" }'
 
 
 #
@@ -748,11 +748,11 @@ EOF
 #           <context>
 #             <user>vagrant</user>
 #           </context>
-#           <script>ssh ubuntu.jenkins.example.com /var/jenkins/bin/jenkins-slave</script>
+#           <script>ssh ubuntu.jenkins.example.com /var/jenkins/bin/jenkins-agent</script>
 #           <language>system-command</language>
 #         </pendingScript>
 #       </pendingScripts>
-# TODO find a better way, and just approve the ssh slave commands.
+# TODO find a better way, and just approve the ssh agent commands.
 
 jgroovy = <<'EOF'
 import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval
