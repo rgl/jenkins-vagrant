@@ -358,6 +358,9 @@ def install(id) {
     'ws-cleanup',               // aka Workspace Cleanup;           see https://plugins.jenkins.io/ws-cleanup
     'docker-workflow',          // aka Docker Pipeline;             see https://plugins.jenkins.io/docker-workflow
     'timestamper',              // aka Timestamper;                 see https://plugins.jenkins.io/timestamper
+    'simple-theme-plugin',      // aka Simple Theme;                see https://plugins.jenkins.io/simple-theme-plugin
+    'dark-theme',               // aka Dark Theme;                  see https://plugins.jenkins.io/dark-theme
+    'chocolate-theme',          // aka Chocolate Theme;             see https://plugins.jenkins.io/chocolate-theme
 ].each {
   install(it)
 }
@@ -625,6 +628,35 @@ mkdir -p /vagrant/tmp
 pushd /vagrant/tmp
 cp /var/lib/jenkins/.ssh/id_rsa.pub $domain-ssh-rsa.pub
 popd
+
+
+#
+# configure the appearance.
+
+jgroovy = <<'EOF'
+import jenkins.model.Jenkins
+import io.jenkins.plugins.chocolatetheme.ChocolateTheme
+import io.jenkins.plugins.darktheme.DarkThemeSystemManagerFactory
+import org.jenkinsci.plugins.simpletheme.CssTextThemeElement
+
+c = Jenkins.instance.getDescriptor("io.jenkins.plugins.thememanager.ThemeManagerPageDecorator")
+//c.theme = new DarkThemeSystemManagerFactory()
+c.theme = new ChocolateTheme()
+c.save()
+
+c = Jenkins.instance.getDescriptor("org.codefirst.SimpleThemeDecorator")
+c.elements = [new CssTextThemeElement(
+    '''\
+    pre.console-output .timestamp {
+        opacity: 0.5;
+        margin-right: 1ch;
+    }
+    pre#out.console-output .timestamp {
+        margin-right: 0;
+    }
+    '''.stripIndent())]
+c.save()
+EOF
 
 
 #
