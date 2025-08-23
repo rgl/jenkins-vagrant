@@ -85,7 +85,7 @@ pushd /var/jenkins
 install -d -o jenkins -g jenkins -m 750 {bin,lib,.ssh}
 install -o jenkins -g jenkins -m 640 /dev/null .ssh/authorized_keys
 cat /vagrant/tmp/$config_jenkins_controller_fqdn-ssh-rsa.pub >>.ssh/authorized_keys
-cp /vagrant/tmp/$config_jenkins_controller_fqdn-crt.pem /usr/local/share/ca-certificates/$config_jenkins_controller_fqdn.crt
+install /vagrant/tmp/jenkins-ca/$config_jenkins_controller_fqdn-crt.pem /usr/local/share/ca-certificates/$config_jenkins_controller_fqdn.crt
 update-ca-certificates # NB this also updates the default java key store at /etc/ssl/certs/java/cacerts.
 cat >bin/jenkins-agent <<EOF
 #!/bin/sh

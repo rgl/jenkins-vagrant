@@ -52,9 +52,9 @@ Install-ChocolateyShortcut `
     -ShortcutFilePath 'C:\Users\All Users\Microsoft\Windows\Start Menu\Programs\Process Monitor.lnk' `
     -TargetPath 'C:\ProgramData\chocolatey\lib\procmon\tools\procmon.exe'
 
-# import the Jenkins controller site https certificate into the local machine trust store.
+# import the Jenkins CA certificate into the local machine trust store.
 Import-Certificate `
-    -FilePath C:/vagrant/tmp/$config_jenkins_controller_fqdn-crt.der `
+    -FilePath C:/vagrant/tmp/jenkins-ca/jenkins-ca-crt.der `
     -CertStoreLocation Cert:/LocalMachine/Root
 
 # import the gitlab-vagrant environment site https certificate into the local machine trust store.
@@ -71,14 +71,14 @@ choco install -y nssm
 choco install -y temurin21jre
 Update-SessionEnvironment
 
-# add our jenkins controller self-signed certificate to the default java trust store.
+# add our jenkins ca certificate to the default java trust store.
 # NB alternatively we could use java.exe -Djavax.net.ssl.trustStoreType=Windows-ROOT
 #    to use the Windows Trust Root store.
 Get-ChildItem -Recurse -Include cacerts -ErrorAction SilentlyContinue @(
     'C:\Program Files\*\*\lib\security\cacerts'
 ) | ForEach-Object {
     $keyStore = $_
-    $alias = $config_jenkins_controller_fqdn
+    $alias = 'jenkins-ca'
     $keytool = Resolve-Path "$keyStore\..\..\..\bin\keytool.exe"
     $keytoolOutput = &$keytool `
         -noprompt `
@@ -101,7 +101,7 @@ Get-ChildItem -Recurse -Include cacerts -ErrorAction SilentlyContinue @(
                 '-storepass changeit',
                 '-cacerts',
                 "-alias `"$alias`"",
-                "-file c:\vagrant\tmp\$config_jenkins_controller_fqdn-crt.der" `
+                "-file c:\vagrant\tmp\jenkins-ca\jenkins-ca-crt.der" `
             -RedirectStandardOutput "$env:TEMP\keytool-stdout.txt" `
             -RedirectStandardError "$env:TEMP\keytool-stderr.txt" `
             -NoNewWindow `

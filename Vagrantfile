@@ -39,6 +39,7 @@ Vagrant.configure('2') do |config|
     config.vm.provision :shell, inline: "echo '#{config_macos_ip} #{config_macos_fqdn}' >>/etc/hosts"
     config.vm.provision :shell, inline: "echo '#{config_gitlab_ip} #{config_gitlab_fqdn}' >>/etc/hosts"
     config.vm.provision :shell, path: 'provision-resize-disk.sh'
+    config.vm.provision :shell, path: 'provision-certificates.sh'
     config.vm.provision :shell, path: 'provision-mailhog.sh'
     config.vm.provision :shell, path: 'provision.sh'
     config.vm.provision :shell, path: 'provision-example-jobs.sh'

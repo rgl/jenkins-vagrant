@@ -110,33 +110,6 @@ EOF
 
 
 #
-# create a self-signed certificate.
-
-pushd /etc/ssl/private
-openssl genrsa \
-    -out $domain-keypair.pem \
-    2048 \
-    2>/dev/null
-chmod 400 $domain-keypair.pem
-openssl req -new \
-    -sha256 \
-    -subj "/CN=$domain" \
-    -key $domain-keypair.pem \
-    -out $domain-csr.pem
-openssl x509 -req -sha256 \
-    -signkey $domain-keypair.pem \
-    -extensions a \
-    -extfile <(echo "[a]
-        subjectAltName=DNS:$domain
-        extendedKeyUsage=serverAuth
-        ") \
-    -days 365 \
-    -in  $domain-csr.pem \
-    -out $domain-crt.pem
-popd
-
-
-#
 # trust the gitlab-vagrant environment certificate.
 
 if [ -f /vagrant/tmp/gitlab.example.com-crt.der ]; then
@@ -168,7 +141,7 @@ server {
     client_max_body_size 50m;
 
     ssl_certificate /etc/ssl/private/$domain-crt.pem;
-    ssl_certificate_key /etc/ssl/private/$domain-keypair.pem;
+    ssl_certificate_key /etc/ssl/private/$domain-key.pem;
     ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
     # see https://github.com/cloudflare/sslconfig/blob/master/conf
     # see https://blog.cloudflare.com/it-takes-two-to-chacha-poly/
@@ -649,8 +622,6 @@ EOF
 mkdir -p /vagrant/tmp
 pushd /vagrant/tmp
 cp /var/lib/jenkins/.ssh/id_rsa.pub $domain-ssh-rsa.pub
-cp /etc/ssl/private/$domain-crt.pem .
-openssl x509 -outform der -in $domain-crt.pem -out $domain-crt.der
 popd
 
 

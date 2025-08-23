@@ -131,7 +131,7 @@ pushd /var/jenkins
 install -d -o jenkins -g jenkins -m 750 {bin,lib,.ssh}
 install -o jenkins -g jenkins -m 640 /dev/null .ssh/authorized_keys
 cat /vagrant/tmp/$config_jenkins_controller_fqdn-ssh-rsa.pub >>.ssh/authorized_keys
-security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain /vagrant/tmp/$config_jenkins_controller_fqdn-crt.pem
+security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain /vagrant/tmp/jenkins-ca/jenkins-ca-crt.pem
 cat >bin/jenkins-agent <<EOF
 #!/bin/sh
 exec java -jar \$PWD/lib/agent.jar
