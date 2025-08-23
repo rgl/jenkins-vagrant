@@ -1,9 +1,9 @@
 # see https://github.com/genuinetools/reg
 
-$archiveVersion = '0.16.0'
+$archiveVersion = '0.16.1'
 $archiveName = 'docker-reg.exe'
 $archiveUrl = "https://github.com/genuinetools/reg/releases/download/v$archiveVersion/reg-windows-amd64"
-$archiveHash = 'aec2ba84a2de95a21f1649e0f398ecf91575c1e1b8994e9589a28d2e32ce2cd8'
+$archiveHash = '23b2a4dd07c88552e98ac37c2cf2ce8fbbd4dc396cf6d1cc1743fa65a6d4565c'
 $archivePath = "$env:TEMP\$archiveName"
 
 Write-Host 'Downloading docker-reg...'
