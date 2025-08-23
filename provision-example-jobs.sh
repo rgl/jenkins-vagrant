@@ -35,12 +35,14 @@ jgroovy = <<'EOF'
 import jenkins.model.Jenkins
 import hudson.model.FreeStyleProject
 import hudson.model.labels.LabelAtom
+import hudson.plugins.timestamper.TimestamperBuildWrapper
 import hudson.tasks.Shell
 
 folder = Jenkins.instance.getItem('dump-environment')
 
 project = new FreeStyleProject(folder, 'linux')
 project.assignedLabel = new LabelAtom('linux')
+project.buildWrappersList.add(new TimestamperBuildWrapper())
 project.buildersList.add(new Shell(
 '''\
 cat /etc/lsb-release
@@ -91,12 +93,14 @@ import jenkins.model.Jenkins
 import hudson.model.FreeStyleProject
 import hudson.model.labels.LabelAtom
 import hudson.plugins.powershell.PowerShell
+import hudson.plugins.timestamper.TimestamperBuildWrapper
 import hudson.tasks.BatchFile
 
 folder = Jenkins.instance.getItem('dump-environment')
 
 project = new FreeStyleProject(folder, 'windows')
 project.assignedLabel = new LabelAtom('windows')
+project.buildWrappersList.add(new TimestamperBuildWrapper())
 project.buildersList.add(new BatchFile(
 '''\
 ver
@@ -238,12 +242,14 @@ jgroovy = <<'EOF'
 import jenkins.model.Jenkins
 import hudson.model.FreeStyleProject
 import hudson.model.labels.LabelAtom
+import hudson.plugins.timestamper.TimestamperBuildWrapper
 import hudson.tasks.Shell
 
 folder = Jenkins.instance.getItem('dump-environment')
 
 project = new FreeStyleProject(folder, 'macos')
 project.assignedLabel = new LabelAtom('macos')
+project.buildWrappersList.add(new TimestamperBuildWrapper())
 project.buildersList.add(new Shell(
 '''\
 system_profiler SPSoftwareDataType
@@ -261,10 +267,12 @@ jgroovy = <<'EOF'
 import jenkins.model.Jenkins
 import hudson.model.FreeStyleProject
 import hudson.model.labels.LabelAtom
+import hudson.plugins.timestamper.TimestamperBuildWrapper
 import hudson.tasks.Shell
 
 project = new FreeStyleProject(Jenkins.instance, 'example-execute-shell-windows')
 project.assignedLabel = new LabelAtom('windows')
+project.buildWrappersList.add(new TimestamperBuildWrapper())
 project.buildersList.add(new Shell(
 '''\
 #!bash
@@ -317,12 +325,14 @@ import hudson.model.FreeStyleProject
 import hudson.model.labels.LabelAtom
 import hudson.model.labels.LabelAtom
 import hudson.plugins.git.BranchSpec
-import hudson.plugins.git.GitSCM
 import hudson.plugins.git.extensions.impl.CleanBeforeCheckout
+import hudson.plugins.git.GitSCM
+import hudson.plugins.timestamper.TimestamperBuildWrapper
 import hudson.tasks.Shell
 
 project = new FreeStyleProject(Jenkins.instance, 'example-greeter-service-wcf-netframework')
 project.assignedLabel = new LabelAtom('windows')
+project.buildWrappersList.add(new TimestamperBuildWrapper())
 
 project.scm = new GitSCM('https://github.com/rgl/example-greeter-service-wcf-netframework.git')
 project.scm.branches = [new BranchSpec('*/master')]
@@ -356,15 +366,17 @@ import jenkins.model.Jenkins
 import hudson.model.FreeStyleProject
 import hudson.model.labels.LabelAtom
 import hudson.plugins.git.BranchSpec
-import hudson.plugins.git.GitSCM
 import hudson.plugins.git.extensions.impl.CleanBeforeCheckout
+import hudson.plugins.git.GitSCM
 import hudson.plugins.powershell.PowerShell
+import hudson.plugins.timestamper.TimestamperBuildWrapper
 import hudson.tasks.ArtifactArchiver
 import hudson.tasks.BatchFile
 import hudson.tasks.Mailer
 
 project = new FreeStyleProject(Jenkins.instance, 'MailBounceDetector')
 project.assignedLabel = new LabelAtom('vs2022')
+project.buildWrappersList.add(new TimestamperBuildWrapper())
 
 //
 // add the git repository.
@@ -497,12 +509,14 @@ import jenkins.model.Jenkins
 import hudson.model.FreeStyleProject
 import hudson.model.labels.LabelAtom
 import hudson.plugins.git.BranchSpec
-import hudson.plugins.git.GitSCM
 import hudson.plugins.git.extensions.impl.CleanBeforeCheckout
+import hudson.plugins.git.GitSCM
 import hudson.plugins.powershell.PowerShell
+import hudson.plugins.timestamper.TimestamperBuildWrapper
 
 project = new FreeStyleProject(Jenkins.instance, 'example-dotnet-source-link')
 project.assignedLabel = new LabelAtom('vs2022')
+project.buildWrappersList.add(new TimestamperBuildWrapper())
 project.scm = new GitSCM('https://github.com/rgl/example-dotnet-source-link.git')
 project.scm.branches = [new BranchSpec('*/master')]
 project.scm.extensions.add(new CleanBeforeCheckout())
@@ -554,6 +568,7 @@ import hudson.model.FreeStyleProject
 import hudson.model.labels.LabelAtom
 import hudson.model.labels.LabelExpression.And
 import hudson.plugins.powershell.PowerShell
+import hudson.plugins.timestamper.TimestamperBuildWrapper
 import hudson.plugins.ws_cleanup.Pattern
 import hudson.plugins.ws_cleanup.Pattern.PatternType
 import hudson.plugins.ws_cleanup.PreBuildCleanup
@@ -563,6 +578,7 @@ import org.jenkinsci.plugins.credentialsbinding.impl.UsernamePasswordMultiBindin
 
 project = new FreeStyleProject(Jenkins.instance, 'windows-vagrant-vsphere-example')
 project.assignedLabel = new And(new LabelAtom('windows'), new LabelAtom('vagrant'))
+project.buildWrappersList.add(new TimestamperBuildWrapper())
 project.buildWrappersList.add(new PreBuildCleanup(
     [
         new Pattern('.vagrant/**', PatternType.EXCLUDE)
@@ -743,13 +759,15 @@ import jenkins.model.Jenkins
 import hudson.model.FreeStyleProject
 import hudson.model.labels.LabelAtom
 import hudson.plugins.git.BranchSpec
-import hudson.plugins.git.GitSCM
 import hudson.plugins.git.extensions.impl.CleanBeforeCheckout
-import hudson.tasks.Shell
+import hudson.plugins.git.GitSCM
+import hudson.plugins.timestamper.TimestamperBuildWrapper
 import hudson.tasks.ArtifactArchiver
+import hudson.tasks.Shell
 
 project = new FreeStyleProject(Jenkins.instance, 'minimal-cocoa-app')
 project.assignedLabel = new LabelAtom('macos')
+project.buildWrappersList.add(new TimestamperBuildWrapper())
 project.scm = new GitSCM('https://github.com/rgl/minimal-cocoa-app.git')
 project.scm.branches = [new BranchSpec('*/master')]
 project.scm.extensions.add(new CleanBeforeCheckout())

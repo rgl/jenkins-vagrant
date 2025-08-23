@@ -357,6 +357,7 @@ def install(id) {
     'workflow-aggregator',      // aka Pipeline;                    see https://plugins.jenkins.io/workflow-aggregator
     'ws-cleanup',               // aka Workspace Cleanup;           see https://plugins.jenkins.io/ws-cleanup
     'docker-workflow',          // aka Docker Pipeline;             see https://plugins.jenkins.io/docker-workflow
+    'timestamper',              // aka Timestamper;                 see https://plugins.jenkins.io/timestamper
 ].each {
   install(it)
 }
@@ -624,6 +625,21 @@ mkdir -p /vagrant/tmp
 pushd /vagrant/tmp
 cp /var/lib/jenkins/.ssh/id_rsa.pub $domain-ssh-rsa.pub
 popd
+
+
+#
+# configure the timestamper plugin.
+
+jgroovy = <<'EOF'
+import jenkins.model.Jenkins
+import hudson.plugins.timestamper.TimestamperConfig
+
+c = TimestamperConfig.get()
+c.allPipelines = true
+c.systemTimeFormat = "yyyy-MM-dd HH:mm:ss.SSS"
+c.elapsedTimeFormat = "HH:mm:ss.SSS"
+c.save()
+EOF
 
 
 #
