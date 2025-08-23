@@ -5,9 +5,9 @@
     <id>UMLDeployment</id>
     <coordinates>
       <x>100</x>
-      <y>40</y>
+      <y>20</y>
       <w>190</w>
-      <h>410</h>
+      <h>420</h>
     </coordinates>
     <panel_attributes>&lt;&lt;jenkins controller&gt;&gt;
 jenkins.example.com
@@ -17,10 +17,10 @@ jenkins.example.com
   <element>
     <id>UMLDeployment</id>
     <coordinates>
-      <x>460</x>
-      <y>50</y>
+      <x>480</x>
+      <y>20</y>
       <w>260</w>
-      <h>80</h>
+      <h>90</h>
     </coordinates>
     <panel_attributes>&lt;&lt;jenkins agent&gt;&gt;
 ubuntu.jenkins.example.com
@@ -30,10 +30,10 @@ ubuntu.jenkins.example.com
   <element>
     <id>UMLDeployment</id>
     <coordinates>
-      <x>460</x>
-      <y>140</y>
+      <x>480</x>
+      <y>120</y>
       <w>260</w>
-      <h>80</h>
+      <h>90</h>
     </coordinates>
     <panel_attributes>&lt;&lt;jenkins agent&gt;&gt;
 windows.jenkins.example.com
@@ -43,46 +43,35 @@ windows.jenkins.example.com
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>280</x>
-      <y>90</y>
+      <x>380</x>
+      <y>30</y>
       <w>120</w>
       <h>50</h>
     </coordinates>
-    <panel_attributes>lt=-(
-</panel_attributes>
-    <additional_attributes>10.0;20.0;90.0;20.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>380</x>
-      <y>90</y>
-      <w>100</w>
-      <h>50</h>
-    </coordinates>
     <panel_attributes>lt=()-
-r1=ssh
-m1=:22</panel_attributes>
-    <additional_attributes>10.0;20.0;80.0;20.0</additional_attributes>
+r1=dockers
+m1=:2376
+</panel_attributes>
+    <additional_attributes>10.0;20.0;100.0;20.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
       <x>370</x>
-      <y>180</y>
-      <w>110</w>
+      <y>170</y>
+      <w>130</w>
       <h>50</h>
     </coordinates>
     <panel_attributes>lt=)-
 
 </panel_attributes>
-    <additional_attributes>20.0;20.0;90.0;20.0</additional_attributes>
+    <additional_attributes>20.0;20.0;110.0;20.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
       <x>280</x>
-      <y>180</y>
+      <y>170</y>
       <w>110</w>
       <h>50</h>
     </coordinates>
@@ -95,7 +84,7 @@ m2=:50000</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>20</x>
-      <y>220</y>
+      <y>200</y>
       <w>100</w>
       <h>50</h>
     </coordinates>
@@ -107,8 +96,8 @@ m1=:443</panel_attributes>
   <element>
     <id>UMLDeployment</id>
     <coordinates>
-      <x>460</x>
-      <y>350</y>
+      <x>480</x>
+      <y>340</y>
       <w>260</w>
       <h>80</h>
     </coordinates>
@@ -121,20 +110,21 @@ dc.example.com
     <id>Relation</id>
     <coordinates>
       <x>380</x>
-      <y>390</y>
-      <w>100</w>
+      <y>380</y>
+      <w>120</w>
       <h>50</h>
     </coordinates>
     <panel_attributes>lt=()-
 r1=ldaps
-m1=:636</panel_attributes>
-    <additional_attributes>10.0;20.0;80.0;20.0</additional_attributes>
+m1=:636
+</panel_attributes>
+    <additional_attributes>10.0;20.0;100.0;20.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
       <x>280</x>
-      <y>390</y>
+      <y>380</y>
       <w>120</w>
       <h>50</h>
     </coordinates>
@@ -145,9 +135,9 @@ m1=:636</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>340</x>
-      <y>320</y>
-      <w>390</w>
+      <x>350</x>
+      <y>310</y>
+      <w>400</w>
       <h>120</h>
     </coordinates>
     <panel_attributes>&lt;&lt;when config_authentication='ldap'&gt;&gt;
@@ -159,8 +149,8 @@ layer=-1</panel_attributes>
   <element>
     <id>UMLDeployment</id>
     <coordinates>
-      <x>460</x>
-      <y>230</y>
+      <x>480</x>
+      <y>220</y>
       <w>260</w>
       <h>80</h>
     </coordinates>
@@ -173,25 +163,64 @@ macos.jenkins.example.com
     <id>Relation</id>
     <coordinates>
       <x>380</x>
-      <y>270</y>
-      <w>100</w>
+      <y>260</y>
+      <w>120</w>
       <h>50</h>
     </coordinates>
     <panel_attributes>lt=()-
 r1=ssh
 m1=:22</panel_attributes>
-    <additional_attributes>10.0;20.0;80.0;20.0</additional_attributes>
+    <additional_attributes>10.0;20.0;100.0;20.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
       <x>280</x>
-      <y>270</y>
+      <y>260</y>
       <w>120</w>
       <h>50</h>
     </coordinates>
     <panel_attributes>lt=-(
 </panel_attributes>
     <additional_attributes>10.0;20.0;90.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>280</x>
+      <y>70</y>
+      <w>120</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>lt=-(
+</panel_attributes>
+    <additional_attributes>10.0;20.0;90.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>380</x>
+      <y>70</y>
+      <w>120</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>lt=()-
+r1=ssh
+m1=:22</panel_attributes>
+    <additional_attributes>10.0;20.0;100.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>380</x>
+      <y>130</y>
+      <w>120</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>lt=()-
+r1=dockers
+m1=:2376
+</panel_attributes>
+    <additional_attributes>10.0;20.0;100.0;20.0</additional_attributes>
   </element>
 </diagram>

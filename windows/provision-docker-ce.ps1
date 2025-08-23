@@ -1,3 +1,8 @@
+param(
+    [Parameter(Mandatory=$true)]
+    [string]$domain = 'windows.jenkins.example.com'
+)
+
 # see https://learn.microsoft.com/en-us/virtualization/windowscontainers/manage-docker/configure-docker-daemon
 # see https://docs.docker.com/engine/installation/linux/docker-ce/binaries/#install-server-and-client-binaries-on-windows
 # see https://github.com/moby/moby/releases/tag/v28.3.3
@@ -33,6 +38,12 @@ New-LocalGroup `
 
 # configure docker through a configuration file.
 # see https://docs.docker.com/engine/reference/commandline/dockerd/#windows-configuration-file
+Write-Title "configuring docker"
+$configPath = "$env:ProgramData\docker\config"
+mkdir -Force $configPath | Out-Null
+Copy-Item "c:\vagrant\tmp\jenkins-ca\$domain-key.pem" $configPath
+Copy-Item "c:\vagrant\tmp\jenkins-ca\$domain-crt.pem" $configPath
+Copy-Item "c:\vagrant\tmp\jenkins-ca\jenkins-ca-crt.pem" $configPath
 $config = @{
     'experimental' = $false
     'debug' = $false
@@ -43,24 +54,27 @@ $config = @{
     # see https://github.com/moby/moby/blob/8e610b2b55bfd1bfa9436ab110d311f5e8a74dcb/daemon/listeners/listeners_windows.go#L25
     'group' = 'docker-users'
     'hosts' = @(
-        'tcp://0.0.0.0:2375',
-        'npipe:////./pipe/docker_engine'
+        'npipe:////./pipe/docker_engine',
+        'tcp://0.0.0.0:2376'
     )
+    'tlsverify' = $true
+    'tlskey' = "$configPath\$domain-key.pem"
+    'tlscert' = "$configPath\$domain-crt.pem"
+    'tlscacert' = "$configPath\jenkins-ca-crt.pem"
 }
-mkdir -Force "$env:ProgramData\docker\config" | Out-Null
-Set-Content -Encoding ascii "$env:ProgramData\docker\config\daemon.json" ($config | ConvertTo-Json -Depth 100)
+Set-Content -Encoding ascii "$configPath\daemon.json" ($config | ConvertTo-Json -Depth 100)
 
-Write-Host 'Starting docker...'
+Write-Title 'starting docker'
 Start-Service docker
 
-Write-Host 'Creating the firewall rule to allow inbound TCP/IP access to the Docker Engine port 2375...'
+Write-Host 'Creating the firewall rule to allow inbound TCP/IP access to the Docker Engine port 2376...'
 New-NetFirewallRule `
     -Name 'Docker-Engine-In-TCP' `
     -DisplayName 'Docker Engine (TCP-In)' `
     -Direction Inbound `
     -Enabled True `
     -Protocol TCP `
-    -LocalPort 2375 `
+    -LocalPort 2376 `
     | Out-Null
 
 Write-Title "windows version"
@@ -76,10 +90,19 @@ Write-Title 'windows BuildLabEx version'
 # see https://channel9.msdn.com/Blogs/One-Dev-Minute/Decoding-Windows-Build-Numbers
 (Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name BuildLabEx).BuildLabEx
 
-Write-Title 'docker version'
+Write-Title 'docker version (https)'
+docker `
+    --tlsverify `
+    --tlskey c:\vagrant\tmp\jenkins-ca\jenkins-key.pem `
+    --tlscert c:\vagrant\tmp\jenkins-ca\jenkins-crt.pem `
+    --tlscacert c:\vagrant\tmp\jenkins-ca\jenkins-ca-crt.pem `
+    --host "tcp://${domain}:2376" `
+    version
+
+Write-Title 'docker version (named pipe)'
 docker version
 
-Write-Title 'docker info'
+Write-Title 'docker info (named pipe)'
 docker info
 
 Write-Title 'docker named pipe \\.\pipe\docker_engine ACL'
@@ -91,11 +114,3 @@ Write-Title 'docker named pipe \\.\pipe\docker_engine ACL'
 #       $ac.AddAccessRule((New-Object System.Security.AccessControl.FileSystemAccessRule 'docker-users','Read,Write,Synchronize','Allow'))
 #       [System.IO.Directory]::SetAccessControl('\\.\pipe\docker_engine', $ac)
 [System.IO.Directory]::GetAccessControl("\\.\pipe\docker_engine") | Format-Table -Wrap
-
-# see https://docs.docker.com/engine/api/v1.41/
-# see https://github.com/moby/moby/tree/master/api
-Write-Title 'docker info (obtained from http://localhost:2375/info)'
-$infoResponse = Invoke-WebRequest 'http://localhost:2375/info' -UseBasicParsing
-$info = $infoResponse.Content | ConvertFrom-Json
-Write-Output "Engine Version:     $($info.ServerVersion)"
-Write-Output "Engine Api Version: $($infoResponse.Headers['Api-Version'])"

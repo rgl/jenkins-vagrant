@@ -110,6 +110,12 @@ EOF
 
 
 #
+# install utilities.
+
+apt-get install -y jq
+
+
+#
 # create artifacts that need to be shared with the other nodes.
 
 mkdir -p /vagrant/tmp
