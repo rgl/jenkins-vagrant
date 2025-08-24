@@ -2,50 +2,53 @@
 set -eux
 
 # download and install.
-artifact_url=https://github.com/mailhog/MailHog/releases/download/v1.0.1/MailHog_linux_amd64
-artifact_sha=e2ed634ded49929f089b20045581955ed217672078fd86082dd7a6c67c5d09c7
-artifact_bin=/opt/mailhog/bin/MailHog
-wget -qO /tmp/MailHog $artifact_url
-if [ "$(sha256sum /tmp/MailHog | awk '{print $1}')" != "$artifact_sha" ]; then
-    echo "downloaded $artifact_url failed the checksum verification"
-    exit 1
-fi
-install -d /opt/mailhog/bin
-install -m 555 /tmp/MailHog /opt/mailhog/bin/MailHog
-/opt/mailhog/bin/MailHog --version
+# renovate: datasource=github-releases depName=axllent/mailpit
+artifact_version='1.27.6'
+artifact_url=https://github.com/axllent/mailpit/releases/download/v$artifact_version/mailpit-linux-amd64.tar.gz
+t="$(mktemp -q -d --suffix=.mailpit)"
+wget -qO- "$artifact_url" | tar xzf - -C "$t"
+install -d /opt/mailpit/bin
+install -m 555 "$t/mailpit" /opt/mailpit/bin/mailpit
+/opt/mailpit/bin/mailpit version
+rm -rf "$t"
 
 # create the service and start it.
-groupadd --system mailhog
+groupadd --system mailpit
 adduser \
     --system \
     --disabled-login \
     --no-create-home \
     --gecos '' \
-    --ingroup mailhog \
-    --home /opt/mailhog \
+    --ingroup mailpit \
+    --home /opt/mailpit \
     --shell /bin/bash \
-    mailhog
-install -d -o mailhog -g mailhog -m 750 /opt/mailhog
-cat >/etc/systemd/system/mailhog.service <<'EOF'
+    mailpit
+install -d -o mailpit -g mailpit -m 750 /opt/mailpit
+install -d -o mailpit -g mailpit -m 750 /opt/mailpit/data
+cat >/etc/systemd/system/mailpit.service <<'EOF'
 [Unit]
-Description=MailHog
+Description=mailpit
 After=network.target
 
 [Service]
 Type=simple
-User=mailhog
-Group=mailhog
-ExecStart=/opt/mailhog/bin/MailHog -storage maildir -maildir-path /opt/mailhog/mail
-WorkingDirectory=/opt/mailhog
+User=mailpit
+Group=mailpit
+ExecStart=/opt/mailpit/bin/mailpit \
+    --disable-version-check \
+    --db-file /opt/mailpit/data/mailpit.db \
+    --smtp-auth-accept-any \
+    --smtp-auth-allow-insecure
+WorkingDirectory=/opt/mailpit
 Restart=always
 
 [Install]
 WantedBy=multi-user.target
 EOF
-systemctl enable mailhog
-systemctl start mailhog
+systemctl enable mailpit
+systemctl start mailpit
 
-# configure the system to use mailhog as a smarthost.
+# configure the system to use mailpit as a smarthost.
 # these answers were obtained (after installing nullmailer) with:
 #   #sudo debconf-show nullmailer
 #   sudo apt-get install debconf-utils

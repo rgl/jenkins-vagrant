@@ -377,7 +377,7 @@ while [[ -n "$(install-plugins)" ]]; do
     jcliwait
 done
 
-# use the local SMTP MailHog server.
+# use the local SMTP Mailpit server.
 jgroovy = <<'EOF'
 import jenkins.model.Jenkins
 
