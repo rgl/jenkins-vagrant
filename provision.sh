@@ -131,11 +131,29 @@ fi
 # install nginx as a proxy to Jenkins.
 
 apt-get install -y --no-install-recommends nginx
-cat >/etc/nginx/sites-available/jenkins <<EOF
-ssl_session_cache shared:SSL:4m;
-ssl_session_timeout 6h;
+wget -qO /etc/ssl/certs/dhparam.pem https://ssl-config.mozilla.org/ffdhe2048.txt
+sed -i -E 's/^(\s*)((ssl_protocols|ssl_ciphers|ssl_prefer_server_ciphers)\s)/\1# \2/' /etc/nginx/nginx.conf
+cat >/etc/nginx/conf.d/local.conf <<EOF
+# NB this is based on the mozilla intermediate configuration.
+# see https://ssl-config.mozilla.org/#server=nginx&version=1.18.0&config=intermediate&openssl=3.0.2&guideline=5.7
+# see https://packages.ubuntu.com/jammy/nginx
+# see https://packages.ubuntu.com/jammy/openssl
+ssl_protocols TLSv1.2 TLSv1.3;
+ssl_ecdh_curve X25519:prime256v1:secp384r1;
+ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-CHACHA20-POLY1305;
+ssl_prefer_server_ciphers off;
+ssl_session_cache shared:SSL:10m; # about 40000 sessions.
+ssl_session_timeout 1d;
+ssl_session_tickets on;
+ssl_dhparam /etc/ssl/certs/dhparam.pem;
+# NB our example ca does not support stapling, so this is commented.
 #ssl_stapling on;
 #ssl_stapling_verify on;
+#ssl_trusted_certificate /etc/ssl/certs/jenkins-ca.pem;
+#resolver 127.0.0.53 valid=30s;
+#resolver_timeout 5s;
+EOF
+cat >/etc/nginx/sites-available/jenkins <<EOF
 server {
     listen 80;
     server_name _;
@@ -148,13 +166,7 @@ server {
 
     ssl_certificate /etc/ssl/private/$domain-crt.pem;
     ssl_certificate_key /etc/ssl/private/$domain-key.pem;
-    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
-    # see https://github.com/cloudflare/sslconfig/blob/master/conf
-    # see https://blog.cloudflare.com/it-takes-two-to-chacha-poly/
-    # see https://blog.cloudflare.com/do-the-chacha-better-mobile-performance-with-cryptography/
-    # NB even though we have CHACHA20 here, the OpenSSL library that ships with Ubuntu 16.04 does not have it. so this is a nop. no problema.
-    ssl_ciphers EECDH+CHACHA20:EECDH+AES128:RSA+AES128:EECDH+AES256:RSA+AES256:EECDH+3DES:RSA+3DES:!aNULL:!MD5;
-    add_header Strict-Transport-Security "max-age=31536000; includeSubdomains";
+    add_header Strict-Transport-Security "max-age=31536000" always;
 
     access_log /var/log/nginx/$domain-access.log;
     error_log /var/log/nginx/$domain-error.log;
