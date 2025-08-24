@@ -20,6 +20,12 @@ export DEBIAN_FRONTEND=noninteractive
 
 
 #
+# set the system timezone.
+
+timedatectl set-timezone Europe/Lisbon
+
+
+#
 # make sure the package index cache is up-to-date before installing anything.
 
 apt-get update

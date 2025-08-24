@@ -53,6 +53,8 @@ Run `vagrant up --no-destroy-on-error jenkins` to launch the controller. See its
 [local Jenkins home page](https://jenkins.example.com) as `admin` (you can also login with
 one of the example accounts, e.g. `alice.doe` and password `password`).
 
+**NB** The Jenkins UI uses the browser locale to format the date and time. In Firefox, you can set the UI Language and the preferred languages for displaying pages (**tip**: to use English with a 24h time format, choose `English (Ireland) [en-ie]` or `English (United Kingdom) [en-gb]`).
+
 **NB** nginx is setup with a self-signed certificate that you have to trust before being able to access the local Jenkins home page.
 
 Run `vagrant up --no-destroy-on-error ubuntu` to launch the Ubuntu agent.
