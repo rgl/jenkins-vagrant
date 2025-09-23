@@ -3,7 +3,7 @@ set -eux
 
 # download and install.
 # renovate: datasource=github-releases depName=axllent/mailpit
-artifact_version='1.27.6'
+artifact_version='1.27.8'
 artifact_url=https://github.com/axllent/mailpit/releases/download/v$artifact_version/mailpit-linux-amd64.tar.gz
 t="$(mktemp -q -d --suffix=.mailpit)"
 wget -qO- "$artifact_url" | tar xzf - -C "$t"

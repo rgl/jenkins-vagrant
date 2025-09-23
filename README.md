@@ -66,6 +66,11 @@ After provisioning you can delete it, as `Xcode_8.1.cpio.xz` will take its place
 
 Email notifications are sent to a local [Mailpit](https://github.com/axllent/mailpit) SMTP server running at localhost:1025 and you can browse them at [http://jenkins.example.com:8025](http://jenkins.example.com:8025).
 
+List this repository dependencies (and which have newer versions):
+
+```bash
+GITHUB_COM_TOKEN='YOUR_GITHUB_PERSONAL_TOKEN' ./renovate.sh
+```
 
 # Groovy Snippets
 
