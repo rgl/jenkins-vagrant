@@ -239,6 +239,42 @@ folder.add(project, project.name)
 EOF
 
 jgroovy = <<'EOF'
+import hudson.plugins.git.BranchSpec
+import hudson.plugins.git.extensions.impl.CleanBeforeCheckout
+import hudson.plugins.git.GitSCM
+import jenkins.model.Jenkins
+import org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition
+import org.jenkinsci.plugins.workflow.job.WorkflowJob
+
+scm = new GitSCM('https://github.com/rgl/ubuntu-docker-compose-example.git')
+scm.branches = [new BranchSpec('*/master')]
+scm.extensions.add(new CleanBeforeCheckout())
+
+project = new WorkflowJob(Jenkins.instance, 'ubuntu-docker-compose-example')
+project.definition = new CpsScmFlowDefinition(scm, 'Jenkinsfile')
+
+Jenkins.instance.add(project, project.name)
+EOF
+
+jgroovy = <<'EOF'
+import hudson.plugins.git.BranchSpec
+import hudson.plugins.git.extensions.impl.CleanBeforeCheckout
+import hudson.plugins.git.GitSCM
+import jenkins.model.Jenkins
+import org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition
+import org.jenkinsci.plugins.workflow.job.WorkflowJob
+
+scm = new GitSCM('https://github.com/rgl/windows-docker-compose-example.git')
+scm.branches = [new BranchSpec('*/master')]
+scm.extensions.add(new CleanBeforeCheckout())
+
+project = new WorkflowJob(Jenkins.instance, 'windows-docker-compose-example')
+project.definition = new CpsScmFlowDefinition(scm, 'Jenkinsfile')
+
+Jenkins.instance.add(project, project.name)
+EOF
+
+jgroovy = <<'EOF'
 import jenkins.model.Jenkins
 import hudson.model.FreeStyleProject
 import hudson.model.labels.LabelAtom

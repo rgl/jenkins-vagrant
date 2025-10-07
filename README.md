@@ -14,9 +14,9 @@ This configures Jenkins through [CLI/JNLP](https://www.jenkins.io/doc/book/manag
 * Create Pipeline job.
 * Create Multibranch Pipeline job.
 * Add a Ubuntu Linux agent node.
-  * With docker.
+  * With docker and docker compose.
 * Add a Windows agent node.
-  * With docker.
+  * With docker and docker compose.
   * With enabled long path support on the OS and chocolatey.
   * With [MSYS2](https://github.com/msys2/msys2/wiki/MSYS2-introduction) to be able to use the `Execute shell` build step.
     * See the [example-execute-shell-windows](https://jenkins.example.com/job/example-execute-shell-windows) job.
