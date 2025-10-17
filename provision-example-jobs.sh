@@ -239,6 +239,40 @@ folder.add(project, project.name)
 EOF
 
 jgroovy = <<'EOF'
+import jenkins.model.Jenkins
+import org.jenkinsci.plugins.workflow.job.WorkflowJob
+import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition
+
+folder = Jenkins.instance.getItem('dump-environment')
+
+project = new WorkflowJob(folder, 'linux-podman-dump-environment')
+project.definition = new CpsFlowDefinition("""\
+pipeline {
+    agent {
+        docker {
+            label 'linux && podman'
+            image 'debian:trixie-slim'
+        }
+    }
+    stages {
+        stage('Build') {
+            steps {
+                sh '''
+                    cat /etc/os-release
+                    uname -a
+                    env | sort
+                    '''.stripIndent()
+            }
+        }
+    }
+}
+""",
+true)
+
+folder.add(project, project.name)
+EOF
+
+jgroovy = <<'EOF'
 import hudson.plugins.git.BranchSpec
 import hudson.plugins.git.extensions.impl.CleanBeforeCheckout
 import hudson.plugins.git.GitSCM
@@ -251,6 +285,24 @@ scm.branches = [new BranchSpec('*/master')]
 scm.extensions.add(new CleanBeforeCheckout())
 
 project = new WorkflowJob(Jenkins.instance, 'ubuntu-docker-compose-example')
+project.definition = new CpsScmFlowDefinition(scm, 'Jenkinsfile')
+
+Jenkins.instance.add(project, project.name)
+EOF
+
+jgroovy = <<'EOF'
+import hudson.plugins.git.BranchSpec
+import hudson.plugins.git.extensions.impl.CleanBeforeCheckout
+import hudson.plugins.git.GitSCM
+import jenkins.model.Jenkins
+import org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition
+import org.jenkinsci.plugins.workflow.job.WorkflowJob
+
+scm = new GitSCM('https://github.com/rgl/ubuntu-podman-compose-example.git')
+scm.branches = [new BranchSpec('*/main')]
+scm.extensions.add(new CleanBeforeCheckout())
+
+project = new WorkflowJob(Jenkins.instance, 'ubuntu-podman-compose-example')
 project.definition = new CpsScmFlowDefinition(scm, 'Jenkinsfile')
 
 Jenkins.instance.add(project, project.name)

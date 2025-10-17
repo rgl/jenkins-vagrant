@@ -2,14 +2,16 @@
 # have to force a --no-parallel execution.
 ENV['VAGRANT_NO_PARALLEL'] = 'yes'
 
-config_jenkins_fqdn = 'jenkins.example.com'
-config_jenkins_ip   = '10.10.10.100'
-config_ubuntu_fqdn  = "ubuntu.#{config_jenkins_fqdn}"
-config_ubuntu_ip    = '10.10.10.101'
-config_windows_fqdn = "windows.#{config_jenkins_fqdn}"
-config_windows_ip   = '10.10.10.102'
-config_macos_fqdn   = "macos.#{config_jenkins_fqdn}"
-config_macos_ip     = '10.10.10.103'
+config_jenkins_fqdn       = 'jenkins.example.com'
+config_jenkins_ip         = '10.10.10.100'
+config_ubuntu_fqdn        = "ubuntu.#{config_jenkins_fqdn}"
+config_ubuntu_ip          = '10.10.10.101'
+config_podman_ubuntu_fqdn = "podman-ubuntu.#{config_jenkins_fqdn}"
+config_podman_ubuntu_ip   = '10.10.10.102'
+config_windows_fqdn       = "windows.#{config_jenkins_fqdn}"
+config_windows_ip         = '10.10.10.103'
+config_macos_fqdn         = "macos.#{config_jenkins_fqdn}"
+config_macos_ip           = '10.10.10.104'
 
 # link to the gitlab-vagrant environment.
 config_gitlab_fqdn  = 'gitlab.example.com'
@@ -35,6 +37,7 @@ Vagrant.configure('2') do |config|
     config.vm.hostname = config_jenkins_fqdn
     config.vm.network :private_network, ip: config_jenkins_ip, libvirt__forward_mode: 'route', libvirt__dhcp_enabled: false
     config.vm.provision :shell, inline: "echo '#{config_ubuntu_ip} #{config_ubuntu_fqdn}' >>/etc/hosts"
+    config.vm.provision :shell, inline: "echo '#{config_podman_ubuntu_ip} #{config_podman_ubuntu_fqdn}' >>/etc/hosts"
     config.vm.provision :shell, inline: "echo '#{config_windows_ip} #{config_windows_fqdn}' >>/etc/hosts"
     config.vm.provision :shell, inline: "echo '#{config_macos_ip} #{config_macos_fqdn}' >>/etc/hosts"
     config.vm.provision :shell, inline: "echo '#{config_gitlab_ip} #{config_gitlab_fqdn}' >>/etc/hosts"
@@ -60,6 +63,20 @@ Vagrant.configure('2') do |config|
     config.vm.provision :shell, path: 'provision-ubuntu.sh'
     config.vm.provision :shell, path: 'provision-docker.sh'
     config.vm.provision :shell, path: 'provision-docker-compose.sh'
+  end
+
+  config.vm.define :'podman-ubuntu' do |config|
+    config.vm.provider :libvirt do |lv, config|
+      lv.machine_virtual_size = 64 # GB
+    end
+    config.vm.hostname = config_podman_ubuntu_fqdn
+    config.vm.network :private_network, ip: config_podman_ubuntu_ip, libvirt__forward_mode: 'route', libvirt__dhcp_enabled: false
+    config.vm.provision :shell, inline: "echo '#{config_jenkins_ip} #{config_jenkins_fqdn}' >>/etc/hosts"
+    config.vm.provision :shell, inline: "echo '#{config_gitlab_ip} #{config_gitlab_fqdn}' >>/etc/hosts"
+    config.vm.provision :shell, path: 'provision-resize-disk.sh'
+    config.vm.provision :shell, path: 'provision-ubuntu.sh'
+    config.vm.provision :shell, path: 'provision-podman.sh'
+    config.vm.provision :shell, path: 'provision-podman-compose.sh'
   end
 
   config.vm.define :windows do |config|
@@ -130,7 +147,7 @@ done
   end
 
   config.trigger.after :up do |trigger|
-    trigger.only_on = ['ubuntu', 'macos']
+    trigger.only_on = ['ubuntu', 'podman-ubuntu', 'macos']
     trigger.run = {inline: "vagrant ssh -c 'cat /vagrant/tmp/*.ssh_known_hosts | sudo tee /etc/ssh/ssh_known_hosts' jenkins"}
   end
 end

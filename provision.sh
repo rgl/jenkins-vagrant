@@ -718,6 +718,26 @@ EOF
 
 
 #
+# add the podman-ubuntu agent node.
+
+jgroovy = <<'EOF'
+import jenkins.model.Jenkins
+import hudson.slaves.DumbSlave
+import hudson.slaves.CommandLauncher
+
+node = new DumbSlave(
+    "podman-ubuntu",
+    "/var/jenkins",
+    new CommandLauncher("ssh podman-ubuntu.jenkins.example.com /var/jenkins/bin/jenkins-agent"))
+node.numExecutors = 3
+node.labelString = "podman-ubuntu 24.04 linux podman amd64"
+node.mode = 'EXCLUSIVE'
+Jenkins.instance.nodesObject.addNode(node)
+Jenkins.instance.nodesObject.save()
+EOF
+
+
+#
 # add the windows agent node.
 
 jgroovy = <<'EOF'

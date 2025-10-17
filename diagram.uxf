@@ -4,10 +4,10 @@
   <element>
     <id>UMLDeployment</id>
     <coordinates>
-      <x>100</x>
-      <y>20</y>
+      <x>410</x>
+      <y>340</y>
       <w>190</w>
-      <h>420</h>
+      <h>520</h>
     </coordinates>
     <panel_attributes>&lt;&lt;jenkins controller&gt;&gt;
 jenkins.example.com
@@ -17,9 +17,9 @@ jenkins.example.com
   <element>
     <id>UMLDeployment</id>
     <coordinates>
-      <x>480</x>
-      <y>20</y>
-      <w>260</w>
+      <x>790</x>
+      <y>340</y>
+      <w>310</w>
       <h>90</h>
     </coordinates>
     <panel_attributes>&lt;&lt;jenkins agent&gt;&gt;
@@ -30,21 +30,21 @@ ubuntu.jenkins.example.com
   <element>
     <id>UMLDeployment</id>
     <coordinates>
-      <x>480</x>
-      <y>120</y>
-      <w>260</w>
+      <x>790</x>
+      <y>540</y>
+      <w>310</w>
       <h>90</h>
     </coordinates>
     <panel_attributes>&lt;&lt;jenkins agent&gt;&gt;
 windows.jenkins.example.com
-(10.10.10.102)</panel_attributes>
+(10.10.10.103)</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>380</x>
-      <y>30</y>
+      <x>690</x>
+      <y>350</y>
       <w>120</w>
       <h>50</h>
     </coordinates>
@@ -57,8 +57,8 @@ m1=:2376
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>370</x>
-      <y>170</y>
+      <x>680</x>
+      <y>590</y>
       <w>130</w>
       <h>50</h>
     </coordinates>
@@ -70,8 +70,8 @@ m1=:2376
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>280</x>
-      <y>170</y>
+      <x>590</x>
+      <y>590</y>
       <w>110</w>
       <h>50</h>
     </coordinates>
@@ -83,8 +83,8 @@ m2=:50000</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>20</x>
-      <y>200</y>
+      <x>330</x>
+      <y>520</y>
       <w>100</w>
       <h>50</h>
     </coordinates>
@@ -96,9 +96,9 @@ m1=:443</panel_attributes>
   <element>
     <id>UMLDeployment</id>
     <coordinates>
-      <x>480</x>
-      <y>340</y>
-      <w>260</w>
+      <x>790</x>
+      <y>760</y>
+      <w>300</w>
       <h>80</h>
     </coordinates>
     <panel_attributes>&lt;&lt;AD LDAP user authentication&gt;&gt;
@@ -109,8 +109,8 @@ dc.example.com
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>380</x>
-      <y>380</y>
+      <x>690</x>
+      <y>800</y>
       <w>120</w>
       <h>50</h>
     </coordinates>
@@ -123,8 +123,8 @@ m1=:636
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>280</x>
-      <y>380</y>
+      <x>590</x>
+      <y>800</y>
       <w>120</w>
       <h>50</h>
     </coordinates>
@@ -135,9 +135,9 @@ m1=:636
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>350</x>
-      <y>310</y>
-      <w>400</w>
+      <x>660</x>
+      <y>730</y>
+      <w>440</w>
       <h>120</h>
     </coordinates>
     <panel_attributes>&lt;&lt;when config_authentication='ldap'&gt;&gt;
@@ -149,21 +149,21 @@ layer=-1</panel_attributes>
   <element>
     <id>UMLDeployment</id>
     <coordinates>
-      <x>480</x>
-      <y>220</y>
-      <w>260</w>
+      <x>790</x>
+      <y>640</y>
+      <w>310</w>
       <h>80</h>
     </coordinates>
     <panel_attributes>&lt;&lt;jenkins agent&gt;&gt;
 macos.jenkins.example.com
-(10.10.10.103)</panel_attributes>
+(10.10.10.104)</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>380</x>
-      <y>260</y>
+      <x>690</x>
+      <y>680</y>
       <w>120</w>
       <h>50</h>
     </coordinates>
@@ -175,8 +175,8 @@ m1=:22</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>280</x>
-      <y>260</y>
+      <x>590</x>
+      <y>680</y>
       <w>120</w>
       <h>50</h>
     </coordinates>
@@ -187,8 +187,8 @@ m1=:22</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>280</x>
-      <y>70</y>
+      <x>590</x>
+      <y>390</y>
       <w>120</w>
       <h>50</h>
     </coordinates>
@@ -199,8 +199,8 @@ m1=:22</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>380</x>
-      <y>70</y>
+      <x>690</x>
+      <y>390</y>
       <w>120</w>
       <h>50</h>
     </coordinates>
@@ -212,8 +212,8 @@ m1=:22</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>380</x>
-      <y>130</y>
+      <x>690</x>
+      <y>550</y>
       <w>120</w>
       <h>50</h>
     </coordinates>
@@ -221,6 +221,44 @@ m1=:22</panel_attributes>
 r1=dockers
 m1=:2376
 </panel_attributes>
+    <additional_attributes>10.0;20.0;100.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLDeployment</id>
+    <coordinates>
+      <x>790</x>
+      <y>440</y>
+      <w>310</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;jenkins agent&gt;&gt;
+podman-ubuntu.jenkins.example.com
+(10.10.10.102)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>590</x>
+      <y>490</y>
+      <w>120</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>lt=-(
+</panel_attributes>
+    <additional_attributes>10.0;20.0;90.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>690</x>
+      <y>490</y>
+      <w>120</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>lt=()-
+r1=ssh
+m1=:22</panel_attributes>
     <additional_attributes>10.0;20.0;100.0;20.0</additional_attributes>
   </element>
 </diagram>

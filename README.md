@@ -15,6 +15,8 @@ This configures Jenkins through [CLI/JNLP](https://www.jenkins.io/doc/book/manag
 * Create Multibranch Pipeline job.
 * Add a Ubuntu Linux agent node.
   * With docker and docker compose.
+* Add a Podman Ubuntu Linux agent node.
+  * With podman and podman compose.
 * Add a Windows agent node.
   * With docker and docker compose.
   * With enabled long path support on the OS and chocolatey.
@@ -41,7 +43,7 @@ Add the following entry to your `/etc/hosts` file:
 
 ```
 10.10.10.100 jenkins.example.com
-10.10.10.102 windows.jenkins.example.com
+10.10.10.103 windows.jenkins.example.com
 ```
 
 If you want to use LDAP for user authentication, you have to:
@@ -58,6 +60,8 @@ one of the example accounts, e.g. `alice.doe` and password `password`).
 **NB** nginx is setup with a self-signed certificate that you have to trust before being able to access the local Jenkins home page.
 
 Run `vagrant up --no-destroy-on-error ubuntu` to launch the Ubuntu agent.
+
+Run `vagrant up --no-destroy-on-error podman-ubuntu` to launch the Podman Ubuntu agent.
 
 Run `vagrant up --no-destroy-on-error windows` to launch the Windows agent.
 
