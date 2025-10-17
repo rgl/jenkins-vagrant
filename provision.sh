@@ -710,7 +710,7 @@ node = new DumbSlave(
     "/var/jenkins",
     new CommandLauncher("ssh ubuntu.jenkins.example.com /var/jenkins/bin/jenkins-agent"))
 node.numExecutors = 3
-node.labelString = "ubuntu 22.04 linux docker amd64"
+node.labelString = "ubuntu 24.04 linux docker amd64"
 node.mode = 'EXCLUSIVE'
 Jenkins.instance.nodesObject.addNode(node)
 Jenkins.instance.nodesObject.save()

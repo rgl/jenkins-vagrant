@@ -111,6 +111,6 @@ ip link
 bridge link
 #docker run --rm hello-world
 #docker run --rm alpine ping -c1 8.8.8.8
-#docker run --rm debian:10 ping -c1 8.8.8.8
-#docker run --rm debian:10-slim cat /etc/os-release
-#docker run --rm ubuntu:22.04 cat /etc/os-release
+#docker run --rm debian:13 ping -c1 8.8.8.8
+#docker run --rm debian:13-slim cat /etc/os-release
+#docker run --rm ubuntu:24.04 cat /etc/os-release
