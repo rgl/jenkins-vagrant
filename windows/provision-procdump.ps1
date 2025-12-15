@@ -1,4 +1,7 @@
-choco install -y procdump
+# NB we ignore the checksum because this package depends on a unversioned
+#    artifact, which changes from time to time, so to prevent those
+#    failures, just ignore the checksum.
+choco install -y --ignore-checksum procdump
 
 
 #
@@ -73,7 +76,7 @@ Set-ItemProperty `
 # NB to print basic information about a mini dump use:
 #       &"C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\cdb.exe" -nosqm -z C:\dumps\raise-illegal-instruction-c.exe_190801_184222.dmp -c '!peb;q'
 #    see https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/extracting-information-from-a-dump-file
-# NB this should correspond to Microsoft.VisualStudio.Component.Windows10SDK.19041 as installed by vs build tools in provision-vs-build-tools.ps1.
+# NB this should correspond to Microsoft.VisualStudio.Component.Windows11SDK.26100 as installed by vs build tools in provision-vs-build-tools.ps1.
 # NB windows-sdk-10-version-2004-windbg is no longer listed in https://community.chocolatey.org/packages/windows-sdk-10-version-2004-windbg,
 #    so we manually install it from the windows sdk that is installed at provision-vs-build-tools.ps1.
 #choco install -y windows-sdk-10-version-2004-windbg

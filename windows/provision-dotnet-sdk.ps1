@@ -1,13 +1,13 @@
-# see https://dotnet.microsoft.com/en-us/download/dotnet/8.0
-# see https://github.com/dotnet/core/blob/main/release-notes/8.0/8.0.20/8.0.20.md
+# see https://dotnet.microsoft.com/en-us/download/dotnet/10.0
+# see https://github.com/dotnet/core/blob/main/release-notes/10.0/10.0.1/10.0.1.md
 
 # opt-out from dotnet telemetry.
 [Environment]::SetEnvironmentVariable('DOTNET_CLI_TELEMETRY_OPTOUT', '1', 'Machine')
 $env:DOTNET_CLI_TELEMETRY_OPTOUT = '1'
 
 # install the dotnet sdk.
-$archiveUrl = 'https://builds.dotnet.microsoft.com/dotnet/Sdk/8.0.414/dotnet-sdk-8.0.414-win-x64.exe'
-$archiveHash = 'e0339a14f2896c9b9348c02a5eacb31033d5ddcff63b18e5ed4331d69e8505fd81592d8884221ca4890b856d36fe8d09955f63d48da81500959bf4c223819f1f'
+$archiveUrl = 'https://builds.dotnet.microsoft.com/dotnet/Sdk/10.0.101/dotnet-sdk-10.0.101-win-x64.exe'
+$archiveHash = 'e3be75e1efee27e2c17c9e1ec68eaf9e281cb092555c5ac7cb244670239055da654ee058576fae76ccc8756551655a56a13d4b8cc0888cf24c123ee91a4e6330'
 $archiveName = Split-Path -Leaf $archiveUrl
 $archivePath = "$env:TEMP\$archiveName"
 Write-Host "Downloading $archiveName..."

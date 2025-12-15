@@ -4,7 +4,7 @@ set -eux
 domain=$(hostname --fqdn)
 
 # see https://www.jenkins.io/download/
-jenkins_version='2.528.1'
+jenkins_version='2.528.3'
 
 # use the local Jenkins user database.
 config_authentication='jenkins'
@@ -263,7 +263,7 @@ sed -i -E 's,^(Environment="JAVA_OPTS=-.+)",\1 -Djenkins.install.runSetupWizard=
 # see windows/provision-jenkins-agent.ps1.
 # see https://issues.jenkins.io/browse/JENKINS-12667
 # see https://www.jenkins.io/doc/book/managing/system-properties/
-# see https://github.com/jenkinsci/jenkins/blob/jenkins-2.528.1/core/src/main/java/hudson/model/Slave.java#L807-L810
+# see https://github.com/jenkinsci/jenkins/blob/jenkins-2.528.3/core/src/main/java/hudson/model/Slave.java#L807-L810
 sed -i -E 's,^(Environment="JAVA_OPTS=-.+)",\1 -Dhudson.model.Slave.workspaceRoot=w",' /etc/systemd/system/jenkins.service.d/override.conf
 # bind to localhost.
 cat >>/etc/systemd/system/jenkins.service.d/override.conf <<'EOF'
@@ -750,7 +750,7 @@ node = new DumbSlave(
     "c:/j",
     new JNLPLauncher(true))
 node.numExecutors = 3
-node.labelString = "windows 2022 vs2022 vagrant docker amd64"
+node.labelString = "windows 2022 vs2026 vagrant docker amd64"
 node.mode = 'EXCLUSIVE'
 Jenkins.instance.nodesObject.addNode(node)
 Jenkins.instance.nodesObject.save()

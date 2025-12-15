@@ -463,7 +463,7 @@ import hudson.tasks.BatchFile
 import hudson.tasks.Mailer
 
 project = new FreeStyleProject(Jenkins.instance, 'MailBounceDetector')
-project.assignedLabel = new LabelAtom('vs2022')
+project.assignedLabel = new LabelAtom('vs2026')
 project.buildWrappersList.add(new TimestamperBuildWrapper())
 
 //
@@ -603,7 +603,7 @@ import hudson.plugins.powershell.PowerShell
 import hudson.plugins.timestamper.TimestamperBuildWrapper
 
 project = new FreeStyleProject(Jenkins.instance, 'example-dotnet-source-link')
-project.assignedLabel = new LabelAtom('vs2022')
+project.assignedLabel = new LabelAtom('vs2026')
 project.buildWrappersList.add(new TimestamperBuildWrapper())
 project.scm = new GitSCM('https://github.com/rgl/example-dotnet-source-link.git')
 project.scm.branches = [new BranchSpec('*/master')]
