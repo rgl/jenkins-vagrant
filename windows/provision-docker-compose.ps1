@@ -1,7 +1,7 @@
 # download install the docker-compose binaries.
 # see https://github.com/docker/compose/releases
 # renovate: datasource=github-releases depName=docker/compose
-$archiveVersion = '5.0.0'
+$archiveVersion = '5.0.1'
 $archiveUrl = "https://github.com/docker/compose/releases/download/v$archiveVersion/docker-compose-windows-x86_64.exe"
 $archiveName = Split-Path -Leaf $archiveUrl
 $archivePath = "$env:TEMP\$archiveName"

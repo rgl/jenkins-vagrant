@@ -5,7 +5,7 @@ set -euxo pipefail
 # see https://docs.docker.com/compose/install/#install-compose-on-linux-systems
 # see https://github.com/docker/compose/releases
 # renovate: datasource=github-releases depName=docker/compose
-docker_compose_version='5.0.0'
+docker_compose_version='5.0.1'
 docker_compose_url="https://github.com/docker/compose/releases/download/v$docker_compose_version/docker-compose-linux-$(uname -m)"
 wget -qO /tmp/docker-compose "$docker_compose_url"
 
