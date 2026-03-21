@@ -10,6 +10,7 @@
       "fileMatch": [
         "\\.ya?ml$",
         "\\.sh$",
+        "\\.ps1$",
       ],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>[^:]+?) depName=(?<depName>.+?)( versioning=(?<versioning>.+?))?( extractVersion=(?<extractVersion>.+?))?( registryUrl=(?<registryUrl>.+?))?\\s.+?[:=]\\s*[\"']?(?<currentValue>.+?)[\"']?\\s"
@@ -22,6 +23,7 @@
       "fileMatch": [
         "\\.ya?ml$",
         "\\.sh$",
+        "\\.ps1$",
       ],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>deb):microsoft depName=(?<depName>.+?)( versioning=(?<versioning>.+?))?( extractVersion=(?<extractVersion>.+?))?( registryUrl=(?<registryUrl>.+?))?\\s.+?[:=]\\s*[\"']?(?<currentValue>.+?)[\"']?\\s"
@@ -35,6 +37,7 @@
       "fileMatch": [
         "\\.ya?ml$",
         "\\.sh$",
+        "\\.ps1$",
       ],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>nuget):powershellgallery depName=(?<depName>.+?)( versioning=(?<versioning>.+?))?( extractVersion=(?<extractVersion>.+?))?( registryUrl=(?<registryUrl>.+?))?\\s.+?[:=]\\s*[\"']?(?<currentValue>.+?)[\"']?\\s"

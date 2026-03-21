@@ -49,7 +49,7 @@ Add the following entry to your `/etc/hosts` file:
 If you want to use LDAP for user authentication, you have to:
 
 1. have [rgl/windows-domain-controller-vagrant](https://github.com/rgl/windows-domain-controller-vagrant) up and running at `../windows-domain-controller-vagrant`.
-1. uncomment the `config_authentication='ldap'` line inside [provision.sh](provision.sh). 
+1. uncomment the `config_authentication='ldap'` line inside [provision.sh](provision.sh).
 
 Run `vagrant up --no-destroy-on-error jenkins` to launch the controller. See its output to known how to login at the
 [local Jenkins home page](https://jenkins.example.com) as `admin` (you can also login with

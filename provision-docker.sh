@@ -4,8 +4,8 @@ set -eux
 domain="$(hostname --fqdn)"
 
 # see https://github.com/moby/moby/releases
-# renovate: datasource=github-releases depName=moby/moby
-docker_version='29.1.3'
+# renovate: datasource=github-releases depName=moby/moby extractVersion=docker-v(?<version>.+)
+docker_version='29.3.0'
 
 # prevent apt-get et al from asking questions.
 # NB even with this, you'll still get some warnings that you can ignore:
