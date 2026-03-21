@@ -4,7 +4,7 @@ set -eux
 domain=$(hostname --fqdn)
 
 # see https://www.jenkins.io/download/
-jenkins_version='2.528.3'
+jenkins_version='2.541.3'
 
 # use the local Jenkins user database.
 config_authentication='jenkins'
@@ -90,9 +90,9 @@ jcli version
 sudo -sHu jenkins
 EOF
 
-cat >~/.bashrc <<'EOF'
+cat >~/.bashrc <<EOF
 # If not running interactively, don't do anything
-[[ "$-" != *i* ]] && return
+[[ "\$-" != *i* ]] && return
 
 export EDITOR=vim
 export PAGER=less
@@ -101,7 +101,7 @@ alias l='ls -lF --color'
 alias ll='l -a'
 alias h='history 25'
 alias j='jobs -l'
-alias jcli="java -jar /var/cache/jenkins/war/WEB-INF/lib/cli-*.jar -s http://localhost:8080 -http -auth @$HOME/.jenkins-cli"
+alias jcli="java -jar /var/cache/jenkins/war/WEB-INF/lib/cli-*.jar -s https://$domain -auth @\$HOME/.jenkins-cli"
 alias jgroovy='jcli groovy'
 EOF
 
@@ -153,7 +153,12 @@ ssl_dhparam /etc/ssl/certs/dhparam.pem;
 #resolver 127.0.0.53 valid=30s;
 #resolver_timeout 5s;
 EOF
+# see https://www.jenkins.io/doc/book/system-administration/reverse-proxy-configuration-with-jenkins/reverse-proxy-configuration-nginx/
 cat >/etc/nginx/sites-available/jenkins <<EOF
+map \$http_upgrade \$connection_upgrade {
+    default upgrade;
+    '' close;
+}
 server {
     listen 80;
     server_name _;
@@ -162,7 +167,6 @@ server {
 server {
     listen 443 ssl http2;
     server_name $domain;
-    client_max_body_size 50m;
 
     ssl_certificate /etc/ssl/private/$domain-crt.pem;
     ssl_certificate_key /etc/ssl/private/$domain-key.pem;
@@ -175,33 +179,39 @@ server {
     #error_log /var/log/nginx/$domain-error.log debug;
     #rewrite_log on;
 
-    location ~ "(/\\.|/\\w+-INF|\\.class\$)" {
-        return 404;
+    ignore_invalid_headers off;
+
+    location ~ "^\\/static\\/[0-9a-fA-F]{8}\\/(.*)\$" {
+        rewrite "^\\/static\\/[0-9a-fA-F]{8}\\/(.*)" /\$1 last;
     }
 
-    location ~ "^/static/[0-9a-f]{8}/plugin/(.+/.+)" {
-        alias /var/lib/jenkins/plugins/\$1;
-    }
-
-    location ~ "^/static/[0-9a-f]{8}/(.+)" {
-        rewrite "^/static/[0-9a-f]{8}/(.+)" /\$1 last;
-    }
-
-    location /userContent/ {
+    location /userContent {
         root /var/lib/jenkins;
+        if (!-f \$request_filename){
+            rewrite (.*) /\$1 last;
+            break;
+        }
+        sendfile on;
     }
 
     location / {
-        root /var/cache/jenkins/war;
-        try_files \$uri @jenkins;
-    }
-
-    location @jenkins {
+        sendfile off;
         proxy_pass http://127.0.0.1:8080;
         proxy_redirect default;
-        proxy_set_header Host \$host;
+        proxy_http_version 1.1;
+        proxy_set_header Connection \$connection_upgrade;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Host \$http_host;
+        proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_max_temp_file_size 0;
+        proxy_connect_timeout 90;
+        proxy_send_timeout 90;
+        proxy_read_timeout 90;
+        proxy_request_buffering off;
+        client_max_body_size 10m;
+        client_body_buffer_size 128k;
     }
 }
 EOF
@@ -213,7 +223,7 @@ systemctl restart nginx
 #
 # install dependencies.
 
-apt-get install -y openjdk-21-jre-headless
+apt-get install -y fontconfig openjdk-21-jre-headless
 apt-get install -y gnupg
 apt-get install -y xmlstarlet
 
@@ -229,7 +239,7 @@ sed -i -E 's,^(\s*assistive_technologies\s*=.*),#\1,' /etc/java-21-openjdk/acces
 # install Jenkins.
 # see https://pkg.jenkins.io/debian-stable/
 
-wget -qO /etc/apt/keyrings/jenkins-keyring.asc https://pkg.jenkins.io/debian/jenkins.io-2023.key
+wget -qO /etc/apt/keyrings/jenkins-keyring.asc https://pkg.jenkins.io/debian-stable/jenkins.io-2026.key
 echo 'deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/' >/etc/apt/sources.list.d/jenkins.list
 apt-get update
 apt-get install -y --no-install-recommends "jenkins=$jenkins_version"
@@ -247,6 +257,12 @@ tail -n +2 config.xml.orig >config.xml
 xmlstarlet edit --inplace -u '/hudson/useSecurity' -v 'false' config.xml
 xmlstarlet edit --inplace -d '/hudson/authorizationStrategy' config.xml
 xmlstarlet edit --inplace -d '/hudson/securityRealm' config.xml
+# set the jenkins url.
+cat >jenkins.model.JenkinsLocationConfiguration.xml <<EOF
+<jenkins.model.JenkinsLocationConfiguration>
+  <jenkinsUrl>https://$domain/</jenkinsUrl>
+</jenkins.model.JenkinsLocationConfiguration>
+EOF
 # see https://www.jenkins.io/doc/book/system-administration/systemd-services/
 install -d /etc/systemd/system/jenkins.service.d
 install /dev/null /etc/systemd/system/jenkins.service.d/override.conf
@@ -263,7 +279,7 @@ sed -i -E 's,^(Environment="JAVA_OPTS=-.+)",\1 -Djenkins.install.runSetupWizard=
 # see windows/provision-jenkins-agent.ps1.
 # see https://issues.jenkins.io/browse/JENKINS-12667
 # see https://www.jenkins.io/doc/book/managing/system-properties/
-# see https://github.com/jenkinsci/jenkins/blob/jenkins-2.528.3/core/src/main/java/hudson/model/Slave.java#L807-L810
+# see https://github.com/jenkinsci/jenkins/blob/jenkins-2.541.3/core/src/main/java/hudson/model/Slave.java#L807-L810
 sed -i -E 's,^(Environment="JAVA_OPTS=-.+)",\1 -Dhudson.model.Slave.workspaceRoot=w",' /etc/systemd/system/jenkins.service.d/override.conf
 # bind to localhost.
 cat >>/etc/systemd/system/jenkins.service.d/override.conf <<'EOF'
@@ -304,13 +320,12 @@ Jenkins.instance.mode = Mode.EXCLUSIVE
 Jenkins.instance.save()
 EOF
 
-# set the jenkins url and administrator email.
+# set the administrator email.
 # see https://javadoc.jenkins.io/jenkins/model/JenkinsLocationConfiguration.html
 jgroovy = <<EOF
 import jenkins.model.JenkinsLocationConfiguration
 
 c = JenkinsLocationConfiguration.get()
-c.url = 'https://$domain'
 c.adminAddress = 'Jenkins <jenkins@example.com>'
 c.save()
 EOF
@@ -456,10 +471,11 @@ EOF
 # see https://javadoc.jenkins.io/hudson/model/User.html
 # see https://javadoc.jenkins.io/jenkins/security/ApiTokenProperty.html
 # see https://jenkins.io/doc/book/managing/cli/
-function jcli {
-    $JCLI -http -auth vagrant:vagrant "$@"
-}
-jgroovy = >~/.jenkins-cli <<'EOF'
+source /vagrant/jenkins-cli.sh
+install -m 600 /dev/null ~/.jenkins-cli
+echo 'vagrant:vagrant' >~/.jenkins-cli
+install -m 600 /dev/null ~/.jenkins-cli.new
+jgroovy = >~/.jenkins-cli.new <<'EOF'
 import hudson.model.User
 import jenkins.security.ApiTokenProperty
 
@@ -469,10 +485,7 @@ t = p.tokenStore.generateNewToken('vagrant')
 u.save()
 println sprintf("%s:%s", u.id, t.plainValue)
 EOF
-chmod 400 ~/.jenkins-cli
-
-# redefine jcli to use the vagrant api token.
-source /vagrant/jenkins-cli.sh
+mv ~/.jenkins-cli.new ~/.jenkins-cli
 
 # show which user is actually being used in jcli. this should show "vagrant".
 # see https://javadoc.jenkins.io/hudson/model/User.html
@@ -826,7 +839,7 @@ EOF
 # configure the oidc provider id-token claims.
 # see /var/lib/jenkins/io.jenkins.plugins.oidc_provider.config.IdTokenConfiguration.xml
 # see https://github.com/jenkinsci/oidc-provider-plugin/blob/master/src/main/java/io/jenkins/plugins/oidc_provider/config/IdTokenConfiguration.java
-# NB GIT_URL, GIT_BRANCH and GIT_COMMIT are not available as build claims.
+# NB GIT_URL, GIT_BRANCH, GIT_COMMIT, and NODE_NAME are not available as build claims.
 
 jgroovy = <<'EOF'
 import io.jenkins.plugins.oidc_provider.config.ClaimTemplate
@@ -838,7 +851,6 @@ import io.jsonwebtoken.Claims
 IdTokenConfiguration.get().buildClaimTemplates = [
     new ClaimTemplate(Claims.SUBJECT, "\${JOB_URL}", new StringClaimType()),
     new ClaimTemplate("build_number", "\${BUILD_NUMBER}", new IntegerClaimType()),
-    new ClaimTemplate("node_name", "\${NODE_NAME}", new StringClaimType()),
 ]
 
 null // return nothing.
