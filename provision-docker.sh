@@ -5,7 +5,7 @@ domain="$(hostname --fqdn)"
 
 # see https://github.com/moby/moby/releases
 # renovate: datasource=github-releases depName=moby/moby extractVersion=docker-v(?<version>.+)
-docker_version='29.3.0'
+docker_version='29.4.2'
 
 # prevent apt-get et al from asking questions.
 # NB even with this, you'll still get some warnings that you can ignore:
@@ -22,7 +22,7 @@ wget -qO- https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/a
 echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/download.docker.com.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" >/etc/apt/sources.list.d/docker.list
 apt-get update
 apt-cache madison docker-ce
-docker_package_version="$(apt-cache madison docker-ce | awk "/$docker_version/{print \$3}")"
+docker_package_version="$(apt-cache madison docker-ce | awk "/$docker_version/{print \$3}" | head -1)"
 apt-get install -y "docker-ce=$docker_package_version" "docker-ce-cli=$docker_package_version" containerd.io
 
 # configure it.
