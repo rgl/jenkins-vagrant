@@ -4,7 +4,7 @@ set -eux
 domain=$(hostname --fqdn)
 
 # see https://www.jenkins.io/download/
-jenkins_version='2.541.3'
+jenkins_version='2.555.1'
 
 # use the local Jenkins user database.
 config_authentication='jenkins'
@@ -223,7 +223,7 @@ systemctl restart nginx
 #
 # install dependencies.
 
-apt-get install -y fontconfig openjdk-21-jre-headless
+apt-get install -y fontconfig openjdk-25-jre-headless
 apt-get install -y gnupg
 apt-get install -y xmlstarlet
 
@@ -232,7 +232,7 @@ apt-get install -y xmlstarlet
 # fix "java.lang.NoClassDefFoundError: Could not initialize class org.jfree.chart.JFreeChart"
 # error while rendering the xUnit Test Result Trend chart on the job page.
 
-sed -i -E 's,^(\s*assistive_technologies\s*=.*),#\1,' /etc/java-21-openjdk/accessibility.properties
+sed -i -E 's,^(\s*assistive_technologies\s*=.*),#\1,' /etc/java-25-openjdk/accessibility.properties
 
 
 #
@@ -279,7 +279,7 @@ sed -i -E 's,^(Environment="JAVA_OPTS=-.+)",\1 -Djenkins.install.runSetupWizard=
 # see windows/provision-jenkins-agent.ps1.
 # see https://issues.jenkins.io/browse/JENKINS-12667
 # see https://www.jenkins.io/doc/book/managing/system-properties/
-# see https://github.com/jenkinsci/jenkins/blob/jenkins-2.541.3/core/src/main/java/hudson/model/Slave.java#L807-L810
+# see https://github.com/jenkinsci/jenkins/blob/jenkins-2.555.1/core/src/main/java/hudson/model/Slave.java#L807-L810
 sed -i -E 's,^(Environment="JAVA_OPTS=-.+)",\1 -Dhudson.model.Slave.workspaceRoot=w",' /etc/systemd/system/jenkins.service.d/override.conf
 # bind to localhost.
 cat >>/etc/systemd/system/jenkins.service.d/override.conf <<'EOF'
@@ -678,11 +678,11 @@ c.save()
 c = Jenkins.instance.getDescriptor("org.codefirst.SimpleThemeDecorator")
 c.elements = [new CssTextThemeElement(
     '''\
-    pre.console-output .timestamp {
+    pre#out.console-output .timestamp {
         opacity: 0.5;
         margin-right: 1ch;
     }
-    pre#out.console-output .timestamp {
+    pre#out.console-output:has(.pipeline-new-node) .timestamp {
         margin-right: 0;
     }
     '''.stripIndent())]

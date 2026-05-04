@@ -68,7 +68,7 @@ if (Test-Path C:/vagrant/tmp/gitlab.example.com-crt.der) {
 choco install -y nssm
 
 # install the JRE.
-choco install -y temurin21jre
+choco install -y temurin25jre
 Update-SessionEnvironment
 
 # add our jenkins ca certificate to the default java trust store.
