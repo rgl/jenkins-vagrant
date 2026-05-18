@@ -5,12 +5,12 @@ param(
 
 # see https://learn.microsoft.com/en-us/virtualization/windowscontainers/manage-docker/configure-docker-daemon
 # see https://docs.docker.com/engine/installation/linux/docker-ce/binaries/#install-server-and-client-binaries-on-windows
-# see https://github.com/moby/moby/releases/tag/docker-v29.4.2
-# see https://github.com/rgl/docker-ce-windows-binaries-vagrant/releases/tag/v29.4.2
+# see https://github.com/moby/moby/releases/tag/docker-v29.5.0
+# see https://github.com/rgl/docker-ce-windows-binaries-vagrant/releases/tag/v29.5.0
 
 # download install the docker binaries.
 # renovate: datasource=github-releases depName=rgl/docker-ce-windows-binaries-vagrant
-$archiveVersion = '29.4.2'
+$archiveVersion = '29.5.0'
 $archiveName = "docker-$archiveVersion.zip"
 $archiveUrl = "https://github.com/rgl/docker-ce-windows-binaries-vagrant/releases/download/v$archiveVersion/$archiveName"
 $archivePath = "$env:TEMP\$archiveName"

@@ -4,7 +4,7 @@ set -eux
 domain=$(hostname --fqdn)
 
 # see https://www.jenkins.io/download/
-jenkins_version='2.555.1'
+jenkins_version='2.555.2'
 
 # use the local Jenkins user database.
 config_authentication='jenkins'
@@ -279,7 +279,7 @@ sed -i -E 's,^(Environment="JAVA_OPTS=-.+)",\1 -Djenkins.install.runSetupWizard=
 # see windows/provision-jenkins-agent.ps1.
 # see https://issues.jenkins.io/browse/JENKINS-12667
 # see https://www.jenkins.io/doc/book/managing/system-properties/
-# see https://github.com/jenkinsci/jenkins/blob/jenkins-2.555.1/core/src/main/java/hudson/model/Slave.java#L807-L810
+# see https://github.com/jenkinsci/jenkins/blob/jenkins-2.555.2/core/src/main/java/hudson/model/Slave.java#L807-L810
 sed -i -E 's,^(Environment="JAVA_OPTS=-.+)",\1 -Dhudson.model.Slave.workspaceRoot=w",' /etc/systemd/system/jenkins.service.d/override.conf
 # bind to localhost.
 cat >>/etc/systemd/system/jenkins.service.d/override.conf <<'EOF'
