@@ -5,7 +5,7 @@ domain="$(hostname --fqdn)"
 
 # see https://github.com/moby/moby/releases
 # renovate: datasource=github-releases depName=moby/moby extractVersion=docker-v(?<version>.+)
-docker_version='29.5.0'
+docker_version='29.6.0'
 
 # prevent apt-get et al from asking questions.
 # NB even with this, you'll still get some warnings that you can ignore:
