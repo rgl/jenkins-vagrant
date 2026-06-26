@@ -239,8 +239,15 @@ sed -i -E 's,^(\s*assistive_technologies\s*=.*),#\1,' /etc/java-25-openjdk/acces
 # install Jenkins.
 # see https://pkg.jenkins.io/debian-stable/
 
-wget -qO /etc/apt/keyrings/jenkins-keyring.asc https://pkg.jenkins.io/debian-stable/jenkins.io-2026.key
-echo 'deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/' >/etc/apt/sources.list.d/jenkins.list
+wget -qO- https://pkg.jenkins.io/debian-stable/jenkins.io-2026.key \
+    | gpg --dearmor -o /etc/apt/keyrings/pkg.jenkins.io.gpg
+cat >/etc/apt/sources.list.d/pkg.jenkins.io.sources <<EOF
+Types: deb
+Signed-By: /etc/apt/keyrings/pkg.jenkins.io.gpg
+URIs: https://pkg.jenkins.io/debian-stable
+Suites: binary/
+Components:
+EOF
 apt-get update
 apt-get install -y --no-install-recommends "jenkins=$jenkins_version"
 pushd /var/lib/jenkins

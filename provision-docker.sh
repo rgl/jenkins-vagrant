@@ -18,8 +18,16 @@ apt-get update
 # install docker.
 # see https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/#install-using-the-repository
 apt-get install -y apt-transport-https software-properties-common
-wget -qO- https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/download.docker.com.gpg
-echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/download.docker.com.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" >/etc/apt/sources.list.d/docker.list
+wget -qO- https://download.docker.com/linux/ubuntu/gpg \
+    | gpg --dearmor -o /etc/apt/keyrings/download.docker.com.gpg
+cat >/etc/apt/sources.list.d/docker.sources <<EOF
+Types: deb
+Architectures: amd64
+Signed-By: /etc/apt/keyrings/download.docker.com.gpg
+URIs: https://download.docker.com/linux/ubuntu
+Suites: $(lsb_release -cs)
+Components: stable
+EOF
 apt-get update
 apt-cache madison docker-ce
 docker_package_version="$(apt-cache madison docker-ce | awk "/$docker_version/{print \$3}" | head -1)"
