@@ -86,7 +86,7 @@ Vagrant.configure('2') do |config|
       lv.memory = 4096
       config.vm.synced_folder '.', '/vagrant', type: 'smb', smb_username: ENV['USER'], smb_password: ENV['VAGRANT_SMB_PASSWORD']
     end
-    config.vm.box = 'windows-2022-uefi-amd64'
+    config.vm.box = 'windows-2025-uefi-amd64'
     config.vm.hostname = 'windows'
     config.vm.network :private_network, ip: config_windows_ip, libvirt__forward_mode: 'route', libvirt__dhcp_enabled: false
     config.vm.provision :shell, inline: "echo '#{config_jenkins_ip} #{config_jenkins_fqdn}' | Out-File -Encoding ASCII -Append c:/Windows/System32/drivers/etc/hosts"

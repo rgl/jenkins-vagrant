@@ -184,7 +184,7 @@ pipeline {
     agent {
         docker {
             label 'windows && docker'
-            image 'mcr.microsoft.com/windows/nanoserver:ltsc2022'
+            image 'mcr.microsoft.com/windows/nanoserver:ltsc2025'
         }
     }
     stages {
@@ -733,7 +733,7 @@ $env:VAGRANT_VSPHERE_HOST = 'vsphere.example.com'
 $env:VAGRANT_VSPHERE_DATA_CENTER_NAME = 'Datacenter'
 $env:VAGRANT_VSPHERE_DATA_STORE_NAME = 'Datastore'
 $env:VAGRANT_VSPHERE_COMPUTE_RESOURCE_NAME = 'Cluster'
-$env:VAGRANT_VSPHERE_TEMPLATE_NAME = 'vagrant-templates/windows-2022-amd64'
+$env:VAGRANT_VSPHERE_TEMPLATE_NAME = 'vagrant-templates/windows-2025-amd64'
 $env:VAGRANT_VSPHERE_VM_BASE_PATH = '/vagrant-examples'
 $env:VAGRANT_VSPHERE_VM_NAME = $env:JOB_NAME -replace '[^A-Za-z0-9]','-'
 $env:VAGRANT_VSPHERE_VLAN = 'vagrant'
@@ -754,7 +754,7 @@ govc vm.destroy --vm.ipath $vmIpath
 
 Set-Content -Encoding Ascii -Path Vagrantfile -Value @'
 Vagrant.configure(2) do |config|
-    config.vm.box = 'windows-2022-amd64'
+    config.vm.box = 'windows-2025-amd64'
     config.vm.provider "vsphere" do |vsphere, override|
         vsphere.name = ENV['VAGRANT_VSPHERE_VM_NAME']
         vsphere.notes = "Created from the #{ENV['BUILD_URL']} job running at the #{ENV['NODE_NAME']} jenkins node"

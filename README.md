@@ -35,7 +35,7 @@ These are the machines and how they are connected with each other:
 
 Build and install the [Ubuntu 26.04 Base Box](https://github.com/rgl/ubuntu-vagrant).
 
-Build and install the [Windows 2022 Base Box](https://github.com/rgl/windows-vagrant).
+Build and install the [Windows 2025 Base Box](https://github.com/rgl/windows-vagrant).
 
 Build and install the [macOS Base Box](https://github.com/rgl/macos-vagrant).
 
