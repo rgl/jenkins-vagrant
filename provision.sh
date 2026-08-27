@@ -852,7 +852,6 @@ EOF
 # configure the oidc provider id-token claims.
 # see /var/lib/jenkins/io.jenkins.plugins.oidc_provider.config.IdTokenConfiguration.xml
 # see https://github.com/jenkinsci/oidc-provider-plugin/blob/master/src/main/java/io/jenkins/plugins/oidc_provider/config/IdTokenConfiguration.java
-# NB GIT_URL, GIT_BRANCH, GIT_COMMIT, and NODE_NAME are not available as build claims.
 
 jgroovy = <<'EOF'
 import io.jenkins.plugins.oidc_provider.config.ClaimTemplate
@@ -864,6 +863,15 @@ import io.jsonwebtoken.Claims
 IdTokenConfiguration.get().buildClaimTemplates = [
     new ClaimTemplate(Claims.SUBJECT, "\${JOB_URL}", new StringClaimType()),
     new ClaimTemplate("build_number", "\${BUILD_NUMBER}", new IntegerClaimType()),
+
+    // the following variables are controlled by the pipeline author, thus
+    // CANNOT be trusted for access control purposes.
+    // see https://github.com/jenkinsci/oidc-provider-plugin/issues/43
+    // see https://github.com/jenkinsci/oidc-provider-plugin/pull/203
+    // see https://github.com/rgl/jenkins-validate-jwt
+    new ClaimTemplate("do_not_trust_git_url", "\${GIT_URL}", new StringClaimType()),
+    new ClaimTemplate("do_not_trust_git_branch", "\${GIT_BRANCH}", new StringClaimType()),
+    new ClaimTemplate("do_not_trust_git_commit", "\${GIT_COMMIT}", new StringClaimType()),
 ]
 
 null // return nothing.
@@ -874,6 +882,7 @@ EOF
 # create an example oidc provider id-token credential.
 # see https://plugins.jenkins.io/oidc-provider
 # see https://javadoc.jenkins.io/plugin/oidc-provider/io/jenkins/plugins/oidc_provider/IdTokenCredentials.html
+# see https://github.com/rgl/jenkins-validate-jwt
 # NB the jwks endpoint is at https://jenkins.example.com/oidc/jwks
 
 jgroovy = <<'EOF'
