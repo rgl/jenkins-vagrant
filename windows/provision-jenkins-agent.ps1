@@ -40,9 +40,9 @@ choco pack
 choco install -y opencover-rgl.portable -Source $PWD
 Pop-Location
 
-# install troubeshooting tools.
-choco install -y procexp
-choco install -y procmon
+# install troubleshooting tools.
+choco install -y --ignore-checksums procexp
+choco install -y --ignore-checksums procmon
 
 # add start menu entries.
 Install-ChocolateyShortcut `

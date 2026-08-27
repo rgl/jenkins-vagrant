@@ -6,9 +6,6 @@ choco install -y packer
 #    here and on the jenkins account from configure-jenkins-home.ps1.
 choco install -y vagrant
 
-# install govc.
-choco install -y govc
-
 # update $env:PATH with the recently installed Chocolatey packages.
 Import-Module "$env:ChocolateyInstall\helpers\chocolateyInstaller.psm1"
 Update-SessionEnvironment
