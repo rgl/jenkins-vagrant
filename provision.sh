@@ -20,6 +20,12 @@ export DEBIAN_FRONTEND=noninteractive
 
 
 #
+# do not place /tmp in memory.
+
+systemctl mask tmp.mount
+
+
+#
 # set the system timezone.
 
 timedatectl set-timezone Europe/Lisbon
@@ -730,7 +736,7 @@ node = new DumbSlave(
     "/var/jenkins",
     new CommandLauncher("ssh ubuntu.jenkins.example.com /var/jenkins/bin/jenkins-agent"))
 node.numExecutors = 3
-node.labelString = "ubuntu 24.04 linux docker amd64"
+node.labelString = "ubuntu 26.04 linux docker amd64"
 node.mode = 'EXCLUSIVE'
 Jenkins.instance.nodesObject.addNode(node)
 Jenkins.instance.nodesObject.save()
@@ -750,7 +756,7 @@ node = new DumbSlave(
     "/var/jenkins",
     new CommandLauncher("ssh podman-ubuntu.jenkins.example.com /var/jenkins/bin/jenkins-agent"))
 node.numExecutors = 3
-node.labelString = "podman-ubuntu 24.04 linux podman amd64"
+node.labelString = "podman-ubuntu 26.04 linux podman amd64"
 node.mode = 'EXCLUSIVE'
 Jenkins.instance.nodesObject.addNode(node)
 Jenkins.instance.nodesObject.save()

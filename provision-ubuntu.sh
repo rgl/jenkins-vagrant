@@ -10,6 +10,12 @@ export DEBIAN_FRONTEND=noninteractive
 
 
 #
+# do not place /tmp in memory.
+
+systemctl mask tmp.mount
+
+
+#
 # set the system timezone.
 
 timedatectl set-timezone Europe/Lisbon

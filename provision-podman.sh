@@ -2,8 +2,8 @@
 set -eux
 
 # install podman and the docker like alias.
-# NB ubuntu noble 24.04 ships with podman 4.9.3.
-# see https://packages.ubuntu.com/noble/podman
+# NB ubuntu resolute 26.04 ships with podman 5.7.0.
+# see https://packages.ubuntu.com/resolute/podman
 apt-get install -y \
     podman
 apt-get install -y --no-install-recommends \
@@ -44,4 +44,4 @@ bridge link
 #podman run --rm hello-world
 #podman run --rm alpine:3.22 cat /etc/os-release
 #podman run --rm debian:13-slim cat /etc/os-release
-#podman run --rm ubuntu:24.04 cat /etc/os-release
+#podman run --rm ubuntu:26.04 cat /etc/os-release

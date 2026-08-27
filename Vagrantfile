@@ -18,7 +18,7 @@ config_gitlab_fqdn  = 'gitlab.example.com'
 config_gitlab_ip    = '10.10.9.99'
 
 Vagrant.configure('2') do |config|
-  config.vm.box = 'ubuntu-24.04-uefi-amd64'
+  config.vm.box = 'ubuntu-26.04-uefi-amd64'
 
   config.vm.provider :libvirt do |lv, config|
     lv.memory = 2048
@@ -63,6 +63,7 @@ Vagrant.configure('2') do |config|
     config.vm.provision :shell, path: 'provision-ubuntu.sh'
     config.vm.provision :shell, path: 'provision-docker.sh'
     config.vm.provision :shell, path: 'provision-docker-compose.sh'
+    config.vm.provision :reload
   end
 
   config.vm.define :'podman-ubuntu' do |config|
@@ -77,6 +78,7 @@ Vagrant.configure('2') do |config|
     config.vm.provision :shell, path: 'provision-ubuntu.sh'
     config.vm.provision :shell, path: 'provision-podman.sh'
     config.vm.provision :shell, path: 'provision-podman-compose.sh'
+    config.vm.provision :reload
   end
 
   config.vm.define :windows do |config|
