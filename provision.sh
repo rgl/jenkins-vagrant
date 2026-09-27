@@ -865,13 +865,13 @@ IdTokenConfiguration.get().buildClaimTemplates = [
     new ClaimTemplate("build_number", "\${BUILD_NUMBER}", new IntegerClaimType()),
 
     // the following variables are controlled by the pipeline author, thus
-    // CANNOT be trusted for access control purposes.
+    // CANNOT be trusted for access control purposes, so, we ignore them.
     // see https://github.com/jenkinsci/oidc-provider-plugin/issues/43
     // see https://github.com/jenkinsci/oidc-provider-plugin/pull/203
     // see https://github.com/rgl/jenkins-validate-jwt
-    new ClaimTemplate("do_not_trust_git_url", "\${GIT_URL}", new StringClaimType()),
-    new ClaimTemplate("do_not_trust_git_branch", "\${GIT_BRANCH}", new StringClaimType()),
-    new ClaimTemplate("do_not_trust_git_commit", "\${GIT_COMMIT}", new StringClaimType()),
+    // new ClaimTemplate("do_not_trust_git_url", "\${GIT_URL}", new StringClaimType()),
+    // new ClaimTemplate("do_not_trust_git_branch", "\${GIT_BRANCH}", new StringClaimType()),
+    // new ClaimTemplate("do_not_trust_git_commit", "\${GIT_COMMIT}", new StringClaimType()),
 ]
 
 null // return nothing.
