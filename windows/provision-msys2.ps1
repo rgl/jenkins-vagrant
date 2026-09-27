@@ -110,7 +110,7 @@ EOF
 # see https://github.com/msys2/MINGW-packages
 Bash @'
 pacman --noconfirm -Sy mingw-w64-x86_64-gcc
-pacman --noconfirm -Sy mingw-w64-x86_64-jq
+pacman --noconfirm -Sy jq
 pacman --noconfirm -Sy mingw-w64-x86_64-python3
 pacman --noconfirm -Sy mingw-w64-x86_64-python-pip
 pacman --noconfirm -Sy mingw-w64-x86_64-python-pygments
