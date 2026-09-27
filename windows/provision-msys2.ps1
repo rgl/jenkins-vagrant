@@ -4,12 +4,14 @@ choco install -y msys2
 Import-Module "$env:ChocolateyInstall\helpers\chocolateyInstaller.psm1"
 Update-SessionEnvironment
 
-# configure the msys2 launcher to let the shell inherith the PATH.
+# configure the msys2 launcher to let the shell inherit the PATH.
 $msys2BasePath = "$env:ChocolateyToolsLocation\msys64"
 @(
-    'msys2.ini'
+    'clang64.ini'
     'mingw32.ini'
     'mingw64.ini'
+    'msys2.ini'
+    'ucrt64.ini'
 ) | ForEach-Object {
     $msys2ConfigPath = "$msys2BasePath\$_"
     [IO.File]::WriteAllText(
@@ -27,7 +29,7 @@ $msys2BasePath = "$env:ChocolateyToolsLocation\msys64"
 )
 Write-Output 'C:\Users /home' | Out-File -Encoding ASCII -Append "$msys2BasePath\etc\fstab"
 
-# define a function for easying the execution of bash scripts.
+# define a function for easing the execution of bash scripts.
 $bashPath = "$msys2BasePath\usr\bin\bash.exe"
 function Bash($script) {
     $eap = $ErrorActionPreference
@@ -36,7 +38,7 @@ function Bash($script) {
         # we also redirect the stderr to stdout because PowerShell
         # oddly interleaves them.
         # see https://www.gnu.org/software/bash/manual/bash.html#The-Set-Builtin
-        echo 'exec 2>&1; export PATH="/usr/bin:$PATH"; MSYS2_PATH_TYPE=inherit; source shell mingw64; set -eu;' $script | &$bashPath
+        echo 'exec 2>&1; export PATH="/usr/bin:$PATH"; MSYS2_PATH_TYPE=inherit; source shell ucrt64; set -eu;' $script | &$bashPath
         if ($LASTEXITCODE) {
             throw "bash execution failed with exit code $LASTEXITCODE"
         }
@@ -106,14 +108,15 @@ autocmd FileType go set smartindent cinwords=if,else,switch,for,func
 EOF
 '@
 
-# install mingw based tools.
+# install ucrt64-based tools.
 # see https://github.com/msys2/MINGW-packages
+# see https://packages.msys2.org/packages/?repo=ucrt64
 Bash @'
-pacman --noconfirm -Sy mingw-w64-x86_64-gcc
-pacman --noconfirm -Sy jq
-pacman --noconfirm -Sy mingw-w64-x86_64-python3
-pacman --noconfirm -Sy mingw-w64-x86_64-python-pip
-pacman --noconfirm -Sy mingw-w64-x86_64-python-pygments
+pacman --noconfirm -Sy mingw-w64-ucrt-x86_64-gcc
+pacman --noconfirm -Sy mingw-w64-ucrt-x86_64-jq
+pacman --noconfirm -Sy mingw-w64-ucrt-x86_64-python
+pacman --noconfirm -Sy mingw-w64-ucrt-x86_64-python-pip
+pacman --noconfirm -Sy mingw-w64-ucrt-x86_64-python-pygments
 # NB this is commented because httpie is currently failing to build/install in msys2.
 #python3 -m pip install httpie
 '@
@@ -121,9 +124,9 @@ pacman --noconfirm -Sy mingw-w64-x86_64-python-pygments
 # add MSYS2 shortcut to the Desktop and Start Menu.
 Install-ChocolateyShortcut `
     -ShortcutFilePath "$env:USERPROFILE\Desktop\MSYS2 Bash.lnk" `
-    -TargetPath "$env:ChocolateyToolsLocation\msys64\mingw64.exe" `
+    -TargetPath "$env:ChocolateyToolsLocation\msys64\ucrt64.exe" `
     -WorkingDirectory '%USERPROFILE%'
 Install-ChocolateyShortcut `
     -ShortcutFilePath "C:\Users\All Users\Microsoft\Windows\Start Menu\Programs\MSYS2 Bash.lnk" `
-    -TargetPath "$env:ChocolateyToolsLocation\msys64\mingw64.exe" `
+    -TargetPath "$env:ChocolateyToolsLocation\msys64\ucrt64.exe" `
     -WorkingDirectory '%USERPROFILE%'

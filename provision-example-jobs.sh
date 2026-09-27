@@ -381,8 +381,8 @@ pacman -Q
 project.buildersList.add(new Shell(
 '''\
 #!bash
-# initialize the shell in mingw64 mode to have access to gcc from the mingw-w64-x86_64-gcc package.
-MSYS2_PATH_TYPE=inherit; source shell mingw64; set -eux
+# initialize the shell in ucrt64 mode to have access to gcc from the mingw-w64-ucrt-x86_64-gcc package.
+MSYS2_PATH_TYPE=inherit; source shell ucrt64; set -eux
 echo "The shell is at $SHELL"
 echo "The shell options are $-"
 echo 'The PATH is:'
@@ -429,7 +429,7 @@ project.scm.extensions.add(new CleanBeforeCheckout())
 project.buildersList.add(new Shell(
 '''\
 #!bash
-MSYS2_PATH_TYPE=inherit; source shell mingw64; set -eux
+MSYS2_PATH_TYPE=inherit; source shell ucrt64; set -eux
 
 # show details about the current windows user account.
 /c/Windows/System32/whoami.exe -all
