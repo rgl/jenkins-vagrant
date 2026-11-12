@@ -1,6 +1,6 @@
 # see https://github.com/vmware/govmomi/releases
 # renovate: datasource=github-releases depName=vmware/govmomi
-$version = '0.56.0'
+$version = '0.56.2'
 
 $archiveUrl = "https://github.com/vmware/govmomi/releases/download/v${version}/govc_Windows_x86_64.zip"
 $govc = "$env:ChocolateyInstall\bin\govc.exe"
