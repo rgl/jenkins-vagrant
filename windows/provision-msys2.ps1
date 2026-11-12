@@ -38,7 +38,7 @@ function Bash([string]$script, [int[]]$successExitCodes=@(0)) {
         # we also redirect the stderr to stdout because PowerShell
         # oddly interleaves them.
         # see https://www.gnu.org/software/bash/manual/bash.html#The-Set-Builtin
-        echo 'exec 2>&1; export PATH="/usr/bin:$PATH"; MSYS2_PATH_TYPE=inherit; source shell ucrt64; set -eu;' $script | &$bashPath
+        echo 'exec 2>&1; export PATH="/usr/bin:$PATH"; MSYS2_PATH_TYPE=inherit; source shell msys; set -eu;' $script | &$bashPath
         if ($LASTEXITCODE -notin $successExitCodes) {
             throw "bash execution failed with exit code $LASTEXITCODE"
         }
@@ -145,25 +145,38 @@ autocmd FileType go set smartindent cinwords=if,else,switch,for,func
 EOF
 '@
 
+# install msys-based tools.
+# see https://github.com/msys2/MINGW-packages
+# see https://packages.msys2.org/packages/?repo=msys
+Bash @'
+pacman --noconfirm -Sy jq
+pacman --noconfirm -Sy python
+pacman --noconfirm -Sy python-pip
+pacman --noconfirm -Sy python-pygments
+# NB this is commented because httpie is currently failing to build/install in msys2.
+#python3 -m pip install httpie
+'@
+
 # install ucrt64-based tools.
 # see https://github.com/msys2/MINGW-packages
 # see https://packages.msys2.org/packages/?repo=ucrt64
 Bash @'
 pacman --noconfirm -Sy mingw-w64-ucrt-x86_64-gcc
-pacman --noconfirm -Sy mingw-w64-ucrt-x86_64-jq
-pacman --noconfirm -Sy mingw-w64-ucrt-x86_64-python
-pacman --noconfirm -Sy mingw-w64-ucrt-x86_64-python-pip
-pacman --noconfirm -Sy mingw-w64-ucrt-x86_64-python-pygments
-# NB this is commented because httpie is currently failing to build/install in msys2.
-#python3 -m pip install httpie
 '@
 
 # add MSYS2 shortcut to the Desktop and Start Menu.
-Install-ChocolateyShortcut `
-    -ShortcutFilePath "$env:USERPROFILE\Desktop\MSYS2 Bash.lnk" `
-    -TargetPath "$env:ChocolateyToolsLocation\msys64\ucrt64.exe" `
-    -WorkingDirectory '%USERPROFILE%'
-Install-ChocolateyShortcut `
-    -ShortcutFilePath "C:\Users\All Users\Microsoft\Windows\Start Menu\Programs\MSYS2 Bash.lnk" `
-    -TargetPath "$env:ChocolateyToolsLocation\msys64\ucrt64.exe" `
-    -WorkingDirectory '%USERPROFILE%'
+@(
+    'msys,msys2.exe'
+    'ucrt64,ucrt64.exe'
+) | ForEach-Object {
+    $name, $exe = $_ -split ','
+    $name = $name.ToUpperInvariant()
+    Install-ChocolateyShortcut `
+        -ShortcutFilePath "$env:USERPROFILE\Desktop\MSYS2 $name Bash.lnk" `
+        -TargetPath "$env:ChocolateyToolsLocation\msys64\$exe" `
+        -WorkingDirectory '%USERPROFILE%'
+    Install-ChocolateyShortcut `
+        -ShortcutFilePath "C:\Users\All Users\Microsoft\Windows\Start Menu\Programs\MSYS2 $name Bash.lnk" `
+        -TargetPath "$env:ChocolateyToolsLocation\msys64\$exe" `
+        -WorkingDirectory '%USERPROFILE%'
+}
