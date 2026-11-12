@@ -902,3 +902,36 @@ project.definition = new CpsScmFlowDefinition(scm, 'Jenkinsfile')
 
 Jenkins.instance.add(project, project.name)
 EOF
+
+jgroovy = <<'EOF'
+import jenkins.model.Jenkins
+import hudson.model.FreeStyleProject
+import hudson.model.labels.LabelAtom
+import hudson.plugins.git.BranchSpec
+import hudson.plugins.git.extensions.impl.CleanBeforeCheckout
+import hudson.plugins.git.GitSCM
+import hudson.plugins.timestamper.TimestamperBuildWrapper
+import hudson.tasks.Shell
+
+project = new FreeStyleProject(Jenkins.instance, 'hello-world-electron')
+project.assignedLabel = new LabelAtom('windows')
+project.buildWrappersList.add(new TimestamperBuildWrapper())
+
+project.scm = new GitSCM('https://github.com/rgl/hello-world-electron.git')
+project.scm.branches = [new BranchSpec('*/master')]
+project.scm.extensions.add(new CleanBeforeCheckout())
+
+project.buildersList.add(new Shell(
+'''\
+#!bash
+MSYS2_PATH_TYPE=inherit; source shell msys; set -eux
+
+# show details about the current windows user account.
+/c/Windows/System32/whoami.exe -all
+
+# build.
+make dist
+'''))
+
+Jenkins.instance.add(project, project.name)
+EOF

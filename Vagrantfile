@@ -98,6 +98,7 @@ Vagrant.configure('2') do |config|
     config.vm.provision :shell, path: 'windows/ps.ps1', args: ['provision-docker-ce.ps1', config_windows_fqdn]
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-docker-compose.ps1'
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-docker-reg.ps1'
+    config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-nodejs.ps1'
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-vs-build-tools.ps1'
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-dotnet-sdk.ps1'
     config.vm.provision :shell, path: 'windows/ps.ps1', args: 'provision-msys2.ps1'
