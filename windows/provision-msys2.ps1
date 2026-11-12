@@ -1,4 +1,4 @@
-choco install -y msys2 --params /NoUpdate
+choco install -y msys2 --params "'/NoPath /NoUpdate'"
 
 # update $env:PATH et all.
 Import-Module "$env:ChocolateyInstall\helpers\chocolateyInstaller.psm1"
